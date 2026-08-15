@@ -1,4 +1,85 @@
 @import "tailwindcss";
+@import "pretendard/dist/web/variable/pretendardvariable.css";
+
+/*
+ * Design tokens pulled from Figma "Design System" (node 391:589) via get_variable_defs.
+ * Colors override Tailwind's built-in `neutral` scale so existing neutral-tinted classes
+ * automatically pick up the real palette. Only Light Theme tokens were published in
+ * Figma at fetch time -- no dark palette exists yet, so dark: overrides below are best-effort
+ * approximations, not tokens from the design system.
+ */
+@theme {
+  --font-sans: 'Pretendard Variable', 'Pretendard', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  /* Neutral (Figma: Neutral/*) */
+  --color-neutral-50: #ffffff;
+  --color-neutral-75: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #eaeaea;
+  --color-neutral-300: #e1e1e1;
+  --color-neutral-400: #cacaca;
+  --color-neutral-500: #b3b3b3;
+  --color-neutral-600: #8e8e8e;
+  --color-neutral-700: #6e6e6e;
+  --color-neutral-800: #4b4b4b;
+  --color-neutral-900: #2c2c2c;
+  --color-neutral-950: #121212;
+
+  /* Primary / Yellow (Figma: Primary/*) */
+  --color-primary-50: #fff8e6;
+  --color-primary-100: #feeab1;
+  --color-primary-200: #fde08c;
+  --color-primary-300: #fcd257;
+  --color-primary-400: #fcc936;
+  --color-primary-500: #fbbc04;
+  --color-primary-600: #e4ab04;
+  --color-primary-700: #b28503;
+  --color-primary-800: #8a6702;
+  --color-primary-900: #694f02;
+
+  /* Success / True (Figma: True/*) */
+  --color-success-100: #b5e1cb;
+  --color-success-200: #3fb179;
+  --color-success-300: #0e8f50;
+  --color-success-400: #085630;
+
+  /* Error (Figma: Error/*) */
+  --color-error-100: #f8c5c0;
+  --color-error-200: #ee695d;
+  --color-error-300: #d53d30;
+  --color-error-400: #81251d;
+
+  /* Typography scale (Figma: Baseline/* + Emphasis/*, family "Pretendard Variable").
+     Weight is applied separately (font-normal = Baseline, font-medium/font-semibold = Emphasis)
+     via the Text component rather than baked into these size tokens. */
+  --text-display-xl: 64px;
+  --text-display-xl--line-height: 1;
+  --text-display-xl--letter-spacing: -0.3px;
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 1;
+  --text-display-lg--letter-spacing: -0.25px;
+  --text-display-md: 36px;
+  --text-display-md--line-height: 1;
+  --text-display-md--letter-spacing: -0.25px;
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 1.2;
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 1.2;
+  --text-title-lg: 20px;
+  --text-title-lg--line-height: 1.2;
+  --text-title-md: 18px;
+  --text-title-md--line-height: 1.2;
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 1.4;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 1.4;
+  --text-body-sm: 12px;
+  --text-body-sm--line-height: 1.4;
+  --text-caption-lg: 12px;
+  --text-caption-lg--line-height: 1.2;
+  --text-caption-sm: 10px;
+  --text-caption-sm--line-height: 1.2;
+}
 
 :root {
   color-scheme: light dark;
@@ -6,7 +87,6 @@
 
 body {
   margin: 0;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
   @apply bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100;
 }
 
