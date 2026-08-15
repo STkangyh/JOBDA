@@ -10,6 +10,7 @@ import { BranchSelect } from './screens/BranchSelect'
 import { VendorCompare } from './screens/VendorCompare'
 import { SelfAssessment } from './screens/SelfAssessment'
 import { Report } from './screens/Report'
+import { DesignSystem } from './screens/DesignSystem'
 import type { Stage } from './types'
 
 const SCREENS: Record<Stage, ComponentType> = {
@@ -26,6 +27,12 @@ const SCREENS: Record<Stage, ComponentType> = {
 
 function App() {
   const stage = useSession((s) => s.currentStage)
+
+  // 라우터 없이 정적 스타일 가이드 하나만 예외로 경로 분기 — 나머지 화면은 세션 stage로 전환된다.
+  if (window.location.pathname === '/design-system') {
+    return <DesignSystem />
+  }
+
   const Screen = SCREENS[stage]
 
   return (
