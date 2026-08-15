@@ -25,17 +25,21 @@
   --color-neutral-900: #2c2c2c;
   --color-neutral-950: #121212;
 
-  /* Primary / Yellow (Figma: Primary/*) */
-  --color-primary-50: #fff8e6;
-  --color-primary-100: #feeab1;
-  --color-primary-200: #fde08c;
-  --color-primary-300: #fcd257;
-  --color-primary-400: #fcc936;
-  --color-primary-500: #fbbc04;
-  --color-primary-600: #e4ab04;
-  --color-primary-700: #b28503;
-  --color-primary-800: #8a6702;
-  --color-primary-900: #694f02;
+  /* Primary (Figma: Primary/* swatch fills — NOT the "Primary/Yellow" variable.
+     That variable and the swatch text labels are stale leftovers from an old yellow
+     palette; the rectangles were manually recolored to this green scale with no
+     variable binding. Verified by reading the actual fill hex off each swatch node,
+     not the label text. */
+  --color-primary-50: #f0f2ef;
+  --color-primary-100: #d0d8cd;
+  --color-primary-200: #b9c5b5;
+  --color-primary-300: #98ab93;
+  --color-primary-400: #859a7e;
+  --color-primary-500: #66815e;
+  --color-primary-600: #5d7556;
+  --color-primary-700: #485c43;
+  --color-primary-800: #384734;
+  --color-primary-900: #2b3627;
 
   /* Success / True (Figma: True/*) */
   --color-success-100: #b5e1cb;
