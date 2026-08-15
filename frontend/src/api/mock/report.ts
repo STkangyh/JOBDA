@@ -1,6 +1,7 @@
 import type { Finding, FindingCode, ReportRequest, ReportResponse } from '../../types'
 
-// BACKEND_SPEC_v2.md 8번 섹션 finding code -> 문장 매핑을 프론트 목데이터로 재현.
+// finding code -> 문장 매핑을 프론트 목데이터로 재현. 버킷 분류는 client.ts의 FINDING_BUCKET과
+// 동일하게 맞춰서(이슈 #1 / 백엔드 API.md 기준) 오프라인 목데이터와 실제 API가 같은 카테고리를 쓴다.
 // 실제 /api/report 는 이 findings 를 LLM으로 다듬지만, 목데이터는 고정 문장을 그대로 쓴다.
 
 const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed'; text: string }> = {
@@ -25,7 +26,7 @@ const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed
     text: '목재를 포기한 뒤 시방서를 다시 작성하며 일정이 지연되었습니다.',
   },
   spec_field_missing: {
-    bucket: 'missed',
+    bucket: 'cautions',
     text: '시방서 필수 항목 중 일부(사이즈/제작 방식/CMF/컬러칩)가 비어 있었습니다.',
   },
   capability_never_asked: {
@@ -37,7 +38,7 @@ const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed
     text: '구매팀에 목재 파트 예산을 확인하지 않았습니다.',
   },
   concept_abandoned: {
-    bucket: 'missed',
+    bucket: 'cautions',
     text: '목재 하우징 콘셉트를 유지할 다른 방법을 더 탐색하지 않고 포기했습니다.',
   },
   deadline_margin_ignored: {
