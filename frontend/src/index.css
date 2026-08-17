@@ -42,12 +42,13 @@
   --color-primary-900: #2b3627;
 
   /* Green (Figma: Green/* — component-level accent used by the CTA button and the
-     step indicator's progress fill. Distinct from `primary` above: no component we've
-     seen actually uses `primary` yet, this is the color real interactive components use. */
+     step indicator's progress fill). `primary` above is real too — used for the
+     job detail page's "업무 프로세스" heading (652:16286). */
   --color-green-50: #f9fef4;
   --color-green-75: #f9fef4;
   --color-green-100: #ecfbde;
   --color-green-200: #e3f9ce;
+  --color-green-400: #cff5aa;
   --color-green-500: #c3f295;
   --color-green-600: #b1dc88;
   --color-green-700: #8aac6a;
