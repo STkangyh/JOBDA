@@ -29,13 +29,14 @@ const SCREENS: Record<Stage, ComponentType> = {
   report: Report,
 }
 
-const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job', '/session1'])
+const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job', '/session1', '/session2'])
 // 직무 상세페이지 "업무 프로세스" 스텝 인덱스 -> 진입할 경로. 6번(모형 제작 및 설계 검토)은
-// 세션1(프로토타입 수정), 8번(시방서 작성 및 설계 이관)은 세션2(기존 "/" 플로우).
-const STEP_INDEX_TO_PATH: Record<number, string> = { 5: '/session1', 7: '/' }
+// 세션1(프로토타입 수정), 8번(시방서 작성 및 설계 이관)은 세션2.
+const STEP_INDEX_TO_PATH: Record<number, string> = { 5: '/session1', 7: '/session2' }
 
-// 라우터 없이 pathname으로만 분기하는 최소 구현. 세션 stage 화면은 항상 "/"에서 뜨고,
-// /explore 계열은 별도 섹션(직무 마켓플레이스), 그 외 경로는 전부 오류 페이지로 떨어진다.
+// 라우터 없이 pathname으로만 분기하는 최소 구현. 첫 진입 화면(홈)은 탐색 페이지("/", 별칭으로
+// "/explore"도 동일하게 렌더)이고, 세션 stage 화면은 "/session2"에서 뜬다. 그 외 경로는 전부
+// 오류 페이지로 떨어진다.
 function useSimpleRouter() {
   const [pathname, setPathname] = useState(window.location.pathname)
 
@@ -61,15 +62,15 @@ function App() {
     return <DesignSystem />
   }
 
-  if (pathname === '/explore') {
+  if (pathname === '/' || pathname === '/explore') {
     return <Explore onOpenJob={() => navigate('/explore/job')} />
   }
 
   if (pathname === '/explore/job') {
     return (
       <JobDetail
-        onClose={() => navigate('/explore')}
-        onSubmit={(stepIndex) => navigate(STEP_INDEX_TO_PATH[stepIndex] ?? '/')}
+        onClose={() => navigate('/')}
+        onSubmit={(stepIndex) => navigate(STEP_INDEX_TO_PATH[stepIndex] ?? '/session2')}
       />
     )
   }
@@ -78,17 +79,20 @@ function App() {
     return <Session1App />
   }
 
+  if (pathname === '/session2') {
+    const Screen = SCREENS[stage]
+    return (
+      <Layout stage={stage}>
+        <Screen />
+      </Layout>
+    )
+  }
+
   if (!KNOWN_PATHS.has(pathname)) {
     return <ErrorPage onConfirm={() => navigate('/')} />
   }
 
-  const Screen = SCREENS[stage]
-
-  return (
-    <Layout stage={stage}>
-      <Screen />
-    </Layout>
-  )
+  return null
 }
 
 export default App

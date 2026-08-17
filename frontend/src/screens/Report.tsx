@@ -31,7 +31,6 @@ export function Report() {
   const report = useSession((s) => s.report)
   const actionLogs = useSession((s) => s.actionLogs)
   const resetSession = useSession((s) => s.resetSession)
-  const goTo = useSession((s) => s.goTo)
 
   if (!report) return null
 
@@ -70,7 +69,7 @@ export function Report() {
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button variant="secondary" onClick={() => goTo('home')}>
+        <Button variant="secondary" onClick={() => (window.location.href = '/')}>
           홈으로
         </Button>
         <Button onClick={() => resetSession()}>다시 체험하기</Button>
