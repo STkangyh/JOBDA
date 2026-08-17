@@ -120,7 +120,12 @@ export function Session1SelfAssessment() {
         </div>
       </Card>
 
-      <Button variant="primary" className="h-[48px] self-end px-8 text-base" onClick={submit} disabled={!complete || submitting}>
+      <Button
+        variant="primary"
+        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
+        onClick={submit}
+        disabled={!complete || submitting}
+      >
         {submitting ? '리포트 생성 중...' : '자기평가 제출'}
       </Button>
     </div>

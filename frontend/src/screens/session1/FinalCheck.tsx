@@ -69,7 +69,12 @@ export function Session1FinalCheck() {
         ))}
       </Card>
 
-      <Button variant="primary" className="h-[48px] self-end px-8 text-base" disabled={!allChecked} onClick={confirmFinalCheck}>
+      <Button
+        variant="primary"
+        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
+        disabled={!allChecked}
+        onClick={confirmFinalCheck}
+      >
         최종 결과물 제출
       </Button>
     </div>

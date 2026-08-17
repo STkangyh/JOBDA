@@ -190,7 +190,12 @@ function ReviewAndChoice() {
         />
       </div>
 
-      <Button variant="primary" className="h-[48px] self-end px-8 text-base" disabled={!canSubmit} onClick={submitRound}>
+      <Button
+        variant="primary"
+        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
+        disabled={!canSubmit}
+        onClick={submitRound}
+      >
         {round.roundNumber === S1_ROUNDS.length ? '최종 설계안 제출' : '수정안 제출'}
       </Button>
     </Card>

@@ -39,10 +39,10 @@ export function SelfAssessment() {
             <button
               key={n}
               onClick={() => setSelfAssessment({ interestScore: n })}
-              className={`h-9 w-9 rounded-full border text-sm ${
+              className={`h-9 w-9 rounded-full border text-sm transition-colors ${
                 value.interestScore === n
                   ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900'
-                  : 'border-neutral-300 dark:border-neutral-700'
+                  : 'border-neutral-300 hover:border-neutral-600 dark:border-neutral-700 dark:hover:border-neutral-400'
               }`}
             >
               {n}
@@ -58,10 +58,10 @@ export function SelfAssessment() {
             <button
               key={v}
               onClick={() => setSelfAssessment({ expectationGap: v })}
-              className={`rounded-md border px-3 py-1.5 text-sm ${
+              className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
                 value.expectationGap === v
                   ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900'
-                  : 'border-neutral-300 dark:border-neutral-700'
+                  : 'border-neutral-300 hover:border-neutral-600 dark:border-neutral-700 dark:hover:border-neutral-400'
               }`}
             >
               {v}
@@ -77,10 +77,10 @@ export function SelfAssessment() {
             <button
               key={v}
               onClick={() => setSelfAssessment({ repeatWillingness: v })}
-              className={`rounded-md border px-3 py-1.5 text-sm ${
+              className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
                 value.repeatWillingness === v
                   ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900'
-                  : 'border-neutral-300 dark:border-neutral-700'
+                  : 'border-neutral-300 hover:border-neutral-600 dark:border-neutral-700 dark:hover:border-neutral-400'
               }`}
             >
               {v}
@@ -96,10 +96,10 @@ export function SelfAssessment() {
             <button
               key={item}
               onClick={() => toggleBurden(item)}
-              className={`rounded-full border px-3 py-1 text-xs ${
+              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                 value.burdenItems.includes(item)
                   ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900'
-                  : 'border-neutral-300 dark:border-neutral-700'
+                  : 'border-neutral-300 hover:border-neutral-600 dark:border-neutral-700 dark:hover:border-neutral-400'
               }`}
             >
               {item}
