@@ -24,7 +24,7 @@ export function DocList() {
               className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
                 selected === doc.key
                   ? 'border-neutral-900 dark:border-white'
-                  : 'border-neutral-200 dark:border-neutral-800'
+                  : 'border-neutral-200 hover:border-neutral-400 dark:border-neutral-800 dark:hover:border-neutral-600'
               }`}
             >
               <div className="text-xs text-neutral-400">{doc.category}</div>

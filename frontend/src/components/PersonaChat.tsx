@@ -36,7 +36,7 @@ export function PersonaChat() {
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               active === p
                 ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
-                : 'border border-neutral-300 text-neutral-600 dark:border-neutral-700 dark:text-neutral-400'
+                : 'border border-neutral-300 text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800'
             }`}
           >
             {PERSONA_LABEL[p]}

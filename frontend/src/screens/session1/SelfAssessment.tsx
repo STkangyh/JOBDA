@@ -44,8 +44,10 @@ export function Session1SelfAssessment() {
               <button
                 key={n}
                 onClick={() => setSelfAssessment({ interestScore: n })}
-                className={`size-9 rounded-full border text-sm ${
-                  value.interestScore === n ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300'
+                className={`size-9 rounded-full border text-sm transition-colors ${
+                  value.interestScore === n
+                    ? 'border-neutral-900 bg-neutral-900 text-white'
+                    : 'border-neutral-300 hover:border-neutral-600'
                 }`}
               >
                 {n}
@@ -63,8 +65,10 @@ export function Session1SelfAssessment() {
               <button
                 key={v}
                 onClick={() => setSelfAssessment({ expectationGap: v })}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
-                  value.expectationGap === v ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300'
+                className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
+                  value.expectationGap === v
+                    ? 'border-neutral-900 bg-neutral-900 text-white'
+                    : 'border-neutral-300 hover:border-neutral-600'
                 }`}
               >
                 {v}
@@ -82,8 +86,10 @@ export function Session1SelfAssessment() {
               <button
                 key={v}
                 onClick={() => setSelfAssessment({ repeatWillingness: v })}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
-                  value.repeatWillingness === v ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300'
+                className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
+                  value.repeatWillingness === v
+                    ? 'border-neutral-900 bg-neutral-900 text-white'
+                    : 'border-neutral-300 hover:border-neutral-600'
                 }`}
               >
                 {v}
@@ -101,8 +107,10 @@ export function Session1SelfAssessment() {
               <button
                 key={item}
                 onClick={() => toggleBurden(item)}
-                className={`rounded-full border px-3 py-1 text-xs ${
-                  value.burdenItems.includes(item) ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300'
+                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                  value.burdenItems.includes(item)
+                    ? 'border-neutral-900 bg-neutral-900 text-white'
+                    : 'border-neutral-300 hover:border-neutral-600'
                 }`}
               >
                 {item}

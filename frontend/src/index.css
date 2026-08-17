@@ -108,6 +108,16 @@ body {
   @apply bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100;
 }
 
+/* Tailwind Preflight resets <button> cursor to `default`, so every clickable button in the
+   app showed an arrow instead of a pointer with no per-component fix. Restoring the native
+   pointer cursor here (Figma's interactive components all assume a pointer on hover). */
+button:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
 #root {
   min-height: 100svh;
 }

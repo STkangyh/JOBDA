@@ -49,7 +49,7 @@ function Messenger() {
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               activePersona === p
                 ? 'border border-green-200 bg-green-50 text-green-900'
-                : 'border border-neutral-200 bg-neutral-100 text-neutral-600'
+                : 'border border-neutral-200 bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
             }`}
           >
             {S1_PERSONA_LABEL[p]}
@@ -150,7 +150,9 @@ function ReviewAndChoice() {
                 key={choice.label}
                 onClick={() => selectChoice(i as 0 | 1)}
                 className={`flex flex-col items-start gap-1 rounded-md p-5 text-left transition-colors ${
-                  selected ? 'bg-green-400 text-neutral-900' : 'border border-neutral-200 bg-white'
+                  selected
+                    ? 'bg-green-400 text-neutral-900'
+                    : 'border border-neutral-200 bg-white hover:border-green-400 hover:bg-green-50'
                 }`}
               >
                 <Text variant="caption-lg" className={selected ? 'text-green-800' : 'text-neutral-400'}>

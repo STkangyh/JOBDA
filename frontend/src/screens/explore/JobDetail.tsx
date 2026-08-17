@@ -88,8 +88,8 @@ export function JobDetail({
                   className={`flex h-12 items-center gap-0.5 rounded-xl border px-6 text-xl transition-colors ${
                     isSelected
                       ? 'border-green-400 bg-neutral-800 font-semibold text-neutral-100'
-                      : 'border-neutral-800 bg-neutral-900 text-neutral-300'
-                  } ${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+                      : `border-neutral-800 bg-neutral-900 text-neutral-300 ${isAvailable ? 'hover:border-neutral-600 hover:text-neutral-100' : ''}`
+                  } ${isAvailable ? '' : 'cursor-not-allowed opacity-50'}`}
                 >
                   <span>{i + 1}.</span>
                   <span>{step}</span>

@@ -36,10 +36,10 @@ export function Workspace() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`border-b-2 px-1 pb-2 ${
+            className={`border-b-2 px-1 pb-2 transition-colors ${
               tab === t
                 ? 'border-neutral-900 font-medium text-neutral-900 dark:border-white dark:text-white'
-                : 'border-transparent text-neutral-400'
+                : 'border-transparent text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
             }`}
           >
             {t === 'docs' ? '자료함' : t === 'chat' ? '업무 메신저' : '시방서'}

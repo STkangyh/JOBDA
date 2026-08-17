@@ -263,8 +263,10 @@ export function DesignSystem() {
             <button
               key={s}
               onClick={() => setStep(s)}
-              className={`rounded-full border px-3 py-1 text-xs ${
-                s === step ? 'border-green-700 bg-green-100 text-green-700' : 'border-neutral-300 text-neutral-600'
+              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                s === step
+                  ? 'border-green-700 bg-green-100 text-green-700'
+                  : 'border-neutral-300 text-neutral-600 hover:border-neutral-500'
               }`}
             >
               {s}
