@@ -4,6 +4,8 @@ import { Chip } from '../components/Chip'
 import { Checkbox } from '../components/Checkbox'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
+import { Sidebar, type SidebarItem } from '../components/Sidebar'
+import { Indicator, INDICATOR_STEPS, type IndicatorStep } from '../components/Indicator'
 import {
   PlusIcon,
   ShareIcon,
@@ -16,6 +18,9 @@ import {
   ProfileIcon,
   ImageIcon,
   MoreIcon,
+  AppsIcon,
+  DatabaseIcon,
+  MailIcon,
 } from '../components/icons'
 
 const NEUTRAL_STEPS = [50, 75, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
@@ -60,6 +65,17 @@ const ERROR_BG: Record<(typeof ERROR_STEPS)[number], string> = {
   300: 'bg-error-300',
   400: 'bg-error-400',
 }
+const GREEN_STEPS = [50, 100, 200, 500, 600, 700, 800, 900] as const
+const GREEN_BG: Record<(typeof GREEN_STEPS)[number], string> = {
+  50: 'bg-green-50',
+  100: 'bg-green-100',
+  200: 'bg-green-200',
+  500: 'bg-green-500',
+  600: 'bg-green-600',
+  700: 'bg-green-700',
+  800: 'bg-green-800',
+  900: 'bg-green-900',
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -95,10 +111,15 @@ const ICONS = [
   { name: 'Profile', Icon: ProfileIcon },
   { name: 'Image', Icon: ImageIcon },
   { name: 'More', Icon: MoreIcon },
+  { name: 'Apps', Icon: AppsIcon },
+  { name: 'Database', Icon: DatabaseIcon },
+  { name: 'Mail', Icon: MailIcon },
 ]
 
 export function DesignSystem() {
   const [checked, setChecked] = useState(true)
+  const [sidebarActive, setSidebarActive] = useState<SidebarItem>('apps')
+  const [step, setStep] = useState<IndicatorStep>('관계자 협업')
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-10">
@@ -154,6 +175,16 @@ export function DesignSystem() {
               ))}
             </div>
           </div>
+          <div>
+            <Text variant="body-sm" className="mb-2 text-neutral-600">
+              Green (CTA / indicator accent — separate from Primary above)
+            </Text>
+            <div className="flex flex-wrap gap-2">
+              {GREEN_STEPS.map((s) => (
+                <Swatch key={s} label={String(s)} className={GREEN_BG[s]} />
+              ))}
+            </div>
+          </div>
         </div>
       </Section>
 
@@ -206,12 +237,39 @@ export function DesignSystem() {
 
       <Section title="Button">
         <div className="flex flex-wrap gap-3">
-          <Button variant="primary">Primary</Button>
+          <Button variant="primary">제출하기</Button>
+          <Button variant="outline">제출하기 (Outline)</Button>
           <Button variant="secondary">Secondary</Button>
           <Button variant="ghost">Ghost</Button>
           <Button variant="primary" disabled>
-            Disabled
+            제출하기 (Disabled)
           </Button>
+        </div>
+      </Section>
+
+      <Section title="Sidebar (GNB)">
+        <div className="flex h-[420px] items-start bg-neutral-100 p-4">
+          <Sidebar active={sidebarActive} onSelect={setSidebarActive} />
+        </div>
+        <Text variant="caption-sm" className="text-neutral-500">
+          선택됨: {sidebarActive}
+        </Text>
+      </Section>
+
+      <Section title="Indicator">
+        <Indicator current={step} />
+        <div className="flex flex-wrap gap-2">
+          {INDICATOR_STEPS.map((s) => (
+            <button
+              key={s}
+              onClick={() => setStep(s)}
+              className={`rounded-full border px-3 py-1 text-xs ${
+                s === step ? 'border-green-700 bg-green-100 text-green-700' : 'border-neutral-300 text-neutral-600'
+              }`}
+            >
+              {s}
+            </button>
+          ))}
         </div>
       </Section>
 
