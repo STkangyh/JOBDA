@@ -1,0 +1,26 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 2147227164" clip-path="url(#clip0_0_71)">
+<rect width="300" height="300" fill="white"/>
+<path id="Rectangle 240654052" d="M216 115C216 98.4315 202.569 85 186 85V128.571C186 140.406 195.594 150 207.429 150C212.162 150 216 146.162 216 141.429V115Z" fill="#E5E5E5"/>
+<rect id="Rectangle 240654048" x="90" y="60" width="120" height="180" rx="50" fill="#F7BBB0"/>
+<rect id="Rectangle 240654065" x="130" y="120" width="20" height="8" rx="4" fill="#E5E5E5"/>
+<rect id="Rectangle 240654054" x="90" y="153" width="140" height="87" rx="43.5" fill="#F7BBB0"/>
+<rect id="Rectangle 240654066" x="170" y="120" width="20" height="8" rx="4" fill="#E5E5E5"/>
+<rect id="Rectangle 240654059" x="130" y="140" width="20" height="27" rx="10" fill="#2B2B2B"/>
+<rect id="Rectangle 240654060" x="170" y="140" width="20" height="27" rx="10" fill="#2B2B2B"/>
+<rect id="Rectangle 240654117" x="70" y="147" width="40" height="40" rx="20" fill="#F7BBB0"/>
+<rect id="Rectangle 240654063" x="163" y="151" width="16" height="16" rx="8" fill="#FF8C77"/>
+<path id="Ellipse 435" d="M150.854 179C146.516 179 142.862 182.646 144.522 186.654C145.528 189.08 147.001 191.285 148.858 193.142C150.715 194.999 152.92 196.472 155.346 197.478C157.773 198.483 160.374 199 163 199C165.626 199 168.227 198.483 170.654 197.478C173.08 196.472 175.285 194.999 177.142 193.142C178.999 191.285 180.472 189.08 181.478 186.654C183.138 182.646 179.484 179 175.146 179L163 179L150.854 179Z" fill="#973D35"/>
+<path id="Rectangle 240654053" d="M80 115C80 98.4315 93.4315 85 110 85V85V120C110 136.569 96.5685 150 80 150V150V115Z" fill="#E5E5E5"/>
+<rect id="Rectangle 240654116" x="130" y="232" width="40" height="108" fill="#F7BBB0"/>
+<ellipse id="Ellipse 438" cx="150" cy="295.5" rx="55" ry="35.5" fill="#F7BBB0"/>
+<path id="Subtract" d="M177.916 265.007C208.333 276.334 230 305.636 230 340V420C230 442.091 212.091 460 190 460H110C87.9086 460 70 442.091 70 420V340C70 305.637 91.6662 276.334 122.083 265.007C126.472 276.13 137.317 284 150 284C162.683 284 173.527 276.13 177.916 265.007Z" fill="#2D3034"/>
+<path id="Rectangle 240654061" d="M170 167C170 181.912 182.088 194 197 194H210V194C210 179.088 197.912 167 183 167H170V167Z" fill="#E5E5E5"/>
+<path id="Rectangle 240654062" d="M170 167C170 181.912 157.912 194 143 194H130V194C130 179.088 142.088 167 157 167H170V167Z" fill="#E5E5E5"/>
+</g>
+<defs>
+<clipPath id="clip0_0_71">
+<rect width="300" height="300" fill="white"/>
+</clipPath>
+</defs>
+</svg>
