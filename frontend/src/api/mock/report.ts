@@ -47,6 +47,16 @@ const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed
   },
 }
 
+// 이슈 #2 (백엔드 #14): work_overview/job_meaning은 항상 채워지는 서술 문자열.
+// branch에 따라 실제로 뭘 했는지가 달라지므로 work_overview만 branch별로 분기.
+const WORK_OVERVIEW: Record<ReportRequest['branch'], string> = {
+  outsourcing: '오크 원목 하우징의 CMF 시방서를 작성하고 외주 업체를 비교해 목재 파트 실현 방법을 선택했습니다.',
+  sheet_wrap: '오크 원목 하우징의 CMF 시방서를 작성하고 시트지 래핑으로 목재 파트 실현 방법을 선택했습니다.',
+  wood_dropped: '오크 원목 하우징의 CMF 시방서를 작성했지만 목재 파트를 포기하고 다른 재질로 방향을 바꿨습니다.',
+}
+
+const JOB_MEANING = '제약 속에서 디자인 의도와 현실의 타협점을 찾는 실무 감각을 경험했습니다.'
+
 export function mockReport(req: ReportRequest): ReportResponse {
   const strengths: string[] = []
   const cautions: string[] = []
@@ -64,5 +74,11 @@ export function mockReport(req: ReportRequest): ReportResponse {
 
   if (strengths.length === 0) strengths.push('시방서 초안부터 최종본까지 제출 흐름을 끝까지 완료했습니다.')
 
-  return { strengths, cautions, missed }
+  return {
+    work_overview: WORK_OVERVIEW[req.branch],
+    strengths,
+    cautions,
+    missed,
+    job_meaning: JOB_MEANING,
+  }
 }

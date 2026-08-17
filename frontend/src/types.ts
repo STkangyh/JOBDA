@@ -75,9 +75,11 @@ export interface ReportRequest {
 }
 
 export interface ReportResponse {
+  work_overview: string
   strengths: string[]
   cautions: string[]
   missed: string[]
+  job_meaning: string
 }
 
 export interface SessionLogRequest {

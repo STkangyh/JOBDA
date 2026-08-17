@@ -40,6 +40,11 @@ export function Report() {
       <h1 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">직무 이해 리포트</h1>
 
       <div>
+        <h2 className="mb-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">이번에 경험한 업무</h2>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">{report.work_overview}</p>
+      </div>
+
+      <div>
         <h2 className="mb-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">업무 행동 타임라인</h2>
         <ol className="flex flex-col gap-1 text-sm text-neutral-500">
           {actionLogs.map((log) => (
@@ -59,10 +64,10 @@ export function Report() {
       <Section title="주의점" items={report.cautions} empty="특별한 주의점은 없었습니다." />
       <Section title="추가로 고려할 수 있었던 요소" items={report.missed} empty="놓친 요소가 없었습니다." />
 
-      <p className="text-xs text-neutral-400">
-        디자인 외에도 설계·원가 조율이 제품디자이너 업무의 핵심입니다. 반복 수정과 이해관계자 조율은 실제
-        업무에서도 반복되는 과정입니다.
-      </p>
+      <div>
+        <h2 className="mb-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">직무에서의 의미</h2>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">{report.job_meaning}</p>
+      </div>
 
       <div className="flex justify-end gap-3">
         <Button variant="secondary" onClick={() => goTo('home')}>
