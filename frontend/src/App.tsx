@@ -14,6 +14,7 @@ import { DesignSystem } from './screens/DesignSystem'
 import { Explore } from './screens/explore/Explore'
 import { JobDetail } from './screens/explore/JobDetail'
 import { ErrorPage } from './screens/explore/ErrorPage'
+import { Session1App } from './screens/session1/Session1App'
 import type { Stage } from './types'
 
 const SCREENS: Record<Stage, ComponentType> = {
@@ -28,7 +29,10 @@ const SCREENS: Record<Stage, ComponentType> = {
   report: Report,
 }
 
-const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job'])
+const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job', '/session1'])
+// 직무 상세페이지 "업무 프로세스" 스텝 인덱스 -> 진입할 경로. 6번(모형 제작 및 설계 검토)은
+// 세션1(프로토타입 수정), 8번(시방서 작성 및 설계 이관)은 세션2(기존 "/" 플로우).
+const STEP_INDEX_TO_PATH: Record<number, string> = { 5: '/session1', 7: '/' }
 
 // 라우터 없이 pathname으로만 분기하는 최소 구현. 세션 stage 화면은 항상 "/"에서 뜨고,
 // /explore 계열은 별도 섹션(직무 마켓플레이스), 그 외 경로는 전부 오류 페이지로 떨어진다.
@@ -65,9 +69,13 @@ function App() {
     return (
       <JobDetail
         onClose={() => navigate('/explore')}
-        onSubmit={() => navigate('/')}
+        onSubmit={(stepIndex) => navigate(STEP_INDEX_TO_PATH[stepIndex] ?? '/')}
       />
     )
+  }
+
+  if (pathname === '/session1') {
+    return <Session1App />
   }
 
   if (!KNOWN_PATHS.has(pathname)) {

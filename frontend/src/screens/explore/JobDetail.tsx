@@ -19,12 +19,20 @@ const PROCESS_STEPS = [
   '프로젝트 사후 관리',
 ] as const
 
-// 지금 실제로 구현된 세션은 8번(시방서 작성 및 설계 이관 = cmf_outsourcing)뿐이라 그것만 선택 가능하게 함.
-const AVAILABLE_STEP_INDEX = 7
+// 실제로 구현된 세션 2개: 6번(모형 제작 및 설계 검토 = prototype_revision/세션1),
+// 8번(시방서 작성 및 설계 이관 = cmf_outsourcing/세션2)만 선택 가능하게 함.
+const AVAILABLE_STEP_INDICES = [5, 7]
+const DEFAULT_STEP_INDEX = 7
 
 // Figma "Desktop - 64" (652:16286) — 직무 상세 페이지. 브랜드/GNB 없이 전체화면 다크 레이아웃.
-export function JobDetail({ onClose, onSubmit }: { onClose: () => void; onSubmit: () => void }) {
-  const [selected, setSelected] = useState<number | null>(AVAILABLE_STEP_INDEX)
+export function JobDetail({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void
+  onSubmit: (stepIndex: number) => void
+}) {
+  const [selected, setSelected] = useState<number | null>(DEFAULT_STEP_INDEX)
 
   return (
     <div className="flex min-h-svh flex-col gap-[18px] bg-neutral-950 p-7">
@@ -69,7 +77,7 @@ export function JobDetail({ onClose, onSubmit }: { onClose: () => void; onSubmit
           </div>
           <div className="flex flex-col gap-4">
             {PROCESS_STEPS.map((step, i) => {
-              const isAvailable = i === AVAILABLE_STEP_INDEX
+              const isAvailable = AVAILABLE_STEP_INDICES.includes(i)
               const isSelected = selected === i
               return (
                 <button
@@ -92,7 +100,12 @@ export function JobDetail({ onClose, onSubmit }: { onClose: () => void; onSubmit
         </div>
       </div>
 
-      <Button variant="primary" className="h-[72px] w-[340px] text-2xl" disabled={selected === null} onClick={onSubmit}>
+      <Button
+        variant="primary"
+        className="h-[72px] w-[340px] text-2xl"
+        disabled={selected === null}
+        onClick={() => selected !== null && onSubmit(selected)}
+      >
         제출하기
       </Button>
     </div>

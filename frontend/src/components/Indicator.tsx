@@ -12,12 +12,19 @@ export const INDICATOR_STEPS = [
 ] as const
 export type IndicatorStep = (typeof INDICATOR_STEPS)[number]
 
+interface IndicatorProps {
+  current: string
+  /** 세션마다 스텝 라벨이 달라서(예: 세션1은 "설계 수정1/2") 커스텀 스텝 배열을 받을 수 있게 함. */
+  steps?: readonly string[]
+  className?: string
+}
+
 // Figma "인디케이터" component (607:12871) — a 7-step journey progress bar with a running
 // character marking the current position. The original uses a diagonal-hatched fill texture;
 // simplified here to a solid bar since the hatch pattern isn't worth the CSS complexity.
-export function Indicator({ current, className = '' }: { current: IndicatorStep; className?: string }) {
-  const index = INDICATOR_STEPS.indexOf(current)
-  const progress = INDICATOR_STEPS.length > 1 ? (index / (INDICATOR_STEPS.length - 1)) * 100 : 0
+export function Indicator({ current, steps = INDICATOR_STEPS, className = '' }: IndicatorProps) {
+  const index = steps.indexOf(current)
+  const progress = steps.length > 1 ? (Math.max(index, 0) / (steps.length - 1)) * 100 : 0
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
@@ -31,7 +38,7 @@ export function Indicator({ current, className = '' }: { current: IndicatorStep;
         />
       </div>
       <div className="flex justify-between">
-        {INDICATOR_STEPS.map((step, i) => (
+        {steps.map((step, i) => (
           <Text
             key={step}
             variant="body-md"
