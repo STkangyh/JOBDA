@@ -72,7 +72,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
     <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
       <Sidebar active="apps" />
 
-      <div className="flex flex-1 flex-col gap-8">
+      <div className="flex min-w-0 flex-1 flex-col gap-8">
         <div
           className="flex items-center justify-end gap-4 rounded-lg bg-neutral-900 bg-cover bg-center px-6 py-5"
           style={{ backgroundImage: `url(${bannerImg})` }}
@@ -98,30 +98,21 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
 
           <div className="relative">
             <div ref={carouselRef} className="flex gap-3 overflow-x-auto scroll-smooth">
-              {NEW_ARRIVAL.map((job, i) => {
-                const isSelected = i === selected
-                return (
-                  <button
-                    key={job.id}
-                    type="button"
-                    onClick={() => selectCard(i)}
-                    className={`relative h-[310px] w-[430px] shrink-0 overflow-hidden rounded-lg text-left transition-opacity ${
-                      isSelected ? 'border-4 border-white' : 'hover:opacity-90'
-                    }`}
-                  >
-                    <img src={job.image} alt="" className="absolute inset-0 size-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
-                    {isSelected && (
-                      <div className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0px_0px_30px_20px_white]" />
-                    )}
-                    <p
-                      className={`relative p-6 text-headline-md text-green-50 ${isSelected ? 'font-semibold' : 'font-normal'}`}
-                    >
-                      {job.title}
-                    </p>
-                  </button>
-                )
-              })}
+              {NEW_ARRIVAL.map((job, i) => (
+                <button
+                  key={job.id}
+                  type="button"
+                  onClick={() => selectCard(i)}
+                  className="group relative h-[310px] w-[430px] shrink-0 overflow-hidden rounded-lg border-4 border-transparent text-left transition-colors hover:border-white"
+                >
+                  <img src={job.image} alt="" className="absolute inset-0 size-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 shadow-[inset_0px_0px_30px_20px_white] transition-opacity group-hover:opacity-100" />
+                  <p className="relative p-6 text-headline-md font-normal text-green-50 group-hover:font-semibold">
+                    {job.title}
+                  </p>
+                </button>
+              ))}
             </div>
             <button
               type="button"
