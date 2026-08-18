@@ -5,6 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>제품디자이너 직무체험</title>
+    <script>
+      // crypto.randomUUID()는 secure context(https 또는 localhost)에서만 존재함.
+      // http+IP 배포(가비아 데모 등)에서는 undefined라 모듈 로드 시점에 즉시 throw되어
+      // 흰 화면이 됨(GitHub #3). https/localhost에서는 no-op이라 항상 켜둬도 무해.
+      if (!window.crypto.randomUUID) {
+        window.crypto.randomUUID = () =>
+          'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = (Math.random() * 16) | 0
+            return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+          })
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
