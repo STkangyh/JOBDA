@@ -89,6 +89,11 @@ export interface ReportResponse {
   missed: string[]
   job_meaning: string
   profile: ProfileAxis[]
+  // v4 백엔드 응답에 아직 없는 필드라 store(session.ts)의 finishAssessment에서 채워 넣는다
+  // (profile을 client.ts에서 backfill하는 것과 같은 갭 흡수 패턴). session1의 S1ReportResponse와
+  // 동일한 필드.
+  personaHeadline: string
+  burdenNote: string
 }
 
 export interface SessionLogRequest {
@@ -124,11 +129,21 @@ export type Stage =
   | 'self_assessment'
   | 'report'
 
+// Figma 823:52645(Desktop-117)의 5점 척도 라벨 — 세션1(744:15050/Desktop-87)과 동일한 스케일을
+// 자기평가 3문항이 공유한다. 세션1 store(session1.ts)를 세션2 store가 직접 import하는 역방향
+// 의존을 피하기 위해, 공유 도메인 타입 파일인 여기(types.ts)에 둔다.
+export const RATING_SCALE = ['전혀 아니다', '아니다', '보통', '그렇다', '매우 그렇다'] as const
+export type RatingScale = (typeof RATING_SCALE)[number]
+
+// Figma 823:52946(Desktop-121)에 세션1(744:15120/Desktop-38)과 동일한 페르소나 한줄평 문구가
+// 재사용되어 있다. Figma에 이 문구 하나만 확인되어 고정 문구로 사용(다른 변형은 근거 없어 생략).
+export const PERSONA_HEADLINE_FIXED = '뚝심 강한 디자이너 DNA가 흐르고 있어요'
+
 export interface SelfAssessment {
-  interestScore: 1 | 2 | 3 | 4 | 5 | null
-  expectationGap: '거의 같았다' | '일부 달랐다' | '상당히 달랐다' | null
-  repeatWillingness: '그렇다' | '잘 모르겠다' | '그렇지 않다' | null
-  burdenItems: string[]
+  interestScore: RatingScale
+  expectationGap: RatingScale
+  repeatWillingness: RatingScale
+  burdenNote: string
 }
 
 export interface SessionState {

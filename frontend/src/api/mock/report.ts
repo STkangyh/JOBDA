@@ -1,4 +1,4 @@
-import type { Finding, FindingCode, ProfileAxis, ReportRequest, ReportResponse } from '../../types'
+import { PERSONA_HEADLINE_FIXED, type Finding, type FindingCode, type ProfileAxis, type ReportRequest, type ReportResponse } from '../../types'
 
 // finding code -> 문장 매핑을 프론트 목데이터로 재현. 버킷 분류는 client.ts의 FINDING_BUCKET과
 // 동일하게 맞춰서(이슈 #1 / 백엔드 API.md 기준) 오프라인 목데이터와 실제 API가 같은 카테고리를 쓴다.
@@ -119,5 +119,10 @@ export function mockReport(req: ReportRequest): ReportResponse {
     missed,
     job_meaning: JOB_MEANING,
     profile: computeProfile(req),
+    // ReportRequest에 selfAssessment가 없어 burdenNote는 여기서 알 수 없다 — store(session.ts)의
+    // finishAssessment가 실제 자기평가 텍스트로 덮어쓴다. personaHeadline은 고정 문구라 여기서도
+    // 채워두지만 마찬가지로 finishAssessment에서 다시 덮어쓴다.
+    personaHeadline: PERSONA_HEADLINE_FIXED,
+    burdenNote: '',
   }
 }

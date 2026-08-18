@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { chat as apiChat, report as apiReport, sessionLog as apiSessionLog } from '../api/client'
+import { PERSONA_HEADLINE_FIXED } from '../types'
 import type {
   ActionLog,
   ActionLogType,
@@ -8,6 +9,7 @@ import type {
   Finding,
   FindingCode,
   Persona,
+  ReportResponse,
   Scores,
   SelfAssessment,
   SessionState,
@@ -50,12 +52,8 @@ const initialState = (): SessionState => ({
   branch: null,
   vendors: emptyVendors(),
   vendorSubmitted: false,
-  selfAssessment: {
-    interestScore: null,
-    expectationGap: null,
-    repeatWillingness: null,
-    burdenItems: [],
-  },
+  // Figma 823:52645(Desktop-117) 주석: 세션1(744:15050/Desktop-87)과 동일하게 기본값은 "보통".
+  selfAssessment: { interestScore: '보통', expectationGap: '보통', repeatWillingness: '보통', burdenNote: '' },
   actionLogs: [],
   report: null,
 })
@@ -230,7 +228,16 @@ export const useSession = create<SessionState & SessionActions>()(
           findings,
           action_logs: s.actionLogs,
         })
-        set({ report: res, currentStage: 'report' })
+        // session1(store/session1.ts)의 finishAssessment와 동일한 패턴: personaHeadline/burdenNote는
+        // v4 백엔드 응답에 없는 필드라 여기서 채워 넣는다. ReportRequest에 selfAssessment가 없어
+        // client.ts 경계에서는 burdenNote를 알 수 없으므로, selfAssessment에 접근 가능한 이
+        // 액션에서 무조건 덮어쓴다(백엔드가 뭘 보내든 프론트가 최종 소스).
+        const report: ReportResponse = {
+          ...res,
+          personaHeadline: PERSONA_HEADLINE_FIXED,
+          burdenNote: s.selfAssessment.burdenNote.trim(),
+        }
+        set({ report, currentStage: 'report' })
         await apiSessionLog({ session_id: s.sessionId, payload: get() })
       },
 

@@ -39,6 +39,10 @@ function QuoteGroup({ items }: { items: string[] }) {
   )
 }
 
+// Figma "Desktop - 121"(823:52946, 파일 x6feHLgVMyg8sh8C2jVPE1) 콘텐츠 보강: personaHeadline을
+// 페이지 타이틀 옆에 노출하고, 자기평가의 부담 기록이 있을 때만 "부담 기록" 섹션을 추가한다
+// (세션1 Report.tsx의 동일 패턴 그대로 — 나머지 섹션은 이미 744:17446 기준으로 완성돼 있어
+// 그대로 둔다).
 export function Report() {
   const report = useSession((s) => s.report)
   const actionLogs = useSession((s) => s.actionLogs)
@@ -68,9 +72,14 @@ export function Report() {
           </div>
         </div>
 
-        <Text variant="headline-lg" emphasis className="text-white">
-          직무 이해 리포트
-        </Text>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <Text variant="headline-lg" emphasis className="text-white">
+            직무 이해 리포트
+          </Text>
+          <Text variant="title-lg" emphasis className="text-green-300">
+            {report.personaHeadline}
+          </Text>
+        </div>
 
         <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-3">
           <div className="flex flex-col gap-4 rounded-xl bg-neutral-900 p-6">
@@ -138,6 +147,13 @@ export function Report() {
             ))}
           </ol>
         </div>
+
+        {report.burdenNote && (
+          <div className="flex flex-col gap-3 rounded-lg bg-neutral-900 p-6">
+            <SectionHeading>부담 기록</SectionHeading>
+            <p className="text-title-md text-green-500">“{report.burdenNote}”</p>
+          </div>
+        )}
 
         <div className="flex flex-col gap-3">
           <SectionHeading>다음 탐색 제안</SectionHeading>
