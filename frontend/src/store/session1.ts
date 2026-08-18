@@ -329,7 +329,52 @@ export const useSession1 = create<Session1State & Session1Actions>()(
 
       resetSession: () => set(initialState()),
     }),
-    { name: 'coad-hackerton-session1' },
+    {
+      name: 'coad-hackerton-session1',
+      version: 2,
+      // v1 -> v2: 자기평가가 숫자 1~5점/3지선다 혼합 + 부담 항목 다중선택 칩이던
+      // 구조(Desktop-87 반영 전)에서 5단계 라벨 척도 + 부담 서술형 텍스트로
+      // 바뀌었음(session1.ts 상단 커밋 참고). 기존 로컬스토리지에 남아있는 v1
+      // 데이터를 새 타입으로 변환하지 않으면 화면에 "4" 같은 원시 숫자나
+      // undefined 필드가 그대로 노출된다.
+      migrate: (persisted, version) => {
+        const state = persisted as any
+        if (version < 2 && state) {
+          const legacy = state.selfAssessment
+          if (legacy) {
+            const numToScale = (n: unknown): S1RatingScale =>
+              typeof n === 'number' ? S1_RATING_SCALE[Math.min(4, Math.max(0, n - 1))] : '보통'
+            const GAP_MAP: Record<string, S1RatingScale> = {
+              '거의 같았다': '아니다',
+              '일부 달랐다': '보통',
+              '상당히 달랐다': '그렇다',
+            }
+            const WILL_MAP: Record<string, S1RatingScale> = {
+              '그렇다': '그렇다',
+              '잘 모르겠다': '보통',
+              '그렇지 않다': '아니다',
+            }
+            const isScale = (v: unknown): v is S1RatingScale => S1_RATING_SCALE.includes(v as S1RatingScale)
+            state.selfAssessment = {
+              interestScore: isScale(legacy.interestScore) ? legacy.interestScore : numToScale(legacy.interestScore),
+              expectationGap: isScale(legacy.expectationGap) ? legacy.expectationGap : (GAP_MAP[legacy.expectationGap] ?? '보통'),
+              repeatWillingness: isScale(legacy.repeatWillingness)
+                ? legacy.repeatWillingness
+                : (WILL_MAP[legacy.repeatWillingness] ?? '보통'),
+              burdenNote: Array.isArray(legacy.burdenItems) ? legacy.burdenItems.join(', ') : (legacy.burdenNote ?? ''),
+            }
+          }
+          if (state.report) {
+            state.report = {
+              ...state.report,
+              personaHeadline: state.report.personaHeadline ?? '뚝심 강한 디자이너 DNA가 흐르고 있어요',
+              burdenNote: state.report.burdenNote ?? '',
+            }
+          }
+        }
+        return state
+      },
+    },
   ),
 )
 
