@@ -1,30 +1,33 @@
+import negotiationScene from '../../assets/illustrations/session1-negotiation-scene.png'
 import avatarGopro from '../../assets/illustrations/avatar-gopro.png'
 import avatarLipro from '../../assets/illustrations/avatar-lipro.png'
 import avatarParkChaeim from '../../assets/illustrations/avatar-parkchaeim.png'
-import { Text } from '../../components/Text'
-import { Chip } from '../../components/Chip'
+import { Sidebar } from '../../components/Sidebar'
+import { Indicator } from '../../components/Indicator'
 import { Card } from '../../components/Card'
+import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
+import { CheckIcon } from '../../components/icons'
 import { useSession1 } from '../../store/session1'
 
+const INDICATOR_STEPS_S1 = ['브리프', '자료탐색', '설계 수정1', '설계 수정2', '설계 확정', '자기 평가', '직무 리포트'] as const
+
 const GOALS = [
-  '벨트라인(면 분할)이라는 핵심 디자인 의도를 지킨다.',
-  '설계팀이 제기하는 비용, 구조 제약 안에서 실현 가능한 형태를 찾는다.',
-  '품평회 전까지 설계팀과 합의점을 도출한다.',
+  '핵심 디자인 의도 유지(벨트라인)',
+  '비용, 구조 제약 안에서 실현 가능 형태 탐색',
+  '품평회 전까지 설계팀과 합의점 도출',
 ]
 
-const INITIAL_CONDITIONS = [
-  '하우징 3파츠 분할안 (금형 비용 이슈 발생)',
-  '제작 방식: 프레스 금형 / CNC 가공',
-  '2주 이내에 설계팀과 합의점 도출',
-]
+const INITIAL_CONDITIONS = ['하우징 3파츠 분할안 (금형 비용 이슈 발생)', '제작 방식 (프레스 금형) (CNC 가공)', '2주 이내에 설계팀과 합의점 도출']
 
 const DELIVERABLES = [
-  '최종 확정된 하우징 파트 분할안 / 형태',
-  '수정 근거 - 초기 디자인 의도를 어떻게 유지했는지에 대한 설명',
-  '협상 과정에서 고려한 제작 방식(성형 방식, 구조적 제약)',
+  '최종 확정된 하우징 파트 분할안, 형태',
+  '수정 근거 (초기 디자인 의도 유지 여부 설명)',
+  '협상 과정에서 고려한 제작 방식',
   '설계팀과의 합의 여부',
 ]
+
+const ROUND_LABELS = ['1차 양산 용이성 협상', '2차 양산 용이성 협상', '3차 양산 용이성 협상', '업무 리포트']
 
 const COLLABORATORS = [
   { img: avatarGopro, name: '고프로', team: '디자인팀' },
@@ -32,146 +35,175 @@ const COLLABORATORS = [
   { img: avatarParkChaeim, name: '박책임', team: '설계팀' },
 ]
 
-// Figma 02_Project Brief (382:2807) — 세션1 브리프. 실제 발견한 원본 텍스트 그대로.
+function CheckItem({ children }: { children: string }) {
+  return (
+    <div className="flex items-center gap-1">
+      <CheckIcon className="size-4 shrink-0 text-green-500" />
+      <Text variant="body-lg" className="text-neutral-600">
+        {children}
+      </Text>
+    </div>
+  )
+}
+
+function Tag({ children }: { children: string }) {
+  return (
+    <span className="shrink-0 rounded-[20px] border border-green-400 bg-green-50 px-3 py-2 text-body-lg font-medium text-green-900">
+      {children}
+    </span>
+  )
+}
+
+// Figma "Desktop - 21"(744:15857) — 세션1 브리프 재설계. 기존엔 일반 라이트 테마 단일 카드
+// 레이아웃이었는데, 다른 세션1 화면들(Materials/Workspace)과 같은 다크 Sidebar+Indicator
+// 3컬럼 레이아웃으로 통일. 텍스트 콘텐츠는 유지하되 구조를 Figma 실측대로 다시 짬.
 export function Session1Brief() {
   const goTo = useSession1((s) => s.goTo)
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10">
-      <div>
-        <Text variant="headline-md" emphasis>
-          세션1_피드백 수정
-        </Text>
-        <Text variant="headline-md" emphasis className="mt-1">
-          업무 브리프
-        </Text>
-      </div>
+    <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
+      <Sidebar active="message" className="shrink-0" />
 
-      <div className="flex flex-col gap-8 lg:flex-row">
-        <Card className="flex-1 p-6">
-          <div className="flex flex-col gap-6">
-            <div>
-              <Text variant="body-sm" className="text-neutral-600">
-                당신의 역할
-              </Text>
-              <Text variant="headline-md" emphasis>
-                생활가전 기업의 신입 제품디자이너
-              </Text>
-              <Text variant="body-lg" className="mt-2 text-neutral-600">
-                월요일 아침, 선임 디자이너로부터 가정용 공기청정기 시안 C의 디자인 확정 소식과 함께 2주
-                뒤에 있을 품평회 전까지 설계팀과 함께 양산 용이성을 검토할 것을 요청받았습니다.
-              </Text>
-            </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-6">
+        <Indicator current="브리프" steps={INDICATOR_STEPS_S1} />
 
-            <div className="rounded-md bg-neutral-100 p-4">
-              <Text variant="caption-lg" emphasis className="text-neutral-600">
-                MISSION
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr_300px]">
+          <div className="flex flex-col gap-4">
+            <Card className="flex items-center justify-center p-6">
+              <Text variant="title-lg" emphasis className="text-center">
+                모형 제작 및 설계 검토 세션
               </Text>
-              <Text variant="title-lg" emphasis className="mt-1">
-                20대 1인 가구를 위한 탁상형 공기청정기의 개선 방향을 제안하세요.
-              </Text>
-              <Text variant="body-sm" className="mt-2 text-neutral-600">
-                사장님까지 참여하는 품평회를 2주 앞두고 있습니다. 설계팀과 함께 공기청정기의 시안을
-                수정하고 검토하여 최적의 양산 구조를 찾으세요.
-              </Text>
-            </div>
-
-            <div>
-              <Text variant="title-md" emphasis className="mb-2">
+            </Card>
+            <Card className="flex flex-col gap-2 p-6">
+              <Text variant="title-md" emphasis className="text-green-900">
                 프로젝트 배경
               </Text>
-              <Text variant="body-lg">
+              <Text variant="body-lg" className="text-neutral-600">
                 탁상형 공기청정기 바디 하우징을 3개 파츠로 분할한 시안을 설계팀에 전달했고, 설계팀
                 박책임으로부터 금형 비용 문제로 파트 통합을 요구받은 상태입니다.
               </Text>
-            </div>
-
-            <div>
-              <Text variant="title-md" emphasis className="mb-2">
-                이번 세션의 목표
+            </Card>
+            <Card className="flex flex-col gap-2 p-6">
+              <Text variant="title-md" emphasis className="text-green-900">
+                세션 목표
               </Text>
-              <ul className="flex flex-col gap-2">
-                {GOALS.map((goal) => (
-                  <li key={goal} className="flex items-start gap-2">
-                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-neutral-900" />
-                    <Text variant="body-lg">{goal}</Text>
-                  </li>
+              <div className="flex flex-col items-start gap-1">
+                {GOALS.map((g) => (
+                  <CheckItem key={g}>{g}</CheckItem>
                 ))}
-              </ul>
-            </div>
-
-            <div>
-              <Text variant="title-md" emphasis className="mb-2">
+              </div>
+            </Card>
+            <Card className="flex flex-col gap-2 p-6">
+              <Text variant="title-md" emphasis className="text-green-900">
                 초기 조건
               </Text>
-              <ul className="list-inside list-disc">
+              <div className="flex flex-col items-start gap-1">
                 {INITIAL_CONDITIONS.map((c) => (
-                  <li key={c}>
-                    <Text as="span" variant="body-lg">
-                      {c}
-                    </Text>
-                  </li>
+                  <CheckItem key={c}>{c}</CheckItem>
                 ))}
-              </ul>
-            </div>
-
-            <div>
-              <Text variant="title-md" emphasis className="mb-2">
-                결과물
-              </Text>
-              <ol className="list-inside list-decimal">
-                {DELIVERABLES.map((d) => (
-                  <li key={d}>
-                    <Text as="span" variant="body-md" className="text-neutral-600">
-                      {d}
-                    </Text>
-                  </li>
-                ))}
-              </ol>
-            </div>
+              </div>
+            </Card>
           </div>
-        </Card>
 
-        <div className="flex w-full flex-col gap-4 lg:w-[340px]">
-          <Card className="p-6">
-            <Text variant="title-lg" emphasis className="mb-4">
-              체험 진행 방식
+          <Card className="flex flex-col gap-6 p-6">
+            <Text variant="title-lg" emphasis className="text-green-900">
+              프로젝트 주제
             </Text>
-            <div className="flex flex-col gap-2">
-              <Chip className="w-full justify-start">01 1차 양산 용이성 협상</Chip>
-              <Chip className="w-full justify-start">02 2차 양산 용이성 협상</Chip>
-              <Chip className="w-full justify-start">03 3차 양산 용이성 협상</Chip>
-              <Chip className="w-full justify-start">04 업무 리포트</Chip>
-            </div>
-            <Text variant="caption-lg" className="mt-4 text-neutral-500">
-              2주간 진행되는 설계 검토 일정에 맞춰 설계팀과 최대 3회의 협상 라운드를 거칩니다. 라운드마다
-              제시되는 선택지 중 하나를 고르고 근거를 작성하면, 다음 라운드의 시안과 협업자의 반응이
-              달라집니다. 합의에 도달하면 세션이 종료됩니다.
-            </Text>
-          </Card>
 
-          <Card className="p-6">
-            <Text variant="title-lg" emphasis className="mb-4">
-              협업 관계자
-            </Text>
-            <div className="flex gap-4">
-              {COLLABORATORS.map((c) => (
-                <div key={c.name} className="flex flex-col items-center gap-2">
-                  <img src={c.img} alt="" className="size-14 rounded-full bg-neutral-100 object-cover" />
-                  <Text variant="caption-sm" className="text-center text-neutral-600">
-                    {c.name} · {c.team}
+            <div className="flex flex-col gap-6">
+              <div className="flex items-start gap-6">
+                <Tag>당신의 역할</Tag>
+                <div className="flex flex-1 flex-col gap-3">
+                  <Text variant="title-lg" emphasis className="text-green-900">
+                    생활가전 기업의 신입 제품 디자이너
+                  </Text>
+                  <Text variant="body-lg" className="text-neutral-600">
+                    월요일 아침, 선임 디자이너로부터 가정용 공기청정기 시안 C의 디자인 확정 소식과 함께
+                    2주 뒤에 있을 품평회 전까지 설계팀과 함께 양산 용이성을 검토할 것을 요청받았습니다.
                   </Text>
                 </div>
-              ))}
+              </div>
+
+              <img src={negotiationScene} alt="" className="h-[300px] w-full rounded-md bg-neutral-200 object-cover" />
+
+              <div className="flex items-start gap-6">
+                <Tag>업무 미션</Tag>
+                <div className="flex flex-1 flex-col gap-3">
+                  <Text variant="title-lg" emphasis className="text-green-900">
+                    20대 1인 가구를 위한 탁상형 공기청정기의 개선 방향을 제안하세요.
+                  </Text>
+                  <Text variant="body-lg" className="text-neutral-600">
+                    사장님까지 참여하는 품평회를 2주 앞두고 있습니다. 설계팀과 함께 공기청정기의 시안을
+                    수정하고 검토하여 최적의 양산 구조를 찾으세요.
+                  </Text>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-6">
+                <Tag>결과물</Tag>
+                <div className="flex flex-1 flex-col items-start gap-1">
+                  {DELIVERABLES.map((d) => (
+                    <CheckItem key={d}>{d}</CheckItem>
+                  ))}
+                </div>
+              </div>
             </div>
           </Card>
 
-          <Button variant="primary" className="h-[48px] text-base" onClick={() => goTo('materials')}>
-            업무 시작하기
-          </Button>
-          <Text variant="caption-sm" className="text-center text-neutral-400">
-            로그인 없이 현재 브라우저에 자동 저장됩니다.
-          </Text>
+          <div className="flex flex-col gap-4">
+            <Card className="flex flex-col gap-6 p-6">
+              <div className="flex flex-col gap-3">
+                <Text variant="title-lg" emphasis className="text-green-900">
+                  체험 진행 방식
+                </Text>
+                <div className="flex flex-col items-start gap-2.5">
+                  {ROUND_LABELS.map((label) => (
+                    <span
+                      key={label}
+                      className="rounded-[20px] border border-green-300 bg-green-50 px-3 py-2 text-body-lg font-medium text-green-900"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <Text variant="body-lg" className="text-neutral-600">
+                2주간 진행되는 설계 검토 일정에 맞춰 설계팀과 최대 3회의 협상 라운드를 거칩니다.
+                라운드마다 제시되는 선택지 중 하나를 고르고 근거를 작성하면, 다음 라운드의 시안과
+                협업자의 반응이 달라집니다. 합의에 도달하면 세션이 종료됩니다.
+              </Text>
+            </Card>
+
+            <Card className="flex flex-col gap-6 p-6">
+              <Text variant="title-lg" emphasis className="text-green-900">
+                협업 관계자
+              </Text>
+              <div className="flex flex-wrap justify-between gap-y-6">
+                {COLLABORATORS.map((c) => (
+                  <div key={c.name} className="flex flex-col items-center gap-3">
+                    <img src={c.img} alt="" className="size-24 rounded-full bg-neutral-100 object-cover" />
+                    <div className="flex items-center gap-1">
+                      <Text variant="caption-sm" className="text-neutral-700">
+                        {c.name}
+                      </Text>
+                      <span className="size-0.5 rounded-full bg-neutral-400" />
+                      <Text variant="caption-sm" className="text-green-600">
+                        {c.team}
+                      </Text>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Button
+              variant="primary"
+              className="h-[72px] w-full !rounded-xl !text-2xl"
+              onClick={() => goTo('materials')}
+            >
+              시작하기
+            </Button>
+          </div>
         </div>
       </div>
     </div>
