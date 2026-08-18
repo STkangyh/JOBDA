@@ -95,7 +95,7 @@ export function JobDetail({
         disabled={selected === null}
         onClick={() => selected !== null && onSubmit(selected)}
       >
-        시작하기
+        업무 시작하기
       </Button>
     </div>
   )
