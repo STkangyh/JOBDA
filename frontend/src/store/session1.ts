@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { ProfileAxis } from '../types'
 
 // 세션1 "프로토타입 수정" — Figma 373:147 구역에서 발굴. 협상 라운드 서사는
 // 실제 발견한 라운드3 화면(587:9749)의 채팅 로그를 역산해서 재구성함:
@@ -111,6 +112,7 @@ export interface S1ReportResponse {
   cautions: string[]
   missed: string[]
   job_meaning: string
+  profile: ProfileAxis[]
 }
 
 interface S1RoundAnswer {
@@ -257,6 +259,39 @@ export const useSession1 = create<Session1State & Session1Actions>()(
           strengths.push('3회의 협상 라운드를 끝까지 진행해 합의안을 도출했습니다.')
         }
 
+        const altRounds = s.roundAnswers.filter((r) => r.selectedChoice === 1).length
+        const consultedSupport = s.chatHistory.purchasing.length > 0 || s.chatHistory.senior.length > 0
+        const questionedEngineering = s.chatHistory.engineering.length > 0
+
+        // "내 직무 이해 프로필" 4축 — 세션2(mock/report.ts computeProfile)와 같은 방식으로
+        // 이미 추적 중인 라운드 선택/채팅 데이터만으로 도출(새 입력 요구 없음).
+        const profile: ProfileAxis[] = [
+          {
+            leftLabel: '품질 우선',
+            rightLabel: '일정 우선',
+            caption: '결과물 완성도 vs 제출 속도',
+            value: ((S1_ROUNDS.length - reasonedRounds) / S1_ROUNDS.length) * 100,
+          },
+          {
+            leftLabel: '수용형',
+            rightLabel: '대안 제시형',
+            caption: '이해관계자 설득 선호도',
+            value: (altRounds / S1_ROUNDS.length) * 100,
+          },
+          {
+            leftLabel: '수용적',
+            rightLabel: '부담 경험',
+            caption: '반복 수정에 대한 반응',
+            value: consultedSupport ? 70 : 30,
+          },
+          {
+            leftLabel: '수용적',
+            rightLabel: '근거 요구형',
+            caption: '피드백 후 판단 수정 성향',
+            value: questionedEngineering ? 80 : 20,
+          },
+        ]
+
         const report: S1ReportResponse = {
           work_overview:
             '탁상형 공기청정기 바디 하우징의 파트 분할 안을 두고 설계팀과 3회에 걸쳐 협상하며 벨트라인 디자인 의도와 제작 가능성 사이의 타협점을 찾았습니다.',
@@ -264,6 +299,7 @@ export const useSession1 = create<Session1State & Session1Actions>()(
           cautions,
           missed,
           job_meaning: '제약 속에서 디자인 의도와 현실의 타협점을 찾는 실무 감각을 경험했습니다.',
+          profile,
         }
         set({ report, currentStage: 'report' })
       },

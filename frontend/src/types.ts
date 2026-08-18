@@ -74,12 +74,21 @@ export interface ReportRequest {
   action_logs: ActionLog[]
 }
 
+// "직무 이해 프로필" 스펙트럼 축. value 0 = leftLabel 쪽, 100 = rightLabel 쪽.
+export interface ProfileAxis {
+  leftLabel: string
+  rightLabel: string
+  caption: string
+  value: number
+}
+
 export interface ReportResponse {
   work_overview: string
   strengths: string[]
   cautions: string[]
   missed: string[]
   job_meaning: string
+  profile: ProfileAxis[]
 }
 
 export interface SessionLogRequest {

@@ -17,7 +17,9 @@ import { ErrorPage } from './screens/explore/ErrorPage'
 import { Session1App } from './screens/session1/Session1App'
 import type { Stage } from './types'
 
-const SCREENS: Record<Stage, ComponentType> = {
+// 'report'는 Layout(구형 라이트 테마 래퍼) 없이 자체 다크 풀블리드 레이아웃(Sidebar 포함)을
+// 쓰므로 SCREENS 매핑에서 빼고 App에서 따로 분기한다.
+const SCREENS: Record<Exclude<Stage, 'report'>, ComponentType> = {
   home: Home,
   brief: Brief,
   workspace: Workspace,
@@ -26,7 +28,6 @@ const SCREENS: Record<Stage, ComponentType> = {
   branch_select: BranchSelect,
   vendor_compare: VendorCompare,
   self_assessment: SelfAssessment,
-  report: Report,
 }
 
 const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job', '/session1', '/session2'])
@@ -80,6 +81,7 @@ function App() {
   }
 
   if (pathname === '/session2') {
+    if (stage === 'report') return <Report />
     const Screen = SCREENS[stage]
     return (
       <Layout stage={stage}>

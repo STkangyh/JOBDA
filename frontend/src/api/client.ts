@@ -1,6 +1,6 @@
 import type { ChatRequest, ChatResponse, Finding, FindingCode, ReportRequest, ReportResponse, SessionLogRequest } from '../types'
 import { mockChat } from './mock/chat'
-import { mockReport } from './mock/report'
+import { mockReport, computeProfile } from './mock/report'
 
 // 백엔드가 BACKEND_SPEC_v4로 배포됨 (GitHub 이슈 #1). v2와의 갭은 이 파일 경계에서만
 // 흡수한다 — 호출부(store)와 내부 타입은 v2 모델 그대로 유지.
@@ -43,7 +43,7 @@ export async function report(req: ReportRequest): Promise<ReportResponse> {
   if (!API_BASE) return mockReport(req)
   const pick = (bucket: 'strengths' | 'cautions' | 'missed'): Finding[] =>
     req.findings.filter((f) => FINDING_BUCKET[f.code] === bucket)
-  return postJson('/api/report', {
+  const res = await postJson<unknown, ReportResponse>('/api/report', {
     scenario: SCENARIO,
     strengths_findings: pick('strengths'),
     cautions_findings: pick('cautions'),
@@ -52,6 +52,8 @@ export async function report(req: ReportRequest): Promise<ReportResponse> {
     scores: req.scores,
     branch: req.branch,
   })
+  // "내 직무 이해 프로필"은 v4 백엔드 응답에 아직 없는 필드라 여기서 채워 넣는다.
+  return res.profile ? res : { ...res, profile: computeProfile(req) }
 }
 
 export async function sessionLog(req: SessionLogRequest): Promise<void> {

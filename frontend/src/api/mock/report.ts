@@ -1,4 +1,4 @@
-import type { Finding, FindingCode, ReportRequest, ReportResponse } from '../../types'
+import type { Finding, FindingCode, ProfileAxis, ReportRequest, ReportResponse } from '../../types'
 
 // finding code -> 문장 매핑을 프론트 목데이터로 재현. 버킷 분류는 client.ts의 FINDING_BUCKET과
 // 동일하게 맞춰서(이슈 #1 / 백엔드 API.md 기준) 오프라인 목데이터와 실제 API가 같은 카테고리를 쓴다.
@@ -57,6 +57,44 @@ const WORK_OVERVIEW: Record<ReportRequest['branch'], string> = {
 
 const JOB_MEANING = '제약 속에서 디자인 의도와 현실의 타협점을 찾는 실무 감각을 경험했습니다.'
 
+// "내 직무 이해 프로필" — 새 축을 위해 별도 입력을 새로 받지 않고, 이미 계산된
+// scores/branch/findings(부록 A 판정 근거)만으로 4축을 도출한다. 실제 백엔드(v4) 응답에는
+// 아직 이 필드가 없어서 client.ts에서도 이 함수로 채워 넣는다(경계에서 갭 흡수).
+export function computeProfile(req: ReportRequest): ProfileAxis[] {
+  const hasFinding = (code: FindingCode) => req.findings.some((f) => f.code === code)
+
+  const revisited = hasFinding('revisited_after_branch')
+  const askedCapability = !hasFinding('capability_never_asked')
+  const askedBudget = !hasFinding('budget_never_asked')
+
+  return [
+    {
+      leftLabel: '품질 우선',
+      rightLabel: '일정 우선',
+      caption: '결과물 완성도 vs 제출 속도',
+      value: ((3 - req.scores.intent_delivery) / 2) * 100,
+    },
+    {
+      leftLabel: '수용형',
+      rightLabel: '대안 제시형',
+      caption: '이해관계자 설득 선호도',
+      value: ((req.scores.concept_retention - 1) / 2) * 100,
+    },
+    {
+      leftLabel: '수용적',
+      rightLabel: '부담 경험',
+      caption: '반복 수정에 대한 반응',
+      value: revisited ? 80 : 20,
+    },
+    {
+      leftLabel: '수용적',
+      rightLabel: '근거 요구형',
+      caption: '피드백 후 판단 수정 성향',
+      value: (askedCapability ? 50 : 0) + (askedBudget ? 50 : 0),
+    },
+  ]
+}
+
 export function mockReport(req: ReportRequest): ReportResponse {
   const strengths: string[] = []
   const cautions: string[] = []
@@ -80,5 +118,6 @@ export function mockReport(req: ReportRequest): ReportResponse {
     cautions,
     missed,
     job_meaning: JOB_MEANING,
+    profile: computeProfile(req),
   }
 }

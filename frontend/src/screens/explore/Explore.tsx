@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react'
-import bannerImg from '../../assets/jobs/explore-banner.png'
 import productDesignerImg from '../../assets/jobs/product-designer.png'
 import softwareEngineerImg from '../../assets/jobs/software-engineer.png'
 import academyInstructorImg from '../../assets/jobs/academy-instructor.png'
@@ -14,8 +13,9 @@ import digitalMarketerImg from '../../assets/jobs/digital-marketer.png'
 import communityManagerImg from '../../assets/jobs/community-manager.png'
 import careerCounselorImg from '../../assets/jobs/career-counselor.png'
 import { Sidebar } from '../../components/Sidebar'
+import { AppHeader } from '../../components/AppHeader'
 import { Text } from '../../components/Text'
-import { SearchIcon, ProfileIcon, ArrowBackIosIcon, WorkIcon, ClockLoaderIcon } from '../../components/icons'
+import { ArrowBackIosIcon, WorkIcon, ClockLoaderIcon } from '../../components/icons'
 
 interface JobPreview {
   id: string
@@ -73,18 +73,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
       <Sidebar active="apps" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-8">
-        <div
-          className="flex items-center justify-end gap-4 rounded-lg bg-neutral-900 bg-cover bg-center px-6 py-5"
-          style={{ backgroundImage: `url(${bannerImg})` }}
-        >
-          <div className="flex h-[50px] w-full max-w-[400px] items-center gap-2 rounded-full bg-neutral-700/80 px-4 text-neutral-300 backdrop-blur">
-            <SearchIcon className="size-5" />
-            <span className="text-body-md">직무 검색</span>
-          </div>
-          <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-green-500 text-neutral-900">
-            <ProfileIcon className="size-5" />
-          </div>
-        </div>
+        <AppHeader />
 
         <div className="flex flex-col gap-6 rounded-lg bg-neutral-900 px-12 py-6">
           <div className="flex items-end justify-between">

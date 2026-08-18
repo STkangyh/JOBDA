@@ -4,25 +4,12 @@ import illustration from '../../assets/illustrations/illustration-desk-work.svg'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
 import { CancelIcon } from '../../components/icons'
-
-const PROCESS_STEPS = [
-  '프로젝트 기획 및 제안',
-  '사용자 리서치 및 분석',
-  '전략 수립 및 컨셉 설정',
-  '아이디어 발상 및 구체화',
-  '아이디어 시각화',
-  '모형 제작 및 설계 검토',
-  '품평회 및 디자인 확정',
-  '시방서 작성 및 설계 이관',
-  '설계 과정 감리',
-  '양산 과정 감리',
-  '프로젝트 사후 관리',
-] as const
+import { PROCESS_STEPS, SESSION1_STEP_INDEX, SESSION2_STEP_INDEX } from '../../data/processSteps'
 
 // 실제로 구현된 세션 2개: 6번(모형 제작 및 설계 검토 = prototype_revision/세션1),
 // 8번(시방서 작성 및 설계 이관 = cmf_outsourcing/세션2)만 선택 가능하게 함.
-const AVAILABLE_STEP_INDICES = [5, 7]
-const DEFAULT_STEP_INDEX = 7
+const AVAILABLE_STEP_INDICES = [SESSION1_STEP_INDEX, SESSION2_STEP_INDEX]
+const DEFAULT_STEP_INDEX = SESSION2_STEP_INDEX
 
 // Figma "Desktop - 64" (652:16286) — 직무 상세 페이지. 브랜드/GNB 없이 전체화면 다크 레이아웃.
 export function JobDetail({
