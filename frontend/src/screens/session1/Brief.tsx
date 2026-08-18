@@ -7,7 +7,7 @@ import { Indicator } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
-import { CheckIcon } from '../../components/icons'
+import { CheckIcon, CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { useSession1 } from '../../store/session1'
 
 const INDICATOR_STEPS_S1 = ['브리프', '자료탐색', '설계 수정1', '설계 수정2', '설계 확정', '자기 평가', '직무 리포트'] as const
@@ -65,9 +65,20 @@ export function Session1Brief() {
       <Sidebar active="message" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <Indicator current="브리프" steps={INDICATOR_STEPS_S1} />
+        {/* Figma(744:15857)에서 인디케이터는 전체 폭이 아니라 가운데 컬럼 위에만 떠 있고,
+            우측 상단엔 저장상태/프로필 아이콘 한 쌍이 따로 있음 — 그리드 1행에 나란히 배치. */}
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[300px_1fr_300px]">
+          <div className="hidden lg:block" />
+          <Indicator current="브리프" steps={INDICATOR_STEPS_S1} />
+          <div className="hidden items-center justify-end gap-[18px] lg:flex">
+            <div className="flex size-[50px] items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
+              <CloudSavedIcon className="size-5" />
+            </div>
+            <div className="flex size-[50px] items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
+              <ProfileIcon className="size-5" />
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr_300px]">
           <div className="flex flex-col gap-4">
             <Card className="flex items-center justify-center p-6">
               <Text variant="title-lg" emphasis className="text-center">
