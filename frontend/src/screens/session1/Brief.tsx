@@ -7,7 +7,7 @@ import { Indicator } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
-import { CheckIcon, CloudSavedIcon, ProfileIcon } from '../../components/icons'
+import { CheckBoxIcon, CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { useSession1 } from '../../store/session1'
 
 const INDICATOR_STEPS_S1 = ['브리프', '자료탐색', '설계 수정1', '설계 수정2', '설계 확정', '자기 평가', '직무 리포트'] as const
@@ -38,7 +38,7 @@ const COLLABORATORS = [
 function CheckItem({ children }: { children: string }) {
   return (
     <div className="flex items-center gap-1">
-      <CheckIcon className="size-4 shrink-0 text-green-500" />
+      <CheckBoxIcon className="size-4 shrink-0 text-green-500" />
       <Text variant="body-lg" className="text-neutral-600">
         {children}
       </Text>
