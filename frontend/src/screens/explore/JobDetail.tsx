@@ -9,7 +9,6 @@ import { PROCESS_STEPS, SESSION1_STEP_INDEX, SESSION2_STEP_INDEX } from '../../d
 // 실제로 구현된 세션 2개: 6번(모형 제작 및 설계 검토 = prototype_revision/세션1),
 // 8번(시방서 작성 및 설계 이관 = cmf_outsourcing/세션2)만 선택 가능하게 함.
 const AVAILABLE_STEP_INDICES = [SESSION1_STEP_INDEX, SESSION2_STEP_INDEX]
-const DEFAULT_STEP_INDEX = SESSION2_STEP_INDEX
 
 // Figma "Desktop - 64" (652:16286) — 직무 상세 페이지. 브랜드/GNB 없이 전체화면 다크 레이아웃.
 export function JobDetail({
@@ -19,7 +18,10 @@ export function JobDetail({
   onClose: () => void
   onSubmit: (stepIndex: number) => void
 }) {
-  const [selected, setSelected] = useState<number | null>(DEFAULT_STEP_INDEX)
+  // Figma Desktop-40(744:13936, 미선택 기본 상태)/Desktop-64(744:14012, 선택 상태) 재확인:
+  // 처음엔 아무 것도 선택 안 된 상태(CTA 비활성)로 시작해야 함 — 이전엔 세션2가 기본
+  // 선택돼 있어서 CTA가 항상 활성 상태였음.
+  const [selected, setSelected] = useState<number | null>(null)
 
   return (
     <div className="flex min-h-svh flex-col gap-[18px] bg-neutral-950 p-7">
@@ -93,7 +95,7 @@ export function JobDetail({
         disabled={selected === null}
         onClick={() => selected !== null && onSubmit(selected)}
       >
-        제출하기
+        시작하기
       </Button>
     </div>
   )
