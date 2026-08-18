@@ -12,10 +12,13 @@ import academyInstructor2Img from '../../assets/jobs/academy-instructor-2.png'
 import digitalMarketerImg from '../../assets/jobs/digital-marketer.png'
 import communityManagerImg from '../../assets/jobs/community-manager.png'
 import careerCounselorImg from '../../assets/jobs/career-counselor.png'
-import { Sidebar } from '../../components/Sidebar'
+import { Sidebar, type SidebarItem } from '../../components/Sidebar'
 import { AppHeader } from '../../components/AppHeader'
 import { Text } from '../../components/Text'
 import { ArrowBackIosIcon, WorkIcon, ClockLoaderIcon } from '../../components/icons'
+
+// Figma 744:23143 사이드바 실측: apps/work/history(검색 아이콘 없음, 브리프와 다름).
+const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 
 interface JobPreview {
   id: string
@@ -70,7 +73,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
-      <Sidebar active="apps" />
+      <Sidebar active="apps" topItems={SIDEBAR_TOP_ITEMS} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-8">
         <AppHeader />

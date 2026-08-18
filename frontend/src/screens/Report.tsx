@@ -1,5 +1,5 @@
 import { useSession } from '../store/session'
-import { Sidebar } from '../components/Sidebar'
+import { Sidebar, type SidebarItem } from '../components/Sidebar'
 import { Indicator } from '../components/Indicator'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
@@ -8,6 +8,9 @@ import { WorkProcessChain } from '../components/WorkProcessChain'
 import { CloudSavedIcon, ProfileIcon } from '../components/icons'
 import { SESSION2_STEP_INDEX } from '../data/processSteps'
 import type { ActionLog } from '../types'
+
+// Figma 744:17446 사이드바 실측: apps/search/work/history 4개, history가 active.
+const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'search', 'work', 'history']
 
 const TYPE_LABEL: Record<ActionLog['type'], string> = {
   doc_view: '자료 열람',
@@ -47,7 +50,7 @@ export function Report() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
-      <Sidebar active="history" />
+      <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6 pb-6">
         {/* 세션1 화면들과 같은 헤더 행 — AppHeader(배너+검색+프로필) 대신 인디케이터+

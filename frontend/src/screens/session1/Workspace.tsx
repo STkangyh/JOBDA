@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Text } from '../../components/Text'
 import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
-import { Sidebar } from '../../components/Sidebar'
+import { Sidebar, type SidebarItem } from '../../components/Sidebar'
 import { Indicator } from '../../components/Indicator'
 import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { S1_ROUNDS, S1_PERSONA_LABEL, useSession1, type S1Persona } from '../../store/session1'
 
 const PERSONAS: S1Persona[] = ['engineering', 'purchasing', 'senior']
+// Figma 744:16874 사이드바 실측: apps/work/history(검색 아이콘 없음), work가 active.
+const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 
 const NOTE_TAGS = {
   userNeeds: ['저소음', '공간 효율', '따뜻함', '관리 용이', '인테리어 오브제 느낌'],
@@ -302,7 +304,7 @@ export function Session1Workspace() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
-      <Sidebar active="message" className="shrink-0" />
+      <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* Figma(744:15857 등)와 동일하게 인디케이터는 가운데 컬럼 폭에만, 저장상태/프로필
             아이콘은 우측 상단에 — 브리프에서 정리한 것과 같은 3열 헤더 행. */}

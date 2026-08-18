@@ -62,7 +62,7 @@ export function Session1Brief() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
-      <Sidebar active="message" className="shrink-0" />
+      <Sidebar active="apps" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* Figma(744:15857)에서 인디케이터는 전체 폭이 아니라 가운데 컬럼 위에만 떠 있고,

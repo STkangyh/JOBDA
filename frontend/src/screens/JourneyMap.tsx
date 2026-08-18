@@ -1,4 +1,4 @@
-import { Sidebar } from '../components/Sidebar'
+import { Sidebar, type SidebarItem } from '../components/Sidebar'
 import { Indicator } from '../components/Indicator'
 import { Card } from '../components/Card'
 import { Text } from '../components/Text'
@@ -8,6 +8,10 @@ import { PROCESS_STEPS, SESSION1_STEP_INDEX } from '../data/processSteps'
 import { S1_RATING_SCALE, S1_ROUNDS, useSession1 } from '../store/session1'
 
 const COLUMNS = ['업무 영역', '체험 여부', '흥미도', '이해도']
+// 이 화면(744:36745)은 Figma에 사이드바 자체가 없어서(작은 로고 박스만 있음) 실측 근거는
+// 없음 — 리포트에서 바로 넘어오는 화면이라 리포트와 같은 구성(apps/search/work/history)으로
+// 맞춰 일관성 유지.
+const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'search', 'work', 'history']
 
 // Figma "Desktop - 120"(744:36745) — get_screenshot으로 재확인해보니 라이트 테마(bg-#fafafa)에
 // AppHeader(배너+검색+프로필)가 아니라 브리프/자료함과 같은 인디케이터 헤더였음. 원래 다크
@@ -25,7 +29,7 @@ export function JourneyMap() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
-      <Sidebar active="history" />
+      <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* 이 화면은 아래 콘텐츠가 3컬럼 그리드가 아니라 단일 카드라, 브리프처럼 인디케이터를
