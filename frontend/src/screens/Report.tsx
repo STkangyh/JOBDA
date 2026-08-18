@@ -1,10 +1,11 @@
 import { useSession } from '../store/session'
 import { Sidebar } from '../components/Sidebar'
-import { AppHeader } from '../components/AppHeader'
+import { Indicator } from '../components/Indicator'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { ProfileSpectrum } from '../components/ProfileSpectrum'
 import { WorkProcessChain } from '../components/WorkProcessChain'
+import { CloudSavedIcon, ProfileIcon } from '../components/icons'
 import { SESSION2_STEP_INDEX } from '../data/processSteps'
 import type { ActionLog } from '../types'
 
@@ -46,10 +47,23 @@ export function Report() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
-      <Sidebar active="data" />
+      <Sidebar active="history" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6 pb-6">
-        <AppHeader />
+        {/* 세션1 화면들과 같은 헤더 행 — AppHeader(배너+검색+프로필) 대신 인디케이터+
+            저장상태/프로필 아이콘으로 통일. */}
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
+          <div className="hidden lg:block" />
+          <Indicator current="직무 리포트" />
+          <div className="hidden items-center justify-end gap-[18px] lg:flex">
+            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
+              <CloudSavedIcon className="size-5" />
+            </div>
+            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
+              <ProfileIcon className="size-5" />
+            </div>
+          </div>
+        </div>
 
         <Text variant="headline-lg" emphasis className="text-white">
           직무 이해 리포트
