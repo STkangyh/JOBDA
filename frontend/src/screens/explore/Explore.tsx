@@ -103,7 +103,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                   key={job.id}
                   type="button"
                   onClick={() => selectCard(i)}
-                  className="group relative h-[310px] w-[430px] shrink-0 overflow-hidden rounded-lg border-4 border-transparent text-left transition-colors hover:border-white"
+                  className="group relative h-[310px] w-[430px] shrink-0 overflow-hidden rounded-lg text-left transition-shadow hover:ring-4 hover:ring-white"
                 >
                   <img src={job.image} alt="" className="absolute inset-0 size-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
@@ -154,12 +154,15 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                     </span>
                   </span>
                 </div>
-                <p className="max-w-2xl text-title-md font-medium leading-tight text-neutral-500">
-                  C 가전회사에서 초임 디자이너로 근무하고 있는 심재현씨가 되어 인하우스 디자인 업무를 체험해보세요.
-                  <br />
-                  탁상형 공기청정기 제품 기획부터 아이데이션, 시각화, 설계, 양산 프로젝트 사후 관리까지 모두
-                  시뮬레이션할 수 있어요.
-                </p>
+                <div className="flex flex-col text-title-md font-medium text-neutral-500">
+                  <p className="leading-tight whitespace-nowrap">
+                    C 가전회사에서 초임 디자이너로 근무하고 있는 심재현씨가 되어 인하우스 디자인 업무를 체험해보세요.
+                  </p>
+                  <p className="leading-tight whitespace-nowrap">
+                    탁상형 공기청정기 제품 기획부터 아이데이션, 시각화, 설계, 양산 프로젝트 사후 관리까지 모두
+                    시뮬레이션할 수 있어요.
+                  </p>
+                </div>
               </>
             ) : (
               <p className="text-title-md font-medium text-neutral-500">아직 준비 중인 직무예요. 곧 만나보실 수 있어요!</p>

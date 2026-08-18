@@ -102,7 +102,7 @@ export function JobDetail({
 
       <Button
         variant="primary"
-        className="h-[72px] w-[340px] !rounded-xl !text-2xl"
+        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
         disabled={selected === null}
         onClick={() => selected !== null && onSubmit(selected)}
       >
