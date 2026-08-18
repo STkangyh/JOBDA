@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 import brandLogo from '../assets/brand-logo.png'
-import { AppsIcon, SearchIcon, WorkIcon, ClockLoaderIcon, DatabaseIcon, MailIcon, EditIcon, type IconProps } from './icons'
+import { AppsIcon, SearchIcon, HomeRepairServiceIcon, DataUsageIcon, DatabaseIcon, MailIcon, EditIcon, type IconProps } from './icons'
 
 export type SidebarItem = 'apps' | 'search' | 'work' | 'history' | 'data' | 'message' | 'memo'
 
@@ -12,11 +12,14 @@ interface SidebarProps {
   className?: string
 }
 
+// Figma 컴포넌트 시트(703:34358)의 실제 glyph 이름: work="home_repair_service"(공구가방),
+// history="data_usage"(원형 링). 예전엔 다른 곳(Explore 배지)에서 쓰던 WorkIcon/ClockLoaderIcon을
+// 그대로 재사용했는데 모양이 달라서 여기 전용으로 정확한 path를 다시 만듦.
 const ICON: Record<SidebarItem, ComponentType<IconProps>> = {
   apps: AppsIcon,
   search: SearchIcon,
-  work: WorkIcon,
-  history: ClockLoaderIcon,
+  work: HomeRepairServiceIcon,
+  history: DataUsageIcon,
   data: DatabaseIcon,
   message: MailIcon,
   memo: EditIcon,
