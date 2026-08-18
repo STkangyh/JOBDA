@@ -4,7 +4,7 @@ import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
 import { Sidebar } from '../../components/Sidebar'
 import { Indicator } from '../../components/Indicator'
-import { WarningIcon } from '../../components/icons'
+import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { S1_ROUNDS, S1_PERSONA_LABEL, useSession1, type S1Persona } from '../../store/session1'
 
 const PERSONAS: S1Persona[] = ['engineering', 'purchasing', 'senior']
@@ -304,8 +304,20 @@ export function Session1Workspace() {
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
       <Sidebar active="message" className="shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <Indicator current={step} steps={INDICATOR_STEPS_S1} />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[340px_1fr_340px]">
+        {/* Figma(744:15857 등)와 동일하게 인디케이터는 가운데 컬럼 폭에만, 저장상태/프로필
+            아이콘은 우측 상단에 — 브리프에서 정리한 것과 같은 3열 헤더 행. */}
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
+          <div className="hidden lg:block" />
+          <Indicator current={step} steps={INDICATOR_STEPS_S1} />
+          <div className="hidden items-center justify-end gap-[18px] lg:flex">
+            <div className="flex size-[50px] items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
+              <CloudSavedIcon className="size-5" />
+            </div>
+            <div className="flex size-[50px] items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
+              <ProfileIcon className="size-5" />
+            </div>
+          </div>
+
           <Messenger />
           <ReviewAndChoice />
           <WorkNotes />

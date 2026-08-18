@@ -5,6 +5,7 @@ import { Indicator } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
+import { CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { useSession1 } from '../../store/session1'
 import { S1_DOCS, S1_DOC_CATEGORIES } from '../../data/session1Docs'
 
@@ -23,9 +24,25 @@ export function Session1Materials() {
       <Sidebar active="message" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <Indicator current="자료탐색" steps={INDICATOR_STEPS_S1} />
+        {/* Figma(744:15857 등)와 동일하게 인디케이터는 가운데 컬럼 폭에만, 저장상태/프로필
+            아이콘은 우측 상단에 — 브리프에서 정리한 것과 같은 3열 헤더 행. */}
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_340px_1fr]">
+          <div className="hidden lg:block" />
+          {/* 자료함 화면은 중앙(2번째) 컬럼이 340px로 좁아서 인디케이터를 거기만 넣으면
+              7단계 라벨이 다 안 들어감 — 2,3번째 컬럼을 합친 폭에 걸치도록 함. */}
+          <div className="hidden items-center gap-6 lg:col-span-2 lg:flex">
+            <Indicator current="자료탐색" steps={INDICATOR_STEPS_S1} className="flex-1" />
+            <div className="flex items-center gap-[18px]">
+              <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
+                <CloudSavedIcon className="size-5" />
+              </div>
+              <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
+                <ProfileIcon className="size-5" />
+              </div>
+            </div>
+          </div>
+          <Indicator current="자료탐색" steps={INDICATOR_STEPS_S1} className="lg:hidden" />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[340px_340px_1fr]">
           <div className="flex flex-col gap-6">
             <Card className="flex items-center justify-center p-6">
               <Text variant="title-lg" emphasis className="text-center">
