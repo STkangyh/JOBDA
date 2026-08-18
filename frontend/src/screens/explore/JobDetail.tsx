@@ -47,8 +47,8 @@ export function JobDetail({
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col gap-[18px] lg:flex-row">
-        <div className="relative flex flex-1 flex-col justify-end overflow-hidden rounded-lg bg-neutral-800 p-6">
+      <div className="flex min-w-0 flex-1 flex-col gap-[18px] lg:flex-row">
+        <div className="relative flex min-w-0 flex-1 flex-col justify-end overflow-hidden rounded-lg bg-neutral-800 p-6">
           <img
             src={illustration}
             alt=""

@@ -245,7 +245,7 @@ export function Session1Workspace() {
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
       <Sidebar active="message" className="shrink-0" />
-      <div className="flex flex-1 flex-col gap-6">
+      <div className="flex min-w-0 flex-1 flex-col gap-6">
         <Indicator current={step} steps={INDICATOR_STEPS_S1} />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[340px_1fr_340px]">
           <Messenger />
