@@ -41,9 +41,14 @@ export function Session1Report() {
       <div className="flex min-w-0 flex-1 flex-col gap-6 pb-6">
         <AppHeader />
 
-        <Text variant="headline-lg" emphasis className="text-white">
-          직무 이해 리포트
-        </Text>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <Text variant="headline-lg" emphasis className="text-white">
+            직무 이해 리포트
+          </Text>
+          <Text variant="title-lg" emphasis className="text-green-300">
+            {report.personaHeadline}
+          </Text>
+        </div>
 
         <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-3">
           <div className="flex flex-col gap-4 rounded-xl bg-neutral-900 p-6">
@@ -96,6 +101,13 @@ export function Session1Report() {
           <WorkProcessChain activeIndex={SESSION1_STEP_INDEX} />
         </div>
 
+        {report.burdenNote && (
+          <div className="flex flex-col gap-3 rounded-lg bg-neutral-900 p-6">
+            <SectionHeading>부담 기록</SectionHeading>
+            <p className="text-title-md text-green-500">“{report.burdenNote}”</p>
+          </div>
+        )}
+
         <div className="flex flex-col gap-3">
           <SectionHeading>다음 탐색 제안</SectionHeading>
           <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 lg:grid-cols-4">
@@ -116,6 +128,9 @@ export function Session1Report() {
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={() => (window.location.href = '/')}>
             탐색 페이지로
+          </Button>
+          <Button variant="secondary" onClick={() => (window.location.href = '/journey-map')}>
+            체험맵 보기
           </Button>
           <Button onClick={() => resetSession()}>다시 체험하기</Button>
         </div>

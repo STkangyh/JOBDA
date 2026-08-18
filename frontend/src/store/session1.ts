@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { ProfileAxis } from '../types'
+import draftRound1Image from '../assets/illustrations/session1-concept-a.png'
 
 // 세션1 "프로토타입 수정" — Figma 373:147 구역에서 발굴. 협상 라운드 서사는
 // 실제 발견한 라운드3 화면(587:9749)의 채팅 로그를 역산해서 재구성함:
@@ -22,7 +23,7 @@ export interface S1ChatMessage {
   content: string
 }
 
-export type S1Stage = 'brief' | 'round' | 'final_check' | 'self_assessment' | 'report'
+export type S1Stage = 'brief' | 'materials' | 'round' | 'final_check' | 'self_assessment' | 'report'
 
 export interface S1Choice {
   label: string
@@ -34,6 +35,8 @@ export interface S1RoundSpec {
   roundNumber: 1 | 2 | 3
   draftLabel: string
   draftDescription: string
+  /** 라운드1만 Figma에 실제 참고 이미지가 있어서 옵셔널로 둠(2/3라운드는 다른 형상이라 재사용 안 함). */
+  draftImage?: string
   feedbackTitle: string
   feedbackText: string
   accepted: boolean
@@ -45,7 +48,8 @@ export const S1_ROUNDS: S1RoundSpec[] = [
     roundNumber: 1,
     draftLabel: '초안',
     draftDescription:
-      '바디 부분의 하우징을 세 조각으로 나눴습니다. 위아래는 일정한 패턴으로 타공된 흡기구, 가운데를 가로지르는 벨트라인. 자칫 투박해보일 수 있는 면을 벨트라인으로 나누어 제품이 컴팩트해 보이게 한 안입니다.',
+      '바디 부분의 하우징을 세 조각으로 나눴습니다. 위아래는 세로 슬랫 구조로 타공된 흡기구, 가운데를 가로지르는 벨트라인. 자칫 투박해보일 수 있는 면을 벨트라인으로 나누어 제품이 컴팩트해 보이게 한 안입니다.',
+    draftImage: draftRound1Image,
     feedbackTitle: '1차 피드백',
     feedbackText:
       '재현씨가 만들고 있는 목업 잘 봤어요. 근데 이대로 만들려면 예산 못 맞춰요. 금형 하나 파는데 얼마나 드는지 아세요? 아무리 제품이 작아도 천은 우습게 깨집니다. 하우징 파트 나누지 말고 하나로 어떻게 안되나요?',
@@ -113,7 +117,13 @@ export interface S1ReportResponse {
   missed: string[]
   job_meaning: string
   profile: ProfileAxis[]
+  personaHeadline: string
+  burdenNote: string
 }
+
+// Figma 744:15050(Desktop-87)의 5점 척도 라벨 — 자기평가 3문항이 공유하는 스케일.
+export const S1_RATING_SCALE = ['전혀 아니다', '아니다', '보통', '그렇다', '매우 그렇다'] as const
+export type S1RatingScale = (typeof S1_RATING_SCALE)[number]
 
 interface S1RoundAnswer {
   selectedChoice: 0 | 1 | null
@@ -128,12 +138,13 @@ export interface Session1State {
   roundAnswers: S1RoundAnswer[]
   chatHistory: Record<S1Persona, S1ChatMessage[]>
   activePersona: S1Persona
+  savedNotes: string[]
   finalChecked: boolean
   selfAssessment: {
-    interestScore: 1 | 2 | 3 | 4 | 5 | null
-    expectationGap: '거의 같았다' | '일부 달랐다' | '상당히 달랐다' | null
-    repeatWillingness: '그렇다' | '잘 모르겠다' | '그렇지 않다' | null
-    burdenItems: string[]
+    interestScore: S1RatingScale
+    expectationGap: S1RatingScale
+    repeatWillingness: S1RatingScale
+    burdenNote: string
   }
   report: S1ReportResponse | null
 }
@@ -142,6 +153,7 @@ interface Session1Actions {
   goTo: (stage: S1Stage) => void
   setActivePersona: (persona: S1Persona) => void
   sendMessage: (persona: S1Persona, message: string) => void
+  saveNote: (text: string) => void
   selectChoice: (choice: 0 | 1) => void
   setReasoning: (text: string) => void
   submitRound: () => void
@@ -158,8 +170,10 @@ const initialState = (): Session1State => ({
   roundAnswers: S1_ROUNDS.map(() => ({ selectedChoice: null, reasoning: '', submitted: false })),
   chatHistory: { engineering: [], purchasing: [], senior: [] },
   activePersona: 'engineering',
+  savedNotes: [],
   finalChecked: false,
-  selfAssessment: { interestScore: null, expectationGap: null, repeatWillingness: null, burdenItems: [] },
+  // Figma 744:15050 주석: "자기평가 기본 설정값은 보통입니다."
+  selfAssessment: { interestScore: '보통', expectationGap: '보통', repeatWillingness: '보통', burdenNote: '' },
   report: null,
 })
 
@@ -186,6 +200,9 @@ export const useSession1 = create<Session1State & Session1Actions>()(
       goTo: (stage) => set({ currentStage: stage }),
 
       setActivePersona: (persona) => set({ activePersona: persona }),
+
+      // Figma 744:16003 등 — 관계자 답변 아래 "답변 내용 노트에 저장" 버튼. 업무 노트 패널에 반영.
+      saveNote: (text) => set((s) => (s.savedNotes.includes(text) ? s : { savedNotes: [...s.savedNotes, text] })),
 
       sendMessage: (persona, message) => {
         const reply = mockReply(persona, message)
@@ -292,6 +309,10 @@ export const useSession1 = create<Session1State & Session1Actions>()(
           },
         ]
 
+        // Figma 744:15120(Desktop-38) — 설계 의도를 끝까지 지켜낸 협상 패턴에 대한 페르소나
+        // 한줄평. Figma에 이 문구 하나만 확인되어 고정 문구로 사용(다른 변형은 근거 없어 생략).
+        const personaHeadline = '뚝심 강한 디자이너 DNA가 흐르고 있어요'
+
         const report: S1ReportResponse = {
           work_overview:
             '탁상형 공기청정기 바디 하우징의 파트 분할 안을 두고 설계팀과 3회에 걸쳐 협상하며 벨트라인 디자인 의도와 제작 가능성 사이의 타협점을 찾았습니다.',
@@ -300,6 +321,8 @@ export const useSession1 = create<Session1State & Session1Actions>()(
           missed,
           job_meaning: '제약 속에서 디자인 의도와 현실의 타협점을 찾는 실무 감각을 경험했습니다.',
           profile,
+          personaHeadline,
+          burdenNote: s.selfAssessment.burdenNote.trim(),
         }
         set({ report, currentStage: 'report' })
       },

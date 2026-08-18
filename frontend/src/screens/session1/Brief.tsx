@@ -1,6 +1,6 @@
-import avatarEngineering from '../../assets/illustrations/avatar-engineering.svg'
-import avatarSenior from '../../assets/illustrations/avatar-senior-designer.svg'
-import avatarDesignTeam from '../../assets/illustrations/avatar-design-team.svg'
+import avatarGopro from '../../assets/illustrations/avatar-gopro.png'
+import avatarLipro from '../../assets/illustrations/avatar-lipro.png'
+import avatarParkChaeim from '../../assets/illustrations/avatar-parkchaeim.png'
 import { Text } from '../../components/Text'
 import { Chip } from '../../components/Chip'
 import { Card } from '../../components/Card'
@@ -15,8 +15,8 @@ const GOALS = [
 
 const INITIAL_CONDITIONS = [
   '하우징 3파츠 분할안 (금형 비용 이슈 발생)',
-  '성형 방식: 사출 / 목표 원가 상세는 미확인',
-  '품평회까지 남은 시간 제한적',
+  '제작 방식: 프레스 금형 / CNC 가공',
+  '2주 이내에 설계팀과 합의점 도출',
 ]
 
 const DELIVERABLES = [
@@ -27,9 +27,9 @@ const DELIVERABLES = [
 ]
 
 const COLLABORATORS = [
-  { img: avatarEngineering, label: '설계팀 박책임' },
-  { img: avatarSenior, label: '선배 디자이너' },
-  { img: avatarDesignTeam, label: '디자인팀' },
+  { img: avatarGopro, name: '고프로', team: '디자인팀' },
+  { img: avatarLipro, name: '이프로', team: '디자인팀' },
+  { img: avatarParkChaeim, name: '박책임', team: '설계팀' },
 ]
 
 // Figma 02_Project Brief (382:2807) — 세션1 브리프. 실제 발견한 원본 텍스트 그대로.
@@ -57,6 +57,10 @@ export function Session1Brief() {
               <Text variant="headline-md" emphasis>
                 생활가전 기업의 신입 제품디자이너
               </Text>
+              <Text variant="body-lg" className="mt-2 text-neutral-600">
+                월요일 아침, 선임 디자이너로부터 가정용 공기청정기 시안 C의 디자인 확정 소식과 함께 2주
+                뒤에 있을 품평회 전까지 설계팀과 함께 양산 용이성을 검토할 것을 요청받았습니다.
+              </Text>
             </div>
 
             <div className="rounded-md bg-neutral-100 p-4">
@@ -67,7 +71,8 @@ export function Session1Brief() {
                 20대 1인 가구를 위한 탁상형 공기청정기의 개선 방향을 제안하세요.
               </Text>
               <Text variant="body-sm" className="mt-2 text-neutral-600">
-                사장님까지 참여하는 품평회를 앞두고, 설계팀과 시안 수정을 반복 검토하는 단계입니다.
+                사장님까지 참여하는 품평회를 2주 앞두고 있습니다. 설계팀과 함께 공기청정기의 시안을
+                수정하고 검토하여 최적의 양산 구조를 찾으세요.
               </Text>
             </div>
 
@@ -133,15 +138,15 @@ export function Session1Brief() {
               체험 진행 방식
             </Text>
             <div className="flex flex-col gap-2">
-              <Chip className="w-full justify-start">01 1차 협상</Chip>
-              <Chip className="w-full justify-start">02 2차 협상</Chip>
-              <Chip className="w-full justify-start">03 3차 협상</Chip>
+              <Chip className="w-full justify-start">01 1차 양산 용이성 협상</Chip>
+              <Chip className="w-full justify-start">02 2차 양산 용이성 협상</Chip>
+              <Chip className="w-full justify-start">03 3차 양산 용이성 협상</Chip>
               <Chip className="w-full justify-start">04 업무 리포트</Chip>
             </div>
             <Text variant="caption-lg" className="mt-4 text-neutral-500">
-              설계팀과 최대 3회의 협상 라운드를 거칩니다. 매 라운드마다 제시되는 선택지 중 하나를
-              고르고 근거를 작성하면, 다음 라운드의 시안과 박책임의 반응이 달라집니다. 합의에
-              도달하면 세션이 종료됩니다.
+              2주간 진행되는 설계 검토 일정에 맞춰 설계팀과 최대 3회의 협상 라운드를 거칩니다. 라운드마다
+              제시되는 선택지 중 하나를 고르고 근거를 작성하면, 다음 라운드의 시안과 협업자의 반응이
+              달라집니다. 합의에 도달하면 세션이 종료됩니다.
             </Text>
           </Card>
 
@@ -151,17 +156,17 @@ export function Session1Brief() {
             </Text>
             <div className="flex gap-4">
               {COLLABORATORS.map((c) => (
-                <div key={c.label} className="flex flex-col items-center gap-2">
-                  <img src={c.img} alt="" className="size-14 rounded-full bg-neutral-100" />
+                <div key={c.name} className="flex flex-col items-center gap-2">
+                  <img src={c.img} alt="" className="size-14 rounded-full bg-neutral-100 object-cover" />
                   <Text variant="caption-sm" className="text-center text-neutral-600">
-                    {c.label}
+                    {c.name} · {c.team}
                   </Text>
                 </div>
               ))}
             </div>
           </Card>
 
-          <Button variant="primary" className="h-[48px] text-base" onClick={() => goTo('round')}>
+          <Button variant="primary" className="h-[48px] text-base" onClick={() => goTo('materials')}>
             업무 시작하기
           </Button>
           <Text variant="caption-sm" className="text-center text-neutral-400">

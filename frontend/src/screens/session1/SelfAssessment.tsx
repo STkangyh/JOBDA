@@ -2,22 +2,50 @@ import { useState } from 'react'
 import { Text } from '../../components/Text'
 import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
-import { useSession1 } from '../../store/session1'
+import { S1_RATING_SCALE, useSession1, type S1RatingScale } from '../../store/session1'
 
-const BURDEN_ITEMS = ['설계팀 피드백 대응', '수정 방향 판단', '선택 근거 작성', '디자인 의도 유지', '반복 수정']
+type RatingField = 'interestScore' | 'expectationGap' | 'repeatWillingness'
+
+const QUESTIONS: { field: RatingField; label: string }[] = [
+  { field: 'interestScore', label: '이 업무가 흥미로웠나요?' },
+  { field: 'expectationGap', label: '수행 과정이 예상과 달랐나요?' },
+  { field: 'repeatWillingness', label: '이 업무가 계속 수행하고 싶나요?' },
+]
+
+function RatingRow({ label, value, onChange }: { label: string; value: S1RatingScale; onChange: (v: S1RatingScale) => void }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <Text variant="title-md" emphasis className="text-green-900">
+        {label}
+      </Text>
+      <div className="flex gap-3">
+        {S1_RATING_SCALE.map((option) => {
+          const selected = value === option
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onChange(option)}
+              className={`h-[72px] flex-1 rounded-xl px-3 py-6 text-center text-title-md transition-colors ${
+                selected
+                  ? 'bg-green-300 font-semibold text-neutral-900'
+                  : 'border border-green-900 text-neutral-500 hover:bg-green-50'
+              }`}
+            >
+              {option}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 export function Session1SelfAssessment() {
   const value = useSession1((s) => s.selfAssessment)
   const setSelfAssessment = useSession1((s) => s.setSelfAssessment)
   const finishAssessment = useSession1((s) => s.finishAssessment)
   const [submitting, setSubmitting] = useState(false)
-
-  const toggleBurden = (item: string) => {
-    const has = value.burdenItems.includes(item)
-    setSelfAssessment({ burdenItems: has ? value.burdenItems.filter((i) => i !== item) : [...value.burdenItems, item] })
-  }
-
-  const complete = value.interestScore && value.expectationGap && value.repeatWillingness && value.burdenItems.length > 0
 
   const submit = async () => {
     setSubmitting(true)
@@ -29,93 +57,40 @@ export function Session1SelfAssessment() {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
-      <Text variant="headline-md" emphasis>
-        자기평가
-      </Text>
-
-      <Card className="flex flex-col gap-6 p-6">
-        <div>
-          <Text variant="body-md" className="mb-2 text-neutral-600">
-            이번 업무를 수행하는 과정이 얼마나 흥미로웠나요?
+    <div className="mx-auto flex max-w-3xl flex-col gap-[18px] px-4 py-10">
+      <Card className="flex flex-col gap-[48px] p-6">
+        <div className="flex flex-col gap-3">
+          <Text variant="headline-md" emphasis>
+            방금 수행한 업무, 어떠셨나요?
           </Text>
-          <div className="flex gap-2">
-            {([1, 2, 3, 4, 5] as const).map((n) => (
-              <button
-                key={n}
-                onClick={() => setSelfAssessment({ interestScore: n })}
-                className={`size-9 rounded-full border text-sm transition-colors ${
-                  value.interestScore === n
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-300 hover:border-neutral-600'
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
+          <Text variant="title-lg" className="text-neutral-600">
+            학습 과정에 대한 리뷰를 등록해주세요. 솔직한 응답일수록 정확한 직무 이해 리포트를 받을 수 있어요.
+          </Text>
         </div>
 
-        <div>
-          <Text variant="body-md" className="mb-2 text-neutral-600">
-            제품디자이너 업무가 체험 전 예상과 얼마나 달랐나요?
-          </Text>
-          <div className="flex gap-2">
-            {(['거의 같았다', '일부 달랐다', '상당히 달랐다'] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setSelfAssessment({ expectationGap: v })}
-                className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
-                  value.expectationGap === v
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-300 hover:border-neutral-600'
-                }`}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-        </div>
+        <div className="flex flex-col gap-6">
+          {QUESTIONS.map((q) => (
+            <RatingRow
+              key={q.field}
+              label={q.label}
+              value={value[q.field]}
+              onChange={(v) => setSelfAssessment({ [q.field]: v })}
+            />
+          ))}
 
-        <div>
-          <Text variant="body-md" className="mb-2 text-neutral-600">
-            비슷한 업무를 반복적으로 수행하는 것이 괜찮을 것 같나요?
-          </Text>
-          <div className="flex gap-2">
-            {(['그렇다', '잘 모르겠다', '그렇지 않다'] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setSelfAssessment({ repeatWillingness: v })}
-                className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
-                  value.repeatWillingness === v
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-300 hover:border-neutral-600'
-                }`}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <Text variant="body-md" className="mb-2 text-neutral-600">
-            업무 과정에서 부담을 느낀 부분을 골라주세요 (복수 선택)
-          </Text>
-          <div className="flex flex-wrap gap-2">
-            {BURDEN_ITEMS.map((item) => (
-              <button
-                key={item}
-                onClick={() => toggleBurden(item)}
-                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                  value.burdenItems.includes(item)
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-300 hover:border-neutral-600'
-                }`}
-              >
-                {item}
-              </button>
-            ))}
+          <div className="flex flex-col gap-3">
+            <Text variant="title-md" emphasis className="text-green-900">
+              업무 중 부담을 느낀 부분이 있었나요?
+            </Text>
+            <div className="rounded-xl border border-neutral-600 p-6">
+              <textarea
+                value={value.burdenNote}
+                onChange={(e) => setSelfAssessment({ burdenNote: e.target.value })}
+                rows={2}
+                placeholder="ex) 설계팀과의 커뮤니케이션에서 제 의도를 정확히 전달하기 어려웠어요."
+                className="w-full resize-none text-body-lg text-neutral-500 placeholder:text-neutral-400 focus:outline-none"
+              />
+            </div>
           </div>
         </div>
       </Card>
@@ -124,9 +99,9 @@ export function Session1SelfAssessment() {
         variant="primary"
         className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
         onClick={submit}
-        disabled={!complete || submitting}
+        disabled={submitting}
       >
-        {submitting ? '리포트 생성 중...' : '자기평가 제출'}
+        {submitting ? '리포트 생성 중...' : '제출하기'}
       </Button>
     </div>
   )

@@ -4,6 +4,7 @@ import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
 import { Sidebar } from '../../components/Sidebar'
 import { Indicator } from '../../components/Indicator'
+import { WarningIcon } from '../../components/icons'
 import { S1_ROUNDS, S1_PERSONA_LABEL, useSession1, type S1Persona } from '../../store/session1'
 
 const PERSONAS: S1Persona[] = ['engineering', 'purchasing', 'senior']
@@ -25,6 +26,8 @@ function Messenger() {
   const setActivePersona = useSession1((s) => s.setActivePersona)
   const chatHistory = useSession1((s) => s.chatHistory)
   const sendMessage = useSession1((s) => s.sendMessage)
+  const savedNotes = useSession1((s) => s.savedNotes)
+  const saveNote = useSession1((s) => s.saveNote)
 
   const history = chatHistory[activePersona]
 
@@ -65,11 +68,21 @@ function Messenger() {
         {history.map((m, i) => (
           <div
             key={i}
-            className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+            className={`flex max-w-[80%] flex-col gap-1.5 rounded-lg px-3 py-2 text-sm ${
               m.role === 'user' ? 'ml-auto bg-green-100 text-green-900' : 'bg-neutral-100 text-neutral-900'
             }`}
           >
             {m.content}
+            {m.role === 'assistant' && (
+              <button
+                type="button"
+                onClick={() => saveNote(m.content)}
+                disabled={savedNotes.includes(m.content)}
+                className="self-start rounded-md bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
+              >
+                {savedNotes.includes(m.content) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -107,9 +120,23 @@ function ReviewAndChoice() {
 
   const round = S1_ROUNDS[currentRoundIndex]
   const answer = roundAnswers[currentRoundIndex]
-  const remaining = S1_ROUNDS.length - 1 - currentRoundIndex
+  // Figma 실측(744:16874 등): 1라운드 시점에 "3회 남음"으로 표시됨 — 이번 라운드까지 포함한
+  // 개수. 마지막 라운드(합의 성사)에서는 기존처럼 배지 자체를 숨김.
+  const remaining = S1_ROUNDS.length - currentRoundIndex
+  const isLastRound = currentRoundIndex === S1_ROUNDS.length - 1
 
   const canSubmit = answer.selectedChoice !== null && answer.reasoning.trim().length > 0
+
+  // Figma 744:16874 등(라운드 전환 로딩 상태) — 제출 직후 다음 라운드 내용이 채워지기 전까지
+  // 짧게 로딩 표시. 실제 응답 지연은 없지만(클라이언트 계산이라 즉시 끝남) 그 순간을 재현.
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const handleSubmit = () => {
+    setIsSubmitting(true)
+    setTimeout(() => {
+      submitRound()
+      setIsSubmitting(false)
+    }, 1200)
+  }
 
   return (
     <Card className="flex flex-col gap-8 p-6">
@@ -117,9 +144,18 @@ function ReviewAndChoice() {
         <Text variant="title-lg" emphasis>
           {round.draftLabel}
         </Text>
-        <Text variant="body-lg" className="text-neutral-600">
-          {round.draftDescription}
-        </Text>
+        <div className="flex gap-6">
+          {round.draftImage && (
+            <img
+              src={round.draftImage}
+              alt=""
+              className="h-[149px] w-[200px] shrink-0 rounded-md bg-neutral-100 object-cover"
+            />
+          )}
+          <Text variant="body-lg" className="text-neutral-600">
+            {round.draftDescription}
+          </Text>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -127,10 +163,13 @@ function ReviewAndChoice() {
           <Text variant="title-lg" emphasis>
             {round.feedbackTitle}
           </Text>
-          {remaining > 0 && (
-            <Text variant="body-sm" className="text-neutral-400">
-              가능 피드백 세션 {remaining}회 남음
-            </Text>
+          {!isLastRound && (
+            <div className="flex items-end gap-1">
+              <WarningIcon className={`size-5 shrink-0 text-error-200 ${isSubmitting ? 'animate-spin' : ''}`} />
+              <Text variant="body-sm" className="text-neutral-400">
+                가능 피드백 세션 {remaining}회 남음
+              </Text>
+            </div>
           )}
         </div>
         <Text variant="body-lg" className="whitespace-pre-line text-neutral-600">
@@ -193,16 +232,18 @@ function ReviewAndChoice() {
       <Button
         variant="primary"
         className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-        disabled={!canSubmit}
-        onClick={submitRound}
+        disabled={!canSubmit || isSubmitting}
+        onClick={handleSubmit}
       >
-        {round.roundNumber === S1_ROUNDS.length ? '최종 설계안 제출' : '수정안 제출'}
+        {isSubmitting ? '로딩중' : round.roundNumber === S1_ROUNDS.length ? '최종 설계안 제출' : '수정안 제출'}
       </Button>
     </Card>
   )
 }
 
 function WorkNotes() {
+  const savedNotes = useSession1((s) => s.savedNotes)
+
   return (
     <Card className="flex flex-col gap-6 p-6">
       <Text variant="title-lg" emphasis>
@@ -232,15 +273,32 @@ function WorkNotes() {
           ))}
         </div>
       </div>
+      {savedNotes.length > 0 && (
+        <div>
+          <Text variant="body-md" className="mb-2 text-neutral-600">
+            저장한 답변
+          </Text>
+          <ul className="flex flex-col gap-2">
+            {savedNotes.map((note, i) => (
+              <li key={i} className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-700">
+                {note}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </Card>
   )
 }
 
 const INDICATOR_STEPS_S1 = ['브리프', '자료탐색', '설계 수정1', '설계 수정2', '설계 확정', '자기 평가', '직무 리포트'] as const
+// round index -> indicator label. "자료탐색"은 별도 화면(Materials)이 생겼으니 라운드 화면에서는
+// 안 씀 — 이전엔 자료탐색 화면이 없어서 라운드1을 임시로 그 라벨에 매핑해뒀던 실수였음.
+const ROUND_STEP_LABELS = ['설계 수정1', '설계 수정2', '설계 확정'] as const
 
 export function Session1Workspace() {
   const currentRoundIndex = useSession1((s) => s.currentRoundIndex)
-  const step = currentRoundIndex === 0 ? '자료탐색' : currentRoundIndex === S1_ROUNDS.length - 1 ? '설계 확정' : '설계 수정1'
+  const step = ROUND_STEP_LABELS[currentRoundIndex]
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">

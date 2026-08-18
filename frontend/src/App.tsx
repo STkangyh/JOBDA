@@ -15,6 +15,7 @@ import { Explore } from './screens/explore/Explore'
 import { JobDetail } from './screens/explore/JobDetail'
 import { ErrorPage } from './screens/explore/ErrorPage'
 import { Session1App } from './screens/session1/Session1App'
+import { JourneyMap } from './screens/JourneyMap'
 import type { Stage } from './types'
 
 // 'report'는 Layout(구형 라이트 테마 래퍼) 없이 자체 다크 풀블리드 레이아웃(Sidebar 포함)을
@@ -30,7 +31,7 @@ const SCREENS: Record<Exclude<Stage, 'report'>, ComponentType> = {
   self_assessment: SelfAssessment,
 }
 
-const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job', '/session1', '/session2'])
+const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job', '/session1', '/session2', '/journey-map'])
 // 직무 상세페이지 "업무 프로세스" 스텝 인덱스 -> 진입할 경로. 6번(모형 제작 및 설계 검토)은
 // 세션1(프로토타입 수정), 8번(시방서 작성 및 설계 이관)은 세션2.
 const STEP_INDEX_TO_PATH: Record<number, string> = { 5: '/session1', 7: '/session2' }
@@ -78,6 +79,10 @@ function App() {
 
   if (pathname === '/session1') {
     return <Session1App />
+  }
+
+  if (pathname === '/journey-map') {
+    return <JourneyMap />
   }
 
   if (pathname === '/session2') {
