@@ -1,8 +1,7 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { useSession } from './store/session'
-import { Layout } from './components/Layout'
-import { Home } from './screens/Home'
 import { Brief } from './screens/Brief'
+import { Materials } from './screens/Materials'
 import { Workspace } from './screens/Workspace'
 import { SeniorFeedback } from './screens/SeniorFeedback'
 import { FinalFeedback } from './screens/FinalFeedback'
@@ -18,11 +17,12 @@ import { Session1App } from './screens/session1/Session1App'
 import { JourneyMap } from './screens/JourneyMap'
 import type { Stage } from './types'
 
-// 'report'는 Layout(구형 라이트 테마 래퍼) 없이 자체 다크 풀블리드 레이아웃(Sidebar 포함)을
-// 쓰므로 SCREENS 매핑에서 빼고 App에서 따로 분기한다.
+// 모든 세션2 화면이 세션1처럼 자체 풀블리드 레이아웃(Sidebar+Indicator 포함)을 갖도록
+// 재구성하면서 구형 Layout(라이트 테마 헤더 래퍼)과 별도 'home' 인트로 화면은 제거함
+// (세션1처럼 "/session2" 진입 시 곧장 브리프부터 시작).
 const SCREENS: Record<Exclude<Stage, 'report'>, ComponentType> = {
-  home: Home,
   brief: Brief,
+  materials: Materials,
   workspace: Workspace,
   senior_feedback: SeniorFeedback,
   final_feedback: FinalFeedback,
@@ -88,11 +88,7 @@ function App() {
   if (pathname === '/session2') {
     if (stage === 'report') return <Report />
     const Screen = SCREENS[stage]
-    return (
-      <Layout stage={stage}>
-        <Screen />
-      </Layout>
-    )
+    return <Screen />
   }
 
   if (!KNOWN_PATHS.has(pathname)) {

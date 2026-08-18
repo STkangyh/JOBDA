@@ -35,7 +35,7 @@ const emptyVendors = (): VendorOption[] => [
 
 const initialState = (): SessionState => ({
   sessionId: crypto.randomUUID(),
-  currentStage: 'home',
+  currentStage: 'brief',
   currentStep: 's1',
   viewedDocs: {},
   askedCapability: false,

@@ -114,8 +114,8 @@ export interface VendorOption {
 }
 
 export type Stage =
-  | 'home'
   | 'brief'
+  | 'materials'
   | 'workspace'
   | 'senior_feedback'
   | 'final_feedback'
