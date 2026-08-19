@@ -4,8 +4,10 @@ import { Card } from '../components/Card'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { CloudSavedIcon, ProfileIcon } from '../components/icons'
-import { PROCESS_STEPS, SESSION1_STEP_INDEX } from '../data/processSteps'
+import { PROCESS_STEPS, SESSION1_STEP_INDEX, SESSION2_STEP_INDEX } from '../data/processSteps'
 import { S1_RATING_SCALE, S1_ROUNDS, useSession1 } from '../store/session1'
+import { useSession } from '../store/session'
+import { RATING_SCALE } from '../types'
 
 const COLUMNS = ['업무 영역', '체험 여부', '흥미도', '이해도']
 // 이 화면(744:36745)은 Figma에 사이드바 자체가 없어서(작은 로고 박스만 있음) 실측 근거는
@@ -18,15 +20,29 @@ const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 // AppHeader(배너+검색+프로필)가 아니라 브리프/자료함과 같은 인디케이터 헤더였음. 원래 다크
 // 테마+AppHeader로 잘못 만들었던 것을 실제 프레임대로 교체.
 export function JourneyMap() {
-  const currentStage = useSession1((s) => s.currentStage)
-  const selfAssessment = useSession1((s) => s.selfAssessment)
+  const session1Stage = useSession1((s) => s.currentStage)
+  const s1SelfAssessment = useSession1((s) => s.selfAssessment)
   const roundAnswers = useSession1((s) => s.roundAnswers)
 
-  const session1Done = currentStage === 'report'
+  // 세션2(store/session.ts)는 완전히 별도 스토어라 여기서 따로 구독해야 한다 — 이전엔 이 화면이
+  // useSession1만 봐서 세션2를 끝내도 8번("시방서 작성 및 설계 이관") 단계가 계속 "미체험"으로
+  // 뜨는 버그가 있었음(SESSION2_STEP_INDEX를 import만 해두고 실제로는 안 씀).
+  const session2Stage = useSession((s) => s.currentStage)
+  const s2SelfAssessment = useSession((s) => s.selfAssessment)
+  const draftParts = useSession((s) => s.draftParts)
+
+  const session1Done = session1Stage === 'report'
+  const session2Done = session2Stage === 'report'
+
   const reasonedRounds = roundAnswers.filter((r) => r.reasoning.trim().length > 0).length
-  // Figma에 "이해도"의 산출 근거가 없어, 라운드마다 선택 근거를 남긴 비율을 대리 지표로
-  // 사용한다(자기평가 응답과 같은 5단계 라벨을 재사용해 일관성 유지).
-  const understandingIndex = Math.round((reasonedRounds / S1_ROUNDS.length) * (S1_RATING_SCALE.length - 1))
+  // Figma에 "이해도"의 산출 근거가 없어, 라운드마다(세션1)/부품마다(세션2) 선택 근거를 남긴
+  // 비율을 대리 지표로 사용한다(자기평가 응답과 같은 5단계 라벨을 재사용해 일관성 유지).
+  const s1UnderstandingIndex = Math.round((reasonedRounds / S1_ROUNDS.length) * (S1_RATING_SCALE.length - 1))
+  const reasonedParts = draftParts.filter((p) => p.reasoning.trim().length > 0).length
+  const s2UnderstandingIndex = Math.round((reasonedParts / draftParts.length) * (RATING_SCALE.length - 1))
+
+  // 둘 다 안 끝났으면 세션1부터, 세션1만 끝났으면 세션2로, 둘 다 끝났으면 더 보낼 데가 없어 홈으로.
+  const nextHref = !session1Done ? '/session1' : !session2Done ? '/session2' : '/'
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
@@ -65,7 +81,19 @@ export function JourneyMap() {
             ))}
           </div>
           {PROCESS_STEPS.map((step, i) => {
-            const isDone = i === SESSION1_STEP_INDEX && session1Done
+            const isSession1Step = i === SESSION1_STEP_INDEX
+            const isSession2Step = i === SESSION2_STEP_INDEX
+            const isDone = (isSession1Step && session1Done) || (isSession2Step && session2Done)
+            const interestScore = isSession1Step
+              ? s1SelfAssessment.interestScore
+              : isSession2Step
+                ? s2SelfAssessment.interestScore
+                : null
+            const understandingLabel = isSession1Step
+              ? S1_RATING_SCALE[s1UnderstandingIndex]
+              : isSession2Step
+                ? RATING_SCALE[s2UnderstandingIndex]
+                : null
             return (
               <div
                 key={step}
@@ -80,10 +108,10 @@ export function JourneyMap() {
                   {isDone ? '진행 완료' : '미체험'}
                 </Text>
                 <Text variant="body-md" className="text-neutral-600">
-                  {isDone ? selfAssessment.interestScore : '-'}
+                  {isDone ? interestScore : '-'}
                 </Text>
                 <Text variant="body-md" className="text-neutral-600">
-                  {isDone ? S1_RATING_SCALE[understandingIndex] : '-'}
+                  {isDone ? understandingLabel : '-'}
                 </Text>
               </div>
             )
@@ -94,7 +122,7 @@ export function JourneyMap() {
           <Button variant="secondary" onClick={() => (window.location.href = '/')}>
             홈으로 가기
           </Button>
-          <Button onClick={() => (window.location.href = '/session2')}>다음 세션으로 이동</Button>
+          <Button onClick={() => (window.location.href = nextHref)}>다음 세션으로 이동</Button>
         </div>
       </div>
     </div>
