@@ -6,7 +6,7 @@ import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { Checkbox } from '../components/Checkbox'
 import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
-import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../components/icons'
+import { WarningIcon, CloudSavedIcon, ProfileIcon, PlusIcon } from '../components/icons'
 import { useSession } from '../store/session'
 import type { PartSpecSize } from '../types'
 import productImage from '../assets/illustrations/product-angle-1.png'
@@ -239,8 +239,15 @@ function FinalSpecCard() {
 function DraftPartsCard() {
   const draftParts = useSession((s) => s.draftParts)
   const updateDraftPart = useSession((s) => s.updateDraftPart)
+  const setPartAttachment = useSession((s) => s.setPartAttachment)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false)
   const part = draftParts[activeIndex]
+
+  const selectTab = (i: number) => {
+    setActiveIndex(i)
+    setAttachMenuOpen(false)
+  }
 
   return (
     <Card className="flex flex-col gap-8 p-6">
@@ -253,7 +260,7 @@ function DraftPartsCard() {
             <button
               key={tag}
               type="button"
-              onClick={() => setActiveIndex(i)}
+              onClick={() => selectTab(i)}
               className={`shrink-0 rounded-full px-3 py-2 text-caption-lg transition-colors ${
                 i === activeIndex ? 'bg-green-200 text-green-900' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
               }`}
@@ -274,13 +281,64 @@ function DraftPartsCard() {
           />
         </FieldRow>
         <FieldRow label="컬러">
-          <input
-            value={part.color}
-            onChange={(e) => updateDraftPart(activeIndex, { color: e.target.value })}
-            placeholder="예: 오크 내추럴"
-            className={FIELD_INPUT_CLASS}
-          />
+          <div className="flex flex-1 items-center gap-2">
+            <input
+              value={part.color}
+              onChange={(e) => updateDraftPart(activeIndex, { color: e.target.value })}
+              placeholder="예: 오크 내추럴"
+              className={FIELD_INPUT_CLASS}
+            />
+            {/* Figma 823:53807("Add") — 컬러칩/한도 견본 판정표 중 하나를 첨부하는 버튼. */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setAttachMenuOpen((v) => !v)}
+                aria-label="컬러칩 또는 한도 견본 판정표 첨부"
+                className="flex size-[50px] items-center justify-center rounded-md bg-neutral-50 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+              >
+                <PlusIcon className="size-5" />
+              </button>
+              {attachMenuOpen && (
+                <div className="absolute right-0 top-[58px] z-10 flex w-[200px] flex-col overflow-hidden rounded-md border border-neutral-200 bg-white py-1 shadow-lg">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPartAttachment(activeIndex, 'colorChip')
+                      setAttachMenuOpen(false)
+                    }}
+                    className="px-4 py-3 text-left text-body-md text-neutral-700 hover:bg-neutral-50"
+                  >
+                    컬러칩 첨부
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPartAttachment(activeIndex, 'limitSample')
+                      setAttachMenuOpen(false)
+                    }}
+                    className="px-4 py-3 text-left text-body-md text-neutral-700 hover:bg-neutral-50"
+                  >
+                    한도 견본 판정표 첨부
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </FieldRow>
+        {part.attachment && (
+          <div className="flex items-center justify-between rounded-md bg-green-50 px-4 py-3 sm:ml-[108px]">
+            <Text variant="body-md" className="text-green-800 underline">
+              {part.attachment === 'colorChip' ? '컬러칩.jpg' : '마루 한도 견본 판정표.docs'}
+            </Text>
+            <button
+              type="button"
+              onClick={() => setPartAttachment(activeIndex, null)}
+              className="text-caption-sm text-neutral-400 transition-colors hover:text-neutral-600"
+            >
+              제거
+            </button>
+          </div>
+        )}
         <FieldRow label="마감">
           <input
             value={part.finish}

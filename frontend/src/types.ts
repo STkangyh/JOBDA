@@ -122,6 +122,10 @@ export interface PartSpecSize {
   thickness: string
 }
 
+// Figma 823:53807("Add") — 컬러 입력 옆 + 버튼. 눌렀을 때 컬러칩과 한도 견본 판정표 중 하나를
+// 첨부하는 용도(둘 다 색/마감 판정 근거 자료라 같은 자리에 묶여 있음). 부품마다 하나만 첨부 가능.
+export type PartAttachment = 'colorChip' | 'limitSample' | null
+
 export interface PartSpec {
   material: string
   color: string
@@ -129,6 +133,7 @@ export interface PartSpec {
   size: PartSpecSize
   method: string
   reasoning: string
+  attachment: PartAttachment
 }
 
 export interface VendorOption {

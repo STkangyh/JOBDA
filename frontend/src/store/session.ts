@@ -9,6 +9,7 @@ import type {
   Finding,
   FindingCode,
   Persona,
+  PartAttachment,
   PartSpec,
   ReportResponse,
   Scores,
@@ -42,6 +43,7 @@ const emptyPartSpec = (): PartSpec => ({
   size: { depth: '', width: '', height: '', thickness: '' },
   method: '',
   reasoning: '',
+  attachment: null,
 })
 
 const emptyVendors = (): VendorOption[] => [
@@ -81,6 +83,7 @@ interface SessionActions {
   sendMessage: (persona: Persona, message: string) => Promise<string>
   saveNote: (text: string) => void
   updateDraftPart: (index: number, fields: Partial<PartSpec>) => void
+  setPartAttachment: (index: number, attachment: PartAttachment) => void
   updateDraft: (fields: Partial<SpecDraft>) => void
   submitDraft: () => void
   updateFinal: (fields: Partial<SpecDraft>) => void
@@ -165,6 +168,18 @@ export const useSession = create<SessionState & SessionActions>()(
             i === index ? { ...p, ...fields, size: fields.size ? { ...p.size, ...fields.size } : p.size } : p,
           ),
         })),
+
+      // Figma 823:53807("Add") — 컬러 옆 + 버튼으로 부품마다 컬러칩 또는 한도 견본 판정표 중
+      // 하나를 첨부. 한도 견본 판정표는 draft.limitSampleAttached(계산 로직이 참조하는 flat 필드)와
+      // 도 연동해서, 부품 중 하나라도 첨부하면 "초안에 한도 견본 안 붙임" finding이 사라지게 한다.
+      setPartAttachment: (index, attachment) =>
+        set((s) => {
+          const draftParts = s.draftParts.map((p, i) => (i === index ? { ...p, attachment } : p))
+          return {
+            draftParts,
+            draft: { ...s.draft, limitSampleAttached: draftParts.some((p) => p.attachment === 'limitSample') },
+          }
+        }),
 
       sendMessage: async (persona, message) => {
         const s = get()
