@@ -163,6 +163,11 @@ export function VendorCompare() {
                   <VendorTable editable vendors={vendors} onChange={updateVendor} />
                 </Card>
 
+                {/* 메신저/업무노트가 h-full로 그리드 행 높이만큼 늘어나는 것과 맞춰, 카드들은
+                    원래 크기 그대로 두고 이 빈 칸이 남는 세로 공간을 흡수해서 제출 버튼을
+                    항상 칸 맨 아래로 붙인다(카드 억지로 늘리는 것보다 자연스러움). */}
+                <div className="flex-1" />
+
                 <Button
                   variant="primary"
                   className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
@@ -217,6 +222,8 @@ export function VendorCompare() {
                   </Text>
                   <VendorTable editable={false} vendors={vendors} onChange={updateVendor} />
                 </Card>
+
+                <div className="flex-1" />
 
                 <Button
                   variant="primary"
