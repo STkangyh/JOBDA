@@ -15,6 +15,7 @@ import { JobDetail } from './screens/explore/JobDetail'
 import { ErrorPage } from './screens/explore/ErrorPage'
 import { Session1App } from './screens/session1/Session1App'
 import { JourneyMap } from './screens/JourneyMap'
+import { ComprehensiveReport } from './screens/ComprehensiveReport'
 import { StageJumper } from './components/StageJumper'
 import type { Stage } from './types'
 
@@ -45,7 +46,16 @@ const SESSION2_STAGES: { value: Stage; label: string }[] = [
   { value: 'report', label: '직무 리포트' },
 ]
 
-const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job', '/session1', '/session2', '/journey-map'])
+const KNOWN_PATHS = new Set([
+  '/',
+  '/design-system',
+  '/explore',
+  '/explore/job',
+  '/session1',
+  '/session2',
+  '/journey-map',
+  '/comprehensive-report',
+])
 // 직무 상세페이지 "업무 프로세스" 스텝 인덱스 -> 진입할 경로. 6번(모형 제작 및 설계 검토)은
 // 세션1(프로토타입 수정), 8번(시방서 작성 및 설계 이관)은 세션2.
 const STEP_INDEX_TO_PATH: Record<number, string> = { 5: '/session1', 7: '/session2' }
@@ -98,6 +108,10 @@ function App() {
 
   if (pathname === '/journey-map') {
     return <JourneyMap />
+  }
+
+  if (pathname === '/comprehensive-report') {
+    return <ComprehensiveReport />
   }
 
   if (pathname === '/session2') {

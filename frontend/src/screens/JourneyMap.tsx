@@ -41,8 +41,9 @@ export function JourneyMap() {
   const reasonedParts = draftParts.filter((p) => p.reasoning.trim().length > 0).length
   const s2UnderstandingIndex = Math.round((reasonedParts / draftParts.length) * (RATING_SCALE.length - 1))
 
-  // 둘 다 안 끝났으면 세션1부터, 세션1만 끝났으면 세션2로, 둘 다 끝났으면 더 보낼 데가 없어 홈으로.
-  const nextHref = !session1Done ? '/session1' : !session2Done ? '/session2' : '/'
+  // 둘 다 안 끝났으면 세션1부터, 세션1만 끝났으면 세션2로, 둘 다 끝났으면 종합 리포트로.
+  const nextHref = !session1Done ? '/session1' : !session2Done ? '/session2' : '/comprehensive-report'
+  const nextLabel = session1Done && session2Done ? '종합 리포트 보기' : '다음 세션으로 이동'
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
@@ -122,7 +123,7 @@ export function JourneyMap() {
           <Button variant="secondary" onClick={() => (window.location.href = '/')}>
             홈으로 가기
           </Button>
-          <Button onClick={() => (window.location.href = nextHref)}>다음 세션으로 이동</Button>
+          <Button onClick={() => (window.location.href = nextHref)}>{nextLabel}</Button>
         </div>
       </div>
     </div>
