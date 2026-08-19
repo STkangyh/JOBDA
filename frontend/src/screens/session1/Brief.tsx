@@ -129,7 +129,7 @@ export function Session1Brief() {
                     생활가전 기업의 신입 제품 디자이너
                   </Text>
                   <Text variant="body-lg" className="text-neutral-600">
-                    월요일 아침, 선임 디자이너로부터 가정용 공기청정기 시안 C의 디자인 확정 소식과 함께
+                    월요일 아침, 선배 디자이너로부터 가정용 공기청정기 시안 C의 디자인 확정 소식과 함께
                     2주 뒤에 있을 품평회 전까지 설계팀과 함께 양산 용이성을 검토할 것을 요청받았습니다.
                   </Text>
                 </div>

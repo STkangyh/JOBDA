@@ -15,7 +15,7 @@ const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed
   },
   limit_sample_missing_in_draft: {
     bucket: 'cautions',
-    text: '초안에 한도 견본 판정표를 별첨하지 않아 선임 디자이너의 재요청이 발생했습니다.',
+    text: '초안에 한도 견본 판정표를 별첨하지 않아 선배 디자이너의 재요청이 발생했습니다.',
   },
   vendor_criteria_incomplete: {
     bucket: 'cautions',

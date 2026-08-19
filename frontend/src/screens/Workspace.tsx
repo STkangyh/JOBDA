@@ -95,7 +95,7 @@ function DesignRecapCard({ editingFinal, remaining }: { editingFinal: boolean; r
           </div>
         ) : (
           <Text variant="body-md" className="text-neutral-400">
-            초안을 제출하면 여기에 선임 디자이너의 피드백이 도착합니다.
+            초안을 제출하면 여기에 선배 디자이너의 피드백이 도착합니다.
           </Text>
         )}
       </div>

@@ -2,10 +2,21 @@
 
 export type Persona = 'senior' | 'engineering' | 'purchasing'
 
+// Figma 823:53752(Desktop-123) 실측: "선임 디자이너"가 아니라 "선배 디자이너"였음
+// (session1의 S1_PERSONA_LABEL.senior와 동일한 표기 — 세션2 쪽만 잘못돼 있었음).
 export const PERSONA_LABEL: Record<Persona, string> = {
-  senior: '선임 디자이너',
+  senior: '선배 디자이너',
   engineering: '설계팀',
   purchasing: '구매팀',
+}
+
+// Figma 823:53752 메신저의 답변 메시지에 붙은 발신자 이름 칩("고프로") — 선배 디자이너=고프로임을
+// 실측 확인. engineering/purchasing 발신자는 Brief.tsx 협업 관계자 로스터(고프로·이프로=디자인팀,
+// 박책임=설계팀, 김부장=구매팀)의 팀 매핑으로 유추(직접 실측된 프레임은 못 찾음).
+export const PERSONA_SENDER_NAME: Record<Persona, string> = {
+  senior: '고프로',
+  engineering: '박책임',
+  purchasing: '김부장',
 }
 
 export const DISCLOSE_KEYS: Record<Persona, string[]> = {
@@ -19,6 +30,8 @@ export type Branch = 'wood_dropped' | 'sheet_wrap' | 'outsourcing'
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
+  // Figma 823:53755 — 말풍선 옆에 보내진 시각("13:12")이 표시돼 있어서 추가.
+  t?: number
 }
 
 export interface ChatRequest {

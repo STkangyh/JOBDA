@@ -75,8 +75,8 @@ const IRRELEVANT_REPLY = '지금 진행 중인 공기청정기 목재 파트 건
 
 const OUT_OF_SCOPE_REDIRECT: Record<Persona, string> = {
   senior: '예산 관련이면 구매팀, 사내 생산 가능 여부는 설계팀에 물어보세요.',
-  engineering: '서식·표현 방식은 선임 디자이너에게, 예산은 구매팀에 물어보세요.',
-  purchasing: '서식 관련은 선임 디자이너에게, 생산 가능 여부는 설계팀에 물어보세요.',
+  engineering: '서식·표현 방식은 선배 디자이너에게, 예산은 구매팀에 물어보세요.',
+  purchasing: '서식 관련은 선배 디자이너에게, 생산 가능 여부는 설계팀에 물어보세요.',
 }
 
 export function mockChat(req: ChatRequest): ChatResponse {

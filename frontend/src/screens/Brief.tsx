@@ -124,7 +124,7 @@ export function Brief() {
                     생활가전 기업의 신입 제품 디자이너
                   </Text>
                   <Text variant="body-lg" className="text-neutral-600">
-                    월요일 아침, 선임 디자이너로부터 CMF 확정 소식과 함께 설계팀에 넘길 디자인
+                    월요일 아침, 선배 디자이너로부터 CMF 확정 소식과 함께 설계팀에 넘길 디자인
                     시방서 작성을 요청받았습니다.
                   </Text>
                 </div>

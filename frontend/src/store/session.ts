@@ -198,8 +198,8 @@ export const useSession = create<SessionState & SessionActions>()(
             ...state.chatHistory,
             [persona]: [
               ...state.chatHistory[persona],
-              { role: 'user', content: message },
-              { role: 'assistant', content: res.reply },
+              { role: 'user', content: message, t: Date.now() },
+              { role: 'assistant', content: res.reply, t: Date.now() },
             ],
           },
           disclosedInfo: {

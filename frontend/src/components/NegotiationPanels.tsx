@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import { Card } from './Card'
 import { Text } from './Text'
-import { Button } from './Button'
+import { ArrowUpwardIcon } from './icons'
 import { useSession } from '../store/session'
-import { PERSONA_LABEL, type Persona } from '../types'
+import { PERSONA_LABEL, PERSONA_SENDER_NAME, type Persona } from '../types'
+
+function formatTime(t: number): string {
+  const d = new Date(t)
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
 
 // 세션2 "관계자 협업" 라운드 화면들(Workspace/SeniorFeedback/FinalFeedback)이 전부 같은 메신저 +
 // 업무노트 패널을 쓰길래(Figma 823:53571, 823:55090, 823:55878 등 전 라운드 공통 레이아웃) 세 화면에
@@ -68,10 +73,25 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
       </div>
       <div className="flex h-72 flex-col gap-3 overflow-y-auto">
         {showIntro && (
-          <div className="max-w-[85%] rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3">
-            <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
-              {intro!.text}
-            </Text>
+          <div className="flex items-end gap-2 self-start">
+            <div className="flex max-w-[85%] flex-col gap-2 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3">
+              <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
+                {intro!.text}
+              </Text>
+              <div className="flex gap-2">
+                <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500">
+                  {PERSONA_SENDER_NAME[intro!.persona]}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => saveNote(intro!.text)}
+                  disabled={savedNotes.includes(intro!.text)}
+                  className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
+                >
+                  {savedNotes.includes(intro!.text) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
         {history.length === 0 && !showIntro && (
@@ -80,22 +100,35 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           </Text>
         )}
         {history.map((m, i) => (
-          <div
-            key={i}
-            className={`flex max-w-[85%] flex-col gap-1.5 rounded-xl px-4 py-3 ${
-              m.role === 'user' ? 'ml-auto bg-green-100 text-green-900' : 'bg-neutral-100 text-neutral-900'
-            }`}
-          >
-            <Text variant="body-md">{m.content}</Text>
-            {m.role === 'assistant' && (
-              <button
-                type="button"
-                onClick={() => saveNote(m.content)}
-                disabled={savedNotes.includes(m.content)}
-                className="self-start rounded-md bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
-              >
-                {savedNotes.includes(m.content) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
-              </button>
+          <div key={i} className={`flex items-end gap-2 ${m.role === 'user' ? 'flex-row-reverse self-end' : 'self-start'}`}>
+            <div
+              className={`flex max-w-[85%] flex-col gap-2 px-4 py-3 ${
+                m.role === 'user'
+                  ? 'rounded-bl-xl rounded-tl-xl rounded-tr-xl bg-green-100 text-green-900'
+                  : 'rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 text-neutral-900'
+              }`}
+            >
+              <Text variant="body-md">{m.content}</Text>
+              {m.role === 'assistant' && (
+                <div className="flex gap-2">
+                  <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500">
+                    {PERSONA_SENDER_NAME[active]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => saveNote(m.content)}
+                    disabled={savedNotes.includes(m.content)}
+                    className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
+                  >
+                    {savedNotes.includes(m.content) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
+                  </button>
+                </div>
+              )}
+            </div>
+            {m.t && (
+              <Text variant="caption-sm" className="shrink-0 text-neutral-400">
+                {formatTime(m.t)}
+              </Text>
             )}
           </div>
         ))}
@@ -106,7 +139,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
         )}
       </div>
       <form
-        className="flex gap-2"
+        className="flex h-[50px] items-center justify-between gap-2 rounded-[4px] bg-neutral-100 py-[9px] pl-3 pr-[9px]"
         onSubmit={(e) => {
           e.preventDefault()
           send(input)
@@ -117,11 +150,15 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           maxLength={300}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Message"
-          className="flex-1 rounded-md bg-neutral-100 px-3 py-2 text-body-md text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+          className="h-full flex-1 bg-transparent text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
         />
-        <Button type="submit" disabled={sending || !input.trim()}>
-          전송
-        </Button>
+        <button
+          type="submit"
+          disabled={sending || !input.trim()}
+          className="flex h-8 w-11 shrink-0 items-center justify-center rounded-[4px] bg-neutral-400 text-white transition-colors disabled:bg-neutral-200 disabled:text-neutral-400"
+        >
+          <ArrowUpwardIcon className="size-6" />
+        </button>
       </form>
       <Text variant="caption-sm" className="text-center text-neutral-400">
         AI는 관계자의 담당 범위 안에서만 정보를 제공합니다.
