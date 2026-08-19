@@ -80,7 +80,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           </button>
         ))}
       </div>
-      <div ref={scrollRef} className="flex h-72 flex-col justify-end gap-3 overflow-y-auto">
+      <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col justify-end gap-3 overflow-y-auto">
         {showIntro && (
           <div className="flex items-end gap-2 self-start">
             <div className="flex max-w-[85%] flex-col gap-2 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3">
@@ -190,8 +190,11 @@ interface WorkNotesCardProps {
 export function WorkNotesCard({ groups }: WorkNotesCardProps) {
   const savedNotes = useSession((s) => s.savedNotes)
 
+  // h-full: 라운드/피드백 화면에서 Messenger와 나란한 그리드 칸에 바로 들어갈 때 행 높이만큼
+  // 늘어나게 함. flex-1: Workspace.tsx처럼 "초안 제출" 버튼과 flex-col로 한 칸을 나눠 쓸 때는
+  // flex-basis가 h-full보다 우선이라 남는 공간만 채우고 버튼을 밀어내지 않는다.
   return (
-    <Card className="flex flex-col gap-6 p-6">
+    <Card className="flex h-full flex-1 flex-col gap-6 p-6">
       <Text variant="title-lg" emphasis className="text-green-900">
         업무 노트
       </Text>
