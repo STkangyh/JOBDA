@@ -15,6 +15,7 @@ import { JobDetail } from './screens/explore/JobDetail'
 import { ErrorPage } from './screens/explore/ErrorPage'
 import { Session1App } from './screens/session1/Session1App'
 import { JourneyMap } from './screens/JourneyMap'
+import { StageJumper } from './components/StageJumper'
 import type { Stage } from './types'
 
 // 모든 세션2 화면이 세션1처럼 자체 풀블리드 레이아웃(Sidebar+Indicator 포함)을 갖도록
@@ -30,6 +31,19 @@ const SCREENS: Record<Exclude<Stage, 'report'>, ComponentType> = {
   vendor_compare: VendorCompare,
   self_assessment: SelfAssessment,
 }
+
+// 임시 개발용 StageJumper가 쓰는 세션2 단계 목록/라벨.
+const SESSION2_STAGES: { value: Stage; label: string }[] = [
+  { value: 'brief', label: '브리프' },
+  { value: 'materials', label: '자료탐색' },
+  { value: 'workspace', label: '관계자 협업' },
+  { value: 'senior_feedback', label: '1차 피드백' },
+  { value: 'final_feedback', label: '최종 피드백' },
+  { value: 'branch_select', label: '방향 선택' },
+  { value: 'vendor_compare', label: '업체 비교' },
+  { value: 'self_assessment', label: '자기 평가' },
+  { value: 'report', label: '직무 리포트' },
+]
 
 const KNOWN_PATHS = new Set(['/', '/design-system', '/explore', '/explore/job', '/session1', '/session2', '/journey-map'])
 // 직무 상세페이지 "업무 프로세스" 스텝 인덱스 -> 진입할 경로. 6번(모형 제작 및 설계 검토)은
@@ -58,6 +72,7 @@ function useSimpleRouter() {
 
 function App() {
   const stage = useSession((s) => s.currentStage)
+  const goTo = useSession((s) => s.goTo)
   const { pathname, navigate } = useSimpleRouter()
 
   if (pathname === '/design-system') {
@@ -86,9 +101,13 @@ function App() {
   }
 
   if (pathname === '/session2') {
-    if (stage === 'report') return <Report />
-    const Screen = SCREENS[stage]
-    return <Screen />
+    const Screen: ComponentType = stage === 'report' ? Report : SCREENS[stage]
+    return (
+      <>
+        <Screen />
+        <StageJumper stages={SESSION2_STAGES} current={stage} onJump={goTo} />
+      </>
+    )
   }
 
   if (!KNOWN_PATHS.has(pathname)) {
