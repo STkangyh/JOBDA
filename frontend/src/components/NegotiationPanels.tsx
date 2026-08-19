@@ -29,6 +29,8 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   const [sending, setSending] = useState(false)
   const chatHistory = useSession((s) => s.chatHistory)
   const sendMessage = useSession((s) => s.sendMessage)
+  const savedNotes = useSession((s) => s.savedNotes)
+  const saveNote = useSession((s) => s.saveNote)
 
   const history = chatHistory[active]
   const showIntro = intro && intro.persona === active
@@ -80,11 +82,21 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
         {history.map((m, i) => (
           <div
             key={i}
-            className={`max-w-[85%] rounded-xl px-4 py-3 ${
+            className={`flex max-w-[85%] flex-col gap-1.5 rounded-xl px-4 py-3 ${
               m.role === 'user' ? 'ml-auto bg-green-100 text-green-900' : 'bg-neutral-100 text-neutral-900'
             }`}
           >
             <Text variant="body-md">{m.content}</Text>
+            {m.role === 'assistant' && (
+              <button
+                type="button"
+                onClick={() => saveNote(m.content)}
+                disabled={savedNotes.includes(m.content)}
+                className="self-start rounded-md bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
+              >
+                {savedNotes.includes(m.content) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
+              </button>
+            )}
           </div>
         ))}
         {sending && (
@@ -126,6 +138,8 @@ interface WorkNotesCardProps {
 // 세션2는 자체 CMF 협상 서사(화이트 오크 흡기구 -> 목재 접합 -> 한도 견본 판정표)가 있어서
 // 화면마다 그룹 내용이 달라진다(특히 CMF 결정 사항은 1차 피드백 전후로 태그가 하나 늘어남).
 export function WorkNotesCard({ groups }: WorkNotesCardProps) {
+  const savedNotes = useSession((s) => s.savedNotes)
+
   return (
     <Card className="flex flex-col gap-6 p-6">
       <Text variant="title-lg" emphasis className="text-green-900">
@@ -148,6 +162,20 @@ export function WorkNotesCard({ groups }: WorkNotesCardProps) {
           </div>
         </div>
       ))}
+      {savedNotes.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <Text variant="body-lg" className="text-neutral-600">
+            저장한 답변
+          </Text>
+          <ul className="flex flex-col gap-2">
+            {savedNotes.map((note, i) => (
+              <li key={i} className="rounded-md bg-neutral-100 px-3 py-2 text-body-md text-neutral-700">
+                {note}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </Card>
   )
 }

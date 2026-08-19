@@ -44,6 +44,7 @@ const initialState = (): SessionState => ({
   askedBudget: false,
   chatHistory: { senior: [], engineering: [], purchasing: [] },
   disclosedInfo: {},
+  savedNotes: [],
   draft: emptyDraft(),
   draftSubmitted: false,
   finalSubmitted: false,
@@ -62,6 +63,7 @@ interface SessionActions {
   goTo: (stage: Stage) => void
   viewDoc: (key: string) => void
   sendMessage: (persona: Persona, message: string) => Promise<string>
+  saveNote: (text: string) => void
   updateDraft: (fields: Partial<SpecDraft>) => void
   submitDraft: () => void
   updateFinal: (fields: Partial<SpecDraft>) => void
@@ -137,6 +139,8 @@ export const useSession = create<SessionState & SessionActions>()(
         set((s) => ({ viewedDocs: { ...s.viewedDocs, [key]: true } }))
         pushLog(set, get, 'doc_view', { target: key })
       },
+
+      saveNote: (text) => set((s) => (s.savedNotes.includes(text) ? s : { savedNotes: [...s.savedNotes, text] })),
 
       sendMessage: async (persona, message) => {
         const s = get()

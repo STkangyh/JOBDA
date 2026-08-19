@@ -155,6 +155,9 @@ export interface SessionState {
   askedBudget: boolean
   chatHistory: Record<Persona, ChatMessage[]>
   disclosedInfo: Partial<Record<Persona, string[]>>
+  // Figma 823:53712(Desktop-123) 등 — 메신저에서 관계자 답변에 "답변 내용 노트에 저장" 버튼.
+  // 세션1(store/session1.ts)의 savedNotes/saveNote와 같은 발상.
+  savedNotes: string[]
   draft: SpecDraft
   draftSubmitted: boolean
   finalSubmitted: boolean

@@ -25,8 +25,11 @@ const DRAFT_DESCRIPTION =
 const SENIOR_INTRO =
   '색이랑 마감 모두 결정됐어요. 설계팀에 넘길 시방서 작성하고 저한테 보내주세요.\n미리 말하는데, 이번에 목재 처음 써보는 거라 사내 공장에서 목재 접합은 안 하는 거로 알고 있어요. 시트지로 마감하거나, 외부 업체 알아봐야 할 겁니다. 발주 일정까지 12일 남았는데 그 안에 어떻게든 해결하세요.'
 
-// Figma 823:53645 — "시방서 초안" 제목 옆 부품 태그. 순수 장식(첫 태그만 강조)이라 store에 안 둠.
-const PART_TAGS = ['목재 흡기구 커버', '상부 하우징', '하부 하우징', '가죽 스트랩']
+// Figma 823:53645 — "시방서 초안" 제목 옆 부품 태그. 처음엔 823:53571(Desktop-104)만 보고 4개로
+// 만들었는데, 같은 컬럼에 세로로 쌓인 823:53712~823:54461(Desktop-123~128, 전부 동일 내용의
+// 더 진행된 상태) 확인 결과 실제로는 6개였음 — PUI 패널/미끄럼 방지 패드 누락돼 있었음.
+// 순수 장식(첫 태그만 강조)이라 store에 안 둠.
+const PART_TAGS = ['목재 흡기구 커버', '상부 하우징', '하부 하우징', '가죽 스트랩', 'PUI 패널', '미끄럼 방지 패드']
 
 const NOTE_TAGS = {
   userNeeds: ['저소음', '공간 효율', '따뜻함', '관리 용이', '인테리어 오브제 느낌'],
@@ -133,7 +136,7 @@ function SpecCard({ editingFinal }: { editingFinal: boolean }) {
     <Card className="flex flex-col gap-8 p-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <Text variant="title-lg" emphasis className="text-green-900">
-          {editingFinal ? '시방서 수정' : '시방서 초안'}
+          {editingFinal ? '시방서 수정' : '시방서 작성 방향 선택'}
         </Text>
         <div className="flex flex-wrap gap-3">
           {PART_TAGS.map((tag, i) => (
