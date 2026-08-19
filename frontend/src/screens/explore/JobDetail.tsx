@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import brandLogo from '../../assets/brand-logo.png'
-import illustration from '../../assets/illustrations/illustration-desk-work.svg'
+import illustration from '../../assets/illustrations/job-detail-banner.png'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
 import { CancelIcon } from '../../components/icons'
@@ -37,18 +37,17 @@ export function JobDetail({
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-[18px] lg:flex-row">
-        <div className="relative flex min-w-0 flex-1 flex-col justify-end overflow-hidden rounded-lg bg-neutral-800 p-6">
-          <img
-            src={illustration}
-            alt=""
-            className="pointer-events-none absolute inset-0 size-full object-cover opacity-90"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/10 to-transparent" />
+        {/* Figma 744:14042 실측: 배너는 위쪽 정렬(제목이 카드 상단)이고 상단 패딩만 48px로
+            더 넓다(pt-[48px] px-[24px] pb-[24px]) — 우리가 justify-end로 하단 정렬해뒀던 게
+            어긋나 있었음. 일러스트 원본 PNG도 위쪽은 배경색과 거의 같은 무지 어두운 영역이라
+            Figma에 없던 그라데이션 스크림/opacity 감쇠 없이 그대로 깔아도 텍스트가 잘 읽힌다. */}
+        <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-neutral-800 pb-6 pl-6 pr-6 pt-12">
+          <img src={illustration} alt="" className="pointer-events-none absolute inset-0 size-full object-cover" />
           <div className="relative flex flex-col gap-3">
             <Text variant="display-md" emphasis className="text-green-400">
               생활 가전 제품디자이너
             </Text>
-            <Text variant="body-lg" className="text-neutral-300">
+            <Text variant="title-lg" className="text-neutral-300">
               C 가전회사에서 초임 디자이너로 근무하고 있는 심재현씨가 되어 인하우스 디자인 업무를
               체험해보세요.
             </Text>
