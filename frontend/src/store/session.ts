@@ -9,6 +9,7 @@ import type {
   Finding,
   FindingCode,
   Persona,
+  PartSpec,
   ReportResponse,
   Scores,
   SelfAssessment,
@@ -29,6 +30,20 @@ const emptyDraft = (): SpecDraft => ({
   vendorNotes: '',
 })
 
+// Figma 823:53712~823:54461(Desktop-123~128) 부품 태그 6개(목재 흡기구 커버/상부 하우징/
+// 하부 하우징/가죽 스트랩/PUI 패널/미끄럼 방지 패드) 순서와 맞춘 6칸. 라벨 자체는 화면(Workspace.tsx)
+// 쪽 PART_TAGS가 갖고 있고, 여기는 그 개수(6)만 안다.
+const PART_COUNT = 6
+
+const emptyPartSpec = (): PartSpec => ({
+  material: '',
+  color: '',
+  finish: '',
+  size: { depth: '', width: '', height: '', thickness: '' },
+  method: '',
+  reasoning: '',
+})
+
 const emptyVendors = (): VendorOption[] => [
   { name: '', leadTimeDays: '', quantity: '', unitPrice: '' },
   { name: '', leadTimeDays: '', quantity: '', unitPrice: '' },
@@ -46,6 +61,7 @@ const initialState = (): SessionState => ({
   disclosedInfo: {},
   savedNotes: [],
   draft: emptyDraft(),
+  draftParts: Array.from({ length: PART_COUNT }, emptyPartSpec),
   draftSubmitted: false,
   finalSubmitted: false,
   final: emptyDraft(),
@@ -64,6 +80,7 @@ interface SessionActions {
   viewDoc: (key: string) => void
   sendMessage: (persona: Persona, message: string) => Promise<string>
   saveNote: (text: string) => void
+  updateDraftPart: (index: number, fields: Partial<PartSpec>) => void
   updateDraft: (fields: Partial<SpecDraft>) => void
   submitDraft: () => void
   updateFinal: (fields: Partial<SpecDraft>) => void
@@ -141,6 +158,13 @@ export const useSession = create<SessionState & SessionActions>()(
       },
 
       saveNote: (text) => set((s) => (s.savedNotes.includes(text) ? s : { savedNotes: [...s.savedNotes, text] })),
+
+      updateDraftPart: (index, fields) =>
+        set((s) => ({
+          draftParts: s.draftParts.map((p, i) =>
+            i === index ? { ...p, ...fields, size: fields.size ? { ...p.size, ...fields.size } : p.size } : p,
+          ),
+        })),
 
       sendMessage: async (persona, message) => {
         const s = get()

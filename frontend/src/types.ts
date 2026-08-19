@@ -111,6 +111,26 @@ export interface SpecDraft {
   vendorNotes: string
 }
 
+// Figma 823:53712~823:54461(Desktop-123~128) — 초안 작성 화면은 부품 태그(목재 흡기구 커버 등
+// 6개)가 실제로는 탭이었고, 탭마다 독립된 소재/컬러/마감/사이즈/제작방식/선택근거를 입력받는다.
+// 최종본 수정 화면(823:55090/823:55255, SpecDraft의 flat 필드가 대응하는 그 화면)과는 다른
+// 별개의 데이터라 SpecDraft에 얹지 않고 SessionState에 draftParts로 따로 둔다.
+export interface PartSpecSize {
+  depth: string
+  width: string
+  height: string
+  thickness: string
+}
+
+export interface PartSpec {
+  material: string
+  color: string
+  finish: string
+  size: PartSpecSize
+  method: string
+  reasoning: string
+}
+
 export interface VendorOption {
   name: string
   leadTimeDays: number | ''
@@ -159,6 +179,7 @@ export interface SessionState {
   // 세션1(store/session1.ts)의 savedNotes/saveNote와 같은 발상.
   savedNotes: string[]
   draft: SpecDraft
+  draftParts: PartSpec[]
   draftSubmitted: boolean
   finalSubmitted: boolean
   final: SpecDraft
