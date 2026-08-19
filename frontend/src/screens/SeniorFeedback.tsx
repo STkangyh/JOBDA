@@ -101,6 +101,11 @@ export function SeniorFeedback() {
               </div>
             </Card>
 
+            {/* 메신저/업무노트는 h-full로 그리드 행 높이만큼 늘어나는데 이 칸은 카드 하나만큼만
+                차지해서 버튼이 카드 바로 아래 붙고 그 밑은 빈 여백으로 남았음 — 카드는 그대로
+                두고 이 빈 칸이 남는 세로 공간을 흡수해서 버튼을 칸 맨 아래로 밀어낸다. */}
+            <div className="flex-1" />
+
             <Button
               variant="primary"
               className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
