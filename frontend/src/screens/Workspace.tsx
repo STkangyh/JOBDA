@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Sidebar } from '../components/Sidebar'
 import { Indicator } from '../components/Indicator'
 import { Card } from '../components/Card'
@@ -243,10 +243,29 @@ function DraftPartsCard() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [attachMenuOpen, setAttachMenuOpen] = useState(false)
   const part = draftParts[activeIndex]
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  // OS 파일 탐색기는 비동기(모달)라, 다이얼로그가 열려있는 동안 탭을 옮길 가능성까지 감안해서
+  // "어느 부품의 어떤 첨부 종류였는지"를 state가 아니라 ref로 들고 있다가 onChange에서 꺼내 쓴다.
+  const pendingAttachmentRef = useRef<{ index: number; kind: 'colorChip' | 'limitSample' } | null>(null)
 
   const selectTab = (i: number) => {
     setActiveIndex(i)
     setAttachMenuOpen(false)
+  }
+
+  const requestAttachment = (kind: 'colorChip' | 'limitSample') => {
+    pendingAttachmentRef.current = { index: activeIndex, kind }
+    setAttachMenuOpen(false)
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    const pending = pendingAttachmentRef.current
+    pendingAttachmentRef.current = null
+    e.target.value = ''
+    if (!file || !pending) return
+    setPartAttachment(pending.index, pending.kind, file.name)
   }
 
   return (
@@ -302,33 +321,34 @@ function DraftPartsCard() {
                 <div className="absolute right-0 top-[58px] z-10 flex w-[200px] flex-col overflow-hidden rounded-md border border-neutral-200 bg-white py-1 shadow-lg">
                   <button
                     type="button"
-                    onClick={() => {
-                      setPartAttachment(activeIndex, 'colorChip')
-                      setAttachMenuOpen(false)
-                    }}
+                    onClick={() => requestAttachment('colorChip')}
                     className="px-4 py-3 text-left text-body-md text-neutral-700 hover:bg-neutral-50"
                   >
                     컬러칩 첨부
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setPartAttachment(activeIndex, 'limitSample')
-                      setAttachMenuOpen(false)
-                    }}
+                    onClick={() => requestAttachment('limitSample')}
                     className="px-4 py-3 text-left text-body-md text-neutral-700 hover:bg-neutral-50"
                   >
                     한도 견본 판정표 첨부
                   </button>
                 </div>
               )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,.pdf,.doc,.docx"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
           </div>
         </FieldRow>
         {part.attachment && (
           <div className="flex items-center justify-between rounded-md bg-green-50 px-4 py-3 sm:ml-[108px]">
             <Text variant="body-md" className="text-green-800 underline">
-              {part.attachment === 'colorChip' ? '컬러칩.jpg' : '마루 한도 견본 판정표.docs'}
+              {part.attachmentFileName ?? (part.attachment === 'colorChip' ? '컬러칩.jpg' : '마루 한도 견본 판정표.docs')}
             </Text>
             <button
               type="button"

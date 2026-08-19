@@ -147,6 +147,8 @@ export interface PartSpec {
   method: string
   reasoning: string
   attachment: PartAttachment
+  // OS 파일 탐색기로 실제 선택한 파일명(File.name). attachment가 null이면 같이 null.
+  attachmentFileName: string | null
 }
 
 export interface VendorOption {
