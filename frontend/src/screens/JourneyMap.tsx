@@ -9,9 +9,10 @@ import { S1_RATING_SCALE, S1_ROUNDS, useSession1 } from '../store/session1'
 
 const COLUMNS = ['업무 영역', '체험 여부', '흥미도', '이해도']
 // 이 화면(744:36745)은 Figma에 사이드바 자체가 없어서(작은 로고 박스만 있음) 실측 근거는
-// 없음 — 리포트에서 바로 넘어오는 화면이라 리포트와 같은 구성(apps/search/work/history)으로
-// 맞춰 일관성 유지.
-const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'search', 'work', 'history']
+// 없음 — 리포트(744:17446, apps/search/work/history 4개로 실측 확인됨)와 같은 구성을 썼더니
+// 아이콘 7개가 되어 다른 화면들(자료함/라운드/탐색 등, apps/work/history 3개=6개)과 어긋났음.
+// 근거 없는 화면이니 소수(리포트)가 아니라 다수 화면 쪽 구성에 맞춤.
+const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 
 // Figma "Desktop - 120"(744:36745) — get_screenshot으로 재확인해보니 라이트 테마(bg-#fafafa)에
 // AppHeader(배너+검색+프로필)가 아니라 브리프/자료함과 같은 인디케이터 헤더였음. 원래 다크
