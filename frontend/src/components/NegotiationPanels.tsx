@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card } from './Card'
 import { Text } from './Text'
 import { ArrowUpwardIcon } from './icons'
@@ -39,6 +39,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
 
   const history = chatHistory[active]
   const showIntro = intro && intro.persona === active
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const send = async (text: string) => {
     if (!text.trim() || sending) return
@@ -51,8 +52,16 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
     }
   }
 
+  // Figma 823:53612 — 메신저 메시지 영역은 justify-end라 메시지가 적을 땐 위쪽이 비고 아래쪽에
+  // 붙어 있다(우리가 처음엔 위에서부터 채워서 어긋났었음). overflow가 생겨도 항상 최신 메시지가
+  // 보이도록 justify-end만으론 브라우저마다 스크롤 위치가 들쭉날쭉해서 직접 맨 아래로 스크롤한다.
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [history.length, sending, showIntro])
+
   return (
-    <Card className="flex h-full flex-col gap-4 p-6">
+    <Card className="flex h-full flex-col gap-6 p-6">
       <Text variant="title-lg" emphasis className="text-green-900">
         메신저
       </Text>
@@ -71,7 +80,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           </button>
         ))}
       </div>
-      <div className="flex h-72 flex-col gap-3 overflow-y-auto">
+      <div ref={scrollRef} className="flex h-72 flex-col justify-end gap-3 overflow-y-auto">
         {showIntro && (
           <div className="flex items-end gap-2 self-start">
             <div className="flex max-w-[85%] flex-col gap-2 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3">
@@ -138,31 +147,35 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           </Text>
         )}
       </div>
-      <form
-        className="flex h-[50px] items-center justify-between gap-2 rounded-[4px] bg-neutral-100 py-[9px] pl-3 pr-[9px]"
-        onSubmit={(e) => {
-          e.preventDefault()
-          send(input)
-        }}
-      >
-        <input
-          value={input}
-          maxLength={300}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Message"
-          className="h-full flex-1 bg-transparent text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={sending || !input.trim()}
-          className="flex h-8 w-11 shrink-0 items-center justify-center rounded-[4px] bg-neutral-400 text-white transition-colors disabled:bg-neutral-200 disabled:text-neutral-400"
+      {/* Figma 823:53615 — 입력창과 안내 문구는 4px 간격으로 붙어있는 한 묶음(메시지 영역과의
+          24px 간격은 바깥 Card의 gap-6가 담당). */}
+      <div className="flex flex-col gap-1">
+        <form
+          className="flex h-[50px] items-center justify-between gap-2 rounded-[4px] bg-neutral-100 py-[9px] pl-3 pr-[9px]"
+          onSubmit={(e) => {
+            e.preventDefault()
+            send(input)
+          }}
         >
-          <ArrowUpwardIcon className="size-6" />
-        </button>
-      </form>
-      <Text variant="caption-sm" className="text-center text-neutral-400">
-        AI는 관계자의 담당 범위 안에서만 정보를 제공합니다.
-      </Text>
+          <input
+            value={input}
+            maxLength={300}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Message"
+            className="h-full flex-1 bg-transparent text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={sending || !input.trim()}
+            className="flex h-8 w-11 shrink-0 items-center justify-center rounded-[4px] bg-neutral-400 text-white transition-colors disabled:bg-neutral-200 disabled:text-neutral-400"
+          >
+            <ArrowUpwardIcon className="size-6" />
+          </button>
+        </form>
+        <Text variant="caption-sm" className="text-center text-neutral-400">
+          AI는 관계자의 담당 범위 안에서만 정보를 제공합니다.
+        </Text>
+      </div>
     </Card>
   )
 }
