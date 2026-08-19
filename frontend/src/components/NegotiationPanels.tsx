@@ -37,9 +37,26 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   const savedNotes = useSession((s) => s.savedNotes)
   const saveNote = useSession((s) => s.saveNote)
 
+  // Figma 823:56235("Frame 2147227201") 주석 원문: "현재 활성화된 메신저창이 아닌 다른 상대로부터
+  // 메시지가 올 경우 상태 표시등 점등". intro가 defaultActive와 다른 사람 몫이면(예: 823:56196
+  // Desktop-137에서 기본 탭은 설계팀인데 인트로는 선배 디자이너 것) 그 사람 탭에 안읽음 점을 켠다.
+  const [unreadPersonas, setUnreadPersonas] = useState<Set<Persona>>(() =>
+    intro && intro.persona !== defaultActive ? new Set([intro.persona]) : new Set(),
+  )
+
   const history = chatHistory[active]
   const showIntro = intro && intro.persona === active
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  const selectTab = (p: Persona) => {
+    setActive(p)
+    setUnreadPersonas((prev) => {
+      if (!prev.has(p)) return prev
+      const next = new Set(prev)
+      next.delete(p)
+      return next
+    })
+  }
 
   const send = async (text: string) => {
     if (!text.trim() || sending) return
@@ -66,19 +83,25 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
         메신저
       </Text>
       <div className="flex gap-2">
-        {PERSONAS.map((p) => (
-          <button
-            key={p}
-            onClick={() => setActive(p)}
-            className={`shrink-0 rounded-[20px] border px-3 py-2 text-body-md font-medium transition-colors ${
-              active === p
-                ? 'border-green-200 bg-green-50 text-green-900'
-                : 'border-neutral-200 bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-            }`}
-          >
-            {PERSONA_LABEL[p]}
-          </button>
-        ))}
+        {PERSONAS.map((p) => {
+          const isUnread = unreadPersonas.has(p)
+          return (
+            <button
+              key={p}
+              onClick={() => selectTab(p)}
+              className={`flex shrink-0 items-center gap-2 rounded-[20px] border px-3 py-2 text-body-md font-medium transition-colors ${
+                isUnread
+                  ? 'border-neutral-200 bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
+                  : active === p
+                    ? 'border-green-200 bg-green-50 text-green-900'
+                    : 'border-neutral-200 bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
+              }`}
+            >
+              {isUnread && <span className="size-2 shrink-0 rounded-full bg-success-200" />}
+              {PERSONA_LABEL[p]}
+            </button>
+          )
+        })}
       </div>
       <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col justify-end gap-3 overflow-y-auto">
         {showIntro && (

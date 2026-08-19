@@ -4,6 +4,7 @@ import { Indicator } from '../components/Indicator'
 import { Card } from '../components/Card'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
+import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
 import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../components/icons'
 import { useSession } from '../store/session'
 import type { VendorOption } from '../types'
@@ -23,44 +24,19 @@ const NOTE_TAGS = {
 const PURCHASING_FEEDBACK =
   '납기일, 가능 수량, 단가 고려해서 적절한 업체를 다시 한 번 확인해보세요. 납기일 맞추는 게 가장 어려워요. 혹시 모를 지연 요소가 있을 수도 있으니 일정을 여유롭게 잡으세요.'
 
+// Figma 823:56235 주석("현재 활성화된 메신저창이 아닌 다른 상대로부터 메시지가 올 경우 상태
+// 표시등 점등") 확인 근거로 823:56196(Desktop-137)을 열어보니 이 화면엔 메신저 패널 자체가
+// 아예 빠져 있었음 — 새로 추가. 기본 탭은 설계팀(이 단계를 촉발한 "목재 파트 취급 불가" 메시지가
+// 주제라서), 선배 디자이너의 시방서 공유 메시지는 인트로로 깔아두되 기본 탭이 아니라서 안읽음
+// 점이 뜬다.
+const SENIOR_VENDOR_INTRO =
+  '디자인 시방서 최종본, 한도 견본 판정표와 함께 공유드려요. 일정이 촉박한 관계로 보시고 수정사항 정리해서 오늘 20시까지 보내주세요.'
+
 const ROWS: { key: keyof Omit<VendorOption, 'name'>; label: string; placeholder: string; unit: string }[] = [
   { key: 'leadTimeDays', label: '납기일', placeholder: '0', unit: '일' },
   { key: 'quantity', label: '가능 수량', placeholder: '0', unit: 'ea' },
   { key: 'unitPrice', label: '단가', placeholder: '0', unit: '원' },
 ]
-
-function NoteGroup({ title, tags }: { title: string; tags: string[] }) {
-  return (
-    <div>
-      <Text variant="body-md" className="mb-2 text-neutral-600">
-        {title}
-      </Text>
-      <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <span key={tag} className="rounded-full border-2 border-neutral-200 bg-neutral-100 px-3 py-1.5 text-sm text-neutral-600">
-            {tag}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// Figma 823:56423/823:57155 "업무 노트" 카드 실측 — 사용자 요구/제조 제약/CMF 결정 사항 3그룹
-// (session1 Workspace.tsx의 WorkNotes는 앞 2그룹만 있고 CMF 그룹은 없음 — 이 화면 전용으로 3번째
-// 그룹 추가). 스토어에 안 묶인 정적 참고 카드라 로컬 컴포넌트로 분리.
-function WorkNotes() {
-  return (
-    <Card className="flex flex-col gap-6 p-6">
-      <Text variant="title-lg" emphasis>
-        업무 노트
-      </Text>
-      <NoteGroup title="사용자 요구" tags={NOTE_TAGS.userNeeds} />
-      <NoteGroup title="제조 제약" tags={NOTE_TAGS.constraints} />
-      <NoteGroup title="CMF 결정 사항" tags={NOTE_TAGS.cmf} />
-    </Card>
-  )
-}
 
 function VendorTable({ editable, vendors, onChange }: { editable: boolean; vendors: VendorOption[]; onChange: (i: number, fields: Partial<VendorOption>) => void }) {
   return (
@@ -151,7 +127,8 @@ export function VendorCompare() {
       <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[1fr_340px]">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
+          <div className="hidden lg:block" />
           <Indicator current="피드백 수정" />
           <div className="hidden items-center justify-end gap-[18px] lg:flex">
             <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
@@ -161,6 +138,8 @@ export function VendorCompare() {
               <ProfileIcon className="size-5" />
             </div>
           </div>
+
+          <Messenger defaultActive="engineering" intro={{ persona: 'senior', text: SENIOR_VENDOR_INTRO }} />
 
           <div className="flex flex-col gap-6">
             {phase === 'edit' ? (
@@ -251,7 +230,13 @@ export function VendorCompare() {
             )}
           </div>
 
-          <WorkNotes />
+          <WorkNotesCard
+            groups={[
+              { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
+              { label: '제조 제약', tags: NOTE_TAGS.constraints },
+              { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
+            ]}
+          />
         </div>
       </div>
     </div>
