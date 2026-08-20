@@ -20,7 +20,7 @@ import type {
   VendorOption,
 } from '../types'
 
-const REQUIRED_FIELDS: (keyof SpecDraft)[] = ['size', 'method', 'cmf', 'colorChip']
+const REQUIRED_FIELDS: ('size' | 'method' | 'cmf' | 'colorChip')[] = ['size', 'method', 'cmf', 'colorChip']
 
 const emptyDraft = (): SpecDraft => ({
   size: '',
@@ -28,6 +28,7 @@ const emptyDraft = (): SpecDraft => ({
   cmf: '',
   colorChip: '',
   limitSampleAttached: false,
+  limitSampleFileName: null,
   vendorNotes: '',
 })
 

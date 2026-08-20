@@ -121,6 +121,7 @@ export interface SpecDraft {
   cmf: string
   colorChip: string
   limitSampleAttached: boolean
+  limitSampleFileName: string | null
   vendorNotes: string
 }
 

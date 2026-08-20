@@ -4,7 +4,6 @@ import { Indicator } from '../components/Indicator'
 import { Card } from '../components/Card'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
-import { Checkbox } from '../components/Checkbox'
 import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
 import { WarningIcon, CloudSavedIcon, ProfileIcon, PlusIcon } from '../components/icons'
 import { useSession } from '../store/session'
@@ -118,7 +117,7 @@ const FIELD_INPUT_CLASS =
   'h-[50px] flex-1 rounded-md bg-neutral-50 px-4 text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none'
 
 // Figma 823:55090/823:55255("시방서 수정") — 1차 피드백 이후 최종본을 수정하는 화면. 부품 탭이
-// 아니라 여전히 사이즈/제작방식/CMF/컬러칩 flat 4필드 + 한도견본판정표 체크박스 + 관계부서
+// 아니라 여전히 사이즈/제작방식/CMF/컬러칩 flat 4필드 + 한도견본판정표 첨부 + 관계부서
 // 전달사항으로 구성돼 있어(draftParts와는 별개), 이 카드는 손대지 않고 그대로 둔다.
 function FinalSpecCard() {
   const final = useSession((s) => s.final)
@@ -127,9 +126,18 @@ function FinalSpecCard() {
   // Figma 823:55255의 "로딩 중..." 버튼 상태 — session1/Workspace.tsx ReviewAndChoice와 동일하게
   // 실제 지연은 없지만(클라이언트 계산) 라운드 전환감을 주기 위해 1200ms 붙잡아둔다.
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const requiredMissing =
-    !final.size.trim() || !final.method.trim() || !final.cmf.trim() || !final.colorChip.trim()
+  // 1차 피드백이 지적한 건 한도 견본 판정표 누락 하나뿐이라, 그것만 첨부하면 넘어갈 수 있어야
+  // 한다 — 나머지 4필드는 계속 편집 가능하게 두되 CTA를 막지는 않는다(사용자 요청).
+  const requiredMissing = !final.limitSampleAttached
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    updateFinal({ limitSampleAttached: true, limitSampleFileName: file.name })
+  }
 
   const handleSubmit = () => {
     setIsSubmitting(true)
@@ -193,17 +201,36 @@ function FinalSpecCard() {
           />
         </FieldRow>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <Checkbox
-            checked={final.limitSampleAttached}
-            onChange={(checked) => updateFinal({ limitSampleAttached: checked })}
-            label="한도 견본 판정표 별첨함"
-          />
-          {final.limitSampleAttached && (
-            <Text variant="body-md" className="text-neutral-500 underline">
-              마루 한도 견본 판정표.docs
-            </Text>
+        <div className="flex flex-col gap-2 pt-2">
+          {final.limitSampleAttached ? (
+            <div className="flex items-center justify-between rounded-md bg-green-50 px-4 py-3">
+              <Text variant="body-md" className="text-green-800 underline">
+                {final.limitSampleFileName ?? '한도 견본 판정표.docs'}
+              </Text>
+              <button
+                type="button"
+                onClick={() => updateFinal({ limitSampleAttached: false, limitSampleFileName: null })}
+                className="text-caption-sm text-neutral-400 transition-colors hover:text-neutral-600"
+              >
+                제거
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="self-start rounded-md bg-neutral-50 px-4 py-3 text-body-md text-neutral-700 transition-colors hover:bg-neutral-100"
+            >
+              한도 견본 판정표 첨부
+            </button>
           )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.pdf,.doc,.docx"
+            className="hidden"
+            onChange={handleFileChange}
+          />
         </div>
       </div>
 
