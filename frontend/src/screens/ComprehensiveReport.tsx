@@ -183,6 +183,9 @@ export function ComprehensiveReport() {
           <Button variant="secondary" onClick={() => (window.location.href = '/')}>
             홈으로
           </Button>
+          <Button variant="secondary" onClick={() => (window.location.href = '/journey-map')}>
+            체험맵 보기
+          </Button>
         </div>
       </div>
     </div>
