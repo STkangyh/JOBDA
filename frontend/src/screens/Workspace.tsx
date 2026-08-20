@@ -169,12 +169,26 @@ function FinalSpecCard() {
         </FieldRow>
         <FieldRow label="컬러">
           <div className="flex flex-1 items-center gap-2">
-            <input
-              value={final.color}
-              onChange={(e) => updateFinal({ color: e.target.value })}
-              placeholder="예: 오크 내추럴"
-              className={FIELD_INPUT_CLASS}
-            />
+            {/* Figma 823:55090(Desktop-130) 실측: 첨부된 파일명은 별도 박스가 아니라 컬러
+                입력창 안에 컬러값과 나란히(밑줄 처리된 회색 텍스트로) 표시된다. */}
+            <div className="flex h-[50px] flex-1 items-center gap-2.5 rounded-md bg-neutral-50 px-4">
+              <input
+                value={final.color}
+                onChange={(e) => updateFinal({ color: e.target.value })}
+                placeholder="예: 오크 내추럴"
+                className="min-w-0 flex-1 bg-transparent text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+              />
+              {final.limitSampleAttached && (
+                <button
+                  type="button"
+                  onClick={() => updateFinal({ limitSampleAttached: false, limitSampleFileName: null })}
+                  title="클릭하면 첨부 제거"
+                  className="shrink-0 truncate text-body-lg text-neutral-500 underline transition-colors hover:text-neutral-600"
+                >
+                  {final.limitSampleFileName ?? '한도 견본 판정표.docs'}
+                </button>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -192,20 +206,6 @@ function FinalSpecCard() {
             />
           </div>
         </FieldRow>
-        {final.limitSampleAttached && (
-          <div className="flex items-center justify-between rounded-md bg-green-50 px-4 py-3 sm:ml-[108px]">
-            <Text variant="body-md" className="text-green-800 underline">
-              {final.limitSampleFileName ?? '한도 견본 판정표.docs'}
-            </Text>
-            <button
-              type="button"
-              onClick={() => updateFinal({ limitSampleAttached: false, limitSampleFileName: null })}
-              className="text-caption-sm text-neutral-400 transition-colors hover:text-neutral-600"
-            >
-              제거
-            </button>
-          </div>
-        )}
         <FieldRow label="마감">
           <input
             value={final.finish}
