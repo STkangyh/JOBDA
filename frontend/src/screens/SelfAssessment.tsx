@@ -54,7 +54,12 @@ function RatingRow({
 // Figma "Desktop - 117"(823:52645, 파일 x6feHLgVMyg8sh8C2jVPE1) — 세션1 자기평가
 // (744:15050/Desktop-87)와 문항 텍스트가 동일해 같은 5점 척도 UI를 그대로 재사용한다.
 // 이 프레임은 브랜드 로고 + 인디케이터(자기 평가 활성)만 보이고, Brief/Report처럼 사이드바
-// 아이콘이나 저장/프로필 아이콘은 없다 — 그래서 3컬럼 헤더 그리드 대신 인디케이터만 단독 배치.
+// 아이콘이나 저장/프로필 아이콘은 없다.
+// 다만 진행률 바 자체의 "크기"는 화면마다 달라 보이면 안 된다는 피드백 — 사이드바가 없다고
+// 인디케이터를 그냥 단독 배치하면 3컬럼 그리드의 가운데 칸(다른 화면들의 실제 폭)보다 훨씬
+// 넓어져서 화면마다 진행률 바 길이가 들쭉날쭉해 보였음. 사이드바 폭(83px)+간격(24px)만큼
+// 빈 공간을 그대로 예약해서, 다른 화면과 같은 3등분 그리드 계산이 나오게 맞춤(로고/아이콘
+// 없이 폭만 맞추는 용도).
 // (참고: 세션1의 SelfAssessment.tsx는 현재 이 인디케이터조차 없이 완전히 헤더가 빈 상태 —
 // Figma 기준으로는 세션1 쪽도 나중에 인디케이터를 추가하는 게 맞아 보임.)
 export function SelfAssessment() {
@@ -73,54 +78,62 @@ export function SelfAssessment() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col gap-[18px] bg-neutral-50 p-6">
-      <Indicator current="자기 평가" />
+    <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
+      <div className="hidden w-[83px] shrink-0 lg:block" aria-hidden />
 
-      <Card className="flex flex-col gap-[48px] p-6">
-        <div className="flex flex-col gap-3">
-          <Text variant="headline-md" emphasis>
-            방금 수행한 업무, 어떠셨나요?
-          </Text>
-          <Text variant="title-lg" className="text-neutral-600">
-            학습 과정에 대한 리뷰를 등록해주세요. 솔직한 응답일수록 정확한 직무 이해 리포트를 받을 수 있어요.
-          </Text>
+      <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
+          <div className="hidden lg:block" />
+          <Indicator current="자기 평가" />
+          <div className="hidden lg:block" />
         </div>
 
-        <div className="flex flex-col gap-6">
-          {QUESTIONS.map((q) => (
-            <RatingRow
-              key={q.field}
-              label={q.label}
-              value={value[q.field]}
-              onChange={(v) => setSelfAssessment({ [q.field]: v })}
-            />
-          ))}
-
+        <Card className="flex flex-col gap-[48px] p-6">
           <div className="flex flex-col gap-3">
-            <Text variant="title-md" emphasis className="text-green-900">
-              업무 중 부담을 느낀 부분이 있었나요?
+            <Text variant="headline-md" emphasis>
+              방금 수행한 업무, 어떠셨나요?
             </Text>
-            <div className="rounded-xl border border-neutral-600 p-6">
-              <textarea
-                value={value.burdenNote}
-                onChange={(e) => setSelfAssessment({ burdenNote: e.target.value })}
-                rows={2}
-                placeholder="ex) 설계팀과의 커뮤니케이션에서 제 의도를 정확히 전달하기 어려웠어요."
-                className="w-full resize-none text-body-lg text-neutral-500 placeholder:text-neutral-400 focus:outline-none"
+            <Text variant="title-lg" className="text-neutral-600">
+              학습 과정에 대한 리뷰를 등록해주세요. 솔직한 응답일수록 정확한 직무 이해 리포트를 받을 수 있어요.
+            </Text>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            {QUESTIONS.map((q) => (
+              <RatingRow
+                key={q.field}
+                label={q.label}
+                value={value[q.field]}
+                onChange={(v) => setSelfAssessment({ [q.field]: v })}
               />
+            ))}
+
+            <div className="flex flex-col gap-3">
+              <Text variant="title-md" emphasis className="text-green-900">
+                업무 중 부담을 느낀 부분이 있었나요?
+              </Text>
+              <div className="rounded-xl border border-neutral-600 p-6">
+                <textarea
+                  value={value.burdenNote}
+                  onChange={(e) => setSelfAssessment({ burdenNote: e.target.value })}
+                  rows={2}
+                  placeholder="ex) 설계팀과의 커뮤니케이션에서 제 의도를 정확히 전달하기 어려웠어요."
+                  className="w-full resize-none text-body-lg text-neutral-500 placeholder:text-neutral-400 focus:outline-none"
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      <Button
-        variant="primary"
-        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-        onClick={submit}
-        disabled={submitting}
-      >
-        {submitting ? '리포트 생성 중...' : '제출하기'}
-      </Button>
+        <Button
+          variant="primary"
+          className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
+          onClick={submit}
+          disabled={submitting}
+        >
+          {submitting ? '리포트 생성 중...' : '제출하기'}
+        </Button>
+      </div>
     </div>
   )
 }
