@@ -52,11 +52,13 @@ export function JourneyMap() {
       <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        {/* 이 화면은 아래 콘텐츠가 3컬럼 그리드가 아니라 단일 카드라, 브리프처럼 인디케이터를
-            가운데 컬럼 폭에 맞출 기준이 없음 — 대신 아이콘을 제외한 나머지 폭을 다 씀. */}
-        <div className="flex items-center gap-6">
-          <Indicator current="직무 리포트" className="flex-1" />
-          <div className="hidden shrink-0 items-center gap-[18px] lg:flex">
+        {/* 이 화면은 아래 콘텐츠가 3컬럼 그리드가 아니라 단일 카드라 Figma 근거는 없지만,
+            인디케이터 폭은 다른 화면들과 시각적으로 일관돼야 해서 동일한 grid-cols-3
+            가운데 컬럼 폭으로 맞춘다(사용자 확인 — 118/121/145에서 폭이 들쭉날쭉했음). */}
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
+          <div className="hidden lg:block" />
+          <Indicator current="직무 리포트" />
+          <div className="hidden items-center justify-end gap-[18px] lg:flex">
             <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
               <CloudSavedIcon className="size-5" />
             </div>
