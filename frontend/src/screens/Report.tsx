@@ -177,6 +177,11 @@ export function Report() {
           <Button variant="secondary" onClick={() => (window.location.href = '/')}>
             홈으로
           </Button>
+          {/* session1/Report.tsx와 대칭 — 목적지는 journey-map이 알아서 정한다: 세션1도 끝났으면
+              종합 리포트, 아직이면 진행 상태 표. */}
+          <Button variant="secondary" onClick={() => (window.location.href = '/journey-map')}>
+            체험맵 보기
+          </Button>
           <Button onClick={() => resetSession()}>다시 체험하기</Button>
         </div>
       </div>
