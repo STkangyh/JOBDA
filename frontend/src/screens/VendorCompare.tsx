@@ -38,6 +38,65 @@ const ROWS: { key: keyof Omit<VendorOption, 'name'>; label: string; placeholder:
   { key: 'unitPrice', label: '단가', placeholder: '0', unit: '원' },
 ]
 
+// Figma 823:56423/823:56600(Desktop-138/139) 실측 — "외주 업체 탐색" 단계엔 사용자가 직접
+// 입력하는 3필드 표(위 ROWS) 말고, 실제 4개 후보 업체의 상세 정보를 담은 참고용 비교표가
+// 따로 있었다(소재지/주력분야/납품이력/기술수준/오일 마감 가능 여부/샘플 수준/발주 단가/수용량/
+// 예상 납기일 9개 항목, 전부 읽기 전용). 우리 store의 vendors는 사용자가 이름까지 자유 입력하는
+// 모델이라(VendorCompare.tsx 상단 주석) 이 참고표를 입력 모델에 편입시키지 않고, 사용자가 3개
+// 업체를 정리할 때 참고할 수 있는 별도 카드로 그대로 재현한다.
+const REFERENCE_VENDORS = [
+  { name: '우진 목형', location: '경기 포천', specialty: '원통 가구 OEM', trackRecord: '많음', techLevel: '양호', finishing: '도장 부스', sampleQuality: '우수', unitPrice: '14,000원', capacity: '10000ea', leadTime: '5개월' },
+  { name: '세림정밀목재', location: '인천 남동 공단', specialty: '정밀 목재 CNC', trackRecord: '보통', techLevel: '부적합', finishing: '2차 외주 필요', sampleQuality: '미달', unitPrice: '12,900원', capacity: '20000ea', leadTime: '8개월' },
+  { name: '한재석 공방', location: '경기 김포', specialty: '개인 공방', trackRecord: '없음', techLevel: '우수', finishing: '하드 왁스 전문', sampleQuality: '우수', unitPrice: '20,000원', capacity: '1000ea', leadTime: '8개월' },
+  { name: '대성우드', location: '대구 성서 공단', specialty: '가구 부재 가공', trackRecord: '많음', techLevel: '양호', finishing: 'UV만', sampleQuality: '양호', unitPrice: '17,000원', capacity: '5000ea', leadTime: '4개월' },
+] as const
+
+const REFERENCE_ROWS: { key: keyof (typeof REFERENCE_VENDORS)[number]; label: string }[] = [
+  { key: 'location', label: '업체 소재지' },
+  { key: 'specialty', label: '주력 분야' },
+  { key: 'trackRecord', label: '납품 이력' },
+  { key: 'techLevel', label: '기술 수준' },
+  { key: 'finishing', label: '오일 마감' },
+  { key: 'sampleQuality', label: '샘플 수준' },
+  { key: 'unitPrice', label: '발주 단가' },
+  { key: 'capacity', label: '수용량' },
+  { key: 'leadTime', label: '예상 납기일' },
+]
+
+function ReferenceVendorTable() {
+  return (
+    <div className="overflow-x-auto">
+      <div className="flex min-w-[640px] flex-col">
+        <div className="grid grid-cols-[110px_repeat(4,1fr)] items-center gap-3 px-2 py-1.5">
+          <Text variant="title-md" emphasis className="text-green-900">
+            업체 항목
+          </Text>
+          {REFERENCE_VENDORS.map((v) => (
+            <Text key={v.name} variant="body-lg" emphasis className="truncate text-green-900">
+              {v.name}
+            </Text>
+          ))}
+        </div>
+        {REFERENCE_ROWS.map((row) => (
+          <div key={row.key} className="flex flex-col">
+            <div className="grid grid-cols-[110px_repeat(4,1fr)] items-center gap-3 px-2 py-2">
+              <Text variant="body-lg" className="text-neutral-500">
+                {row.label}
+              </Text>
+              {REFERENCE_VENDORS.map((v) => (
+                <Text key={v.name} variant="body-lg" className="text-neutral-700">
+                  {v[row.key]}
+                </Text>
+              ))}
+            </div>
+            <div className="h-px w-full bg-neutral-300" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function VendorTable({ editable, vendors, onChange }: { editable: boolean; vendors: VendorOption[]; onChange: (i: number, fields: Partial<VendorOption>) => void }) {
   return (
     <div className="flex flex-col gap-4">
@@ -152,8 +211,20 @@ export function VendorCompare() {
                     필요한 업체를 찾고 아래 항목에 맞게 리스트에 정리하세요.
                   </Text>
                   <Text variant="body-sm" className="text-neutral-400">
-                    예시 업체: 우진 목형 · 세림정밀목재 · 한재석 공방 (아직 확정된 이름은 아니에요)
+                    아래 업체 정보 참고자료를 확인하고, 그 아래 리스트에 직접 정리하세요.
                   </Text>
+                </Card>
+
+                <Card className="flex flex-col gap-6 p-6">
+                  <div className="flex flex-col gap-1">
+                    <Text variant="title-lg" emphasis className="text-green-900">
+                      업체 정보 참고자료
+                    </Text>
+                    <Text variant="body-sm" className="text-neutral-400">
+                      실제 후보 업체 4곳의 상세 정보입니다. 이 정보를 바탕으로 아래 리스트를 정리하세요.
+                    </Text>
+                  </div>
+                  <ReferenceVendorTable />
                 </Card>
 
                 <Card className="flex flex-col gap-6 p-6">
