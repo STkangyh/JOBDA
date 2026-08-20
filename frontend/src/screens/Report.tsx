@@ -80,7 +80,11 @@ export function Report() {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-[19px]">
-        <Indicator current="직무 리포트" />
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
+          <div className="hidden lg:block" />
+          <Indicator current="직무 리포트" />
+          <div className="hidden lg:block" />
+        </div>
 
         {/* Figma 캔버스(1728px)의 442/855/340 고정폭을 그대로 쓰면 실제 브라우저 폭(예: 1280px)에서
             가운데 컬럼이 300px도 안 남아 긴 인용구가 세로로 짜부라짐 — 같은 비율을 fr로 유지해
