@@ -113,7 +113,7 @@ export function SeniorFeedback() {
               className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
               onClick={() => goTo('workspace')}
             >
-              최종본 작성하러 가기
+              시방서 수정하러 가기
             </Button>
           </div>
 
