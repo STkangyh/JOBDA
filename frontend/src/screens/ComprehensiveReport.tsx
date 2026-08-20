@@ -1,7 +1,6 @@
 import { useSession } from '../store/session'
 import { useSession1 } from '../store/session1'
 import { Sidebar, type SidebarItem } from '../components/Sidebar'
-import { Indicator } from '../components/Indicator'
 import { Text } from '../components/Text'
 import { ProfileSpectrum } from '../components/ProfileSpectrum'
 import { WorkProcessChain } from '../components/WorkProcessChain'
@@ -49,16 +48,12 @@ function ComprehensiveReportPending() {
       <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
-          <div className="hidden lg:block" />
-          <Indicator current="직무 리포트" />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
-            </div>
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
-              <ProfileIcon className="size-5" />
-            </div>
+        <div className="hidden items-center justify-end gap-[18px] lg:flex">
+          <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
+            <CloudSavedIcon className="size-5" />
+          </div>
+          <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
+            <ProfileIcon className="size-5" />
           </div>
         </div>
 
@@ -104,16 +99,12 @@ export function ComprehensiveReport() {
       <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6 pb-6">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
-          <div className="hidden lg:block" />
-          <Indicator current="직무 리포트" />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
-            </div>
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
-              <ProfileIcon className="size-5" />
-            </div>
+        <div className="hidden items-center justify-end gap-[18px] lg:flex">
+          <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
+            <CloudSavedIcon className="size-5" />
+          </div>
+          <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
+            <ProfileIcon className="size-5" />
           </div>
         </div>
 
