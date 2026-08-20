@@ -120,10 +120,10 @@ const FIELD_INPUT_CLASS =
 
 // Figma 823:54925("Desktop - 105", "시방서 수정") — 1차 피드백 이후 최종본을 수정하는 화면.
 // 부품 태그는 탭이 아니라 정적 표시(첫 번째만 강조)지만, 그 아래 필드 구성 자체는 초안 작성
-// 화면(DraftPartsCard)과 완전히 동일 — 소재/컬러(+첨부)/마감/사이즈(4분할)/제작방식. 제출
-// 버튼은 이 카드 안이 아니라 Figma에서 업무노트 카드 바로 아래(오른쪽 컬럼)에 있어서
-// FinalSubmitButton으로 분리했다. "관계부서 전달사항"은 이 프레임엔 없었지만, computeFindings의
-// deadline_margin_ignored 판정이 참조하는 유일한 자유 입력이라 그대로 남겨둠.
+// 화면(DraftPartsCard)과 완전히 동일 — 소재/컬러(+첨부)/마감/사이즈(4분할)/제작방식. 카드는
+// 제작 방식 필드 바로 다음에 끝나며(pb-40px) 그 외 자유 입력 필드는 없다. 제출 버튼은 이 카드
+// 안이 아니라 Figma에서 업무노트 카드 바로 아래(오른쪽 컬럼)에 있어서 FinalSubmitButton으로
+// 분리했다.
 function FinalSpecCard() {
   const final = useSession((s) => s.final)
   const updateFinal = useSession((s) => s.updateFinal)
@@ -148,8 +148,8 @@ function FinalSpecCard() {
           {PART_TAGS.map((tag, i) => (
             <span
               key={tag}
-              className={`shrink-0 rounded-full px-3 py-2 text-caption-lg ${
-                i === 0 ? 'bg-green-300 text-green-900' : 'bg-neutral-100 text-neutral-500'
+              className={`shrink-0 rounded-full px-3 py-2 text-caption-lg text-neutral-700 ${
+                i === 0 ? 'bg-green-300' : 'bg-neutral-100'
               }`}
             >
               {tag}
@@ -235,19 +235,6 @@ function FinalSpecCard() {
             className={FIELD_INPUT_CLASS}
           />
         </FieldRow>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <Text variant="title-lg" emphasis className="text-green-900">
-          관계부서 전달사항 (선택)
-        </Text>
-        <textarea
-          value={final.vendorNotes}
-          onChange={(e) => updateFinal({ vendorNotes: e.target.value })}
-          rows={3}
-          placeholder="설계팀·구매팀에 함께 전달할 내용이 있다면 적어주세요."
-          className="rounded-md bg-neutral-50 px-4 py-3 text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
-        />
       </div>
     </Card>
   )

@@ -30,7 +30,6 @@ const emptyDraft = (): SpecDraft => ({
   method: '',
   limitSampleAttached: false,
   limitSampleFileName: null,
-  vendorNotes: '',
 })
 
 // Figma 823:53712~823:54461(Desktop-123~128) 부품 태그 6개(목재 흡기구 커버/상부 하우징/
@@ -167,7 +166,12 @@ function computeFindings(state: SessionState): Finding[] {
   if (state.revisitCount > 0) add('revisited_after_branch')
   if (state.branch === 'wood_dropped') add('concept_abandoned')
 
-  const deadlineMentioned = /12일|일정|납기/.test(state.final.vendorNotes || '')
+  // vendorNotes 같은 전용 자유 입력 필드가 UI에 없으므로(Figma 823:54925엔 그런 필드가 없음),
+  // askedCapability/askedBudget과 같은 패턴으로 실제 대화 로그에서 사용자가 보낸 메시지 중
+  // 발주 일정을 언급했는지를 본다.
+  const deadlineMentioned = Object.values(state.chatHistory).some((messages) =>
+    messages.some((m) => m.role === 'user' && /12일|일정|납기/.test(m.content)),
+  )
   if (!deadlineMentioned) add('deadline_margin_ignored')
 
   return findings

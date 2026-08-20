@@ -117,7 +117,9 @@ export interface SessionLogRequest {
 // 시방서 (spec sheet) 입력 필드 — 축 1 판정 기준 (필수: material, color, finish, size, method).
 // Figma 823:54925(Desktop-105, "시방서 수정")로 재확인: 예전엔 size/method/cmf/colorChip
 // flat 4필드로 다르게 만들어져 있었는데, 실제로는 초안 작성 화면(PartSpec)과 완전히 같은
-// 소재/컬러/마감/사이즈(4분할)/제작방식 구성이었음 — PartSpecSize를 그대로 재사용.
+// 소재/컬러/마감/사이즈(4분할)/제작방식 구성이었음 — PartSpecSize를 그대로 재사용. 이 프레임엔
+// 그 다섯 필드 외에 다른 입력이 없어(카드가 제작방식 필드 바로 다음에 끝남), vendorNotes 같은
+// 자유 텍스트 필드는 없다.
 export interface SpecDraft {
   material: string
   color: string
@@ -126,7 +128,6 @@ export interface SpecDraft {
   method: string
   limitSampleAttached: boolean
   limitSampleFileName: string | null
-  vendorNotes: string
 }
 
 // Figma 823:53712~823:54461(Desktop-123~128) — 초안 작성 화면은 부품 태그(목재 흡기구 커버 등

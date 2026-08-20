@@ -78,7 +78,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   }, [history.length, sending, showIntro])
 
   return (
-    <Card className="flex h-full flex-col gap-6 p-6">
+    <Card className="flex h-full max-h-[1400px] flex-col gap-6 p-6">
       <Text variant="title-lg" emphasis className="text-green-900">
         메신저
       </Text>
@@ -103,72 +103,79 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           )
         })}
       </div>
-      <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col justify-end gap-3 overflow-y-auto">
-        {showIntro && (
-          <div className="flex items-end gap-2 self-start">
-            <div className="flex max-w-[85%] flex-col gap-2 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3">
-              <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
-                {intro!.text}
-              </Text>
-              <div className="flex gap-2">
-                <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500">
-                  {PERSONA_SENDER_NAME[intro!.persona]}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => saveNote(intro!.text)}
-                  disabled={savedNotes.includes(intro!.text)}
-                  className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
-                >
-                  {savedNotes.includes(intro!.text) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {history.length === 0 && !showIntro && (
-          <Text variant="body-sm" className="text-neutral-400">
-            {PERSONA_LABEL[active]}에게 궁금한 걸 질문해보세요.
-          </Text>
-        )}
-        {history.map((m, i) => (
-          <div key={i} className={`flex items-end gap-2 ${m.role === 'user' ? 'flex-row-reverse self-end' : 'self-start'}`}>
-            <div
-              className={`flex max-w-[85%] flex-col gap-2 px-4 py-3 ${
-                m.role === 'user'
-                  ? 'rounded-bl-xl rounded-tl-xl rounded-tr-xl bg-green-100 text-green-900'
-                  : 'rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 text-neutral-900'
-              }`}
-            >
-              <Text variant="body-md">{m.content}</Text>
-              {m.role === 'assistant' && (
+      {/* flex-col + justify-end를 스크롤 컨테이너에 직접 걸면(예전 방식) 크로미움에서
+          overflow가 생겨도 scrollHeight가 clientHeight와 같게 보고돼 스크롤이 막힌다 — 스크롤은
+          바깥의 평범한 overflow-y-auto 블록이 담당하고, justify-end(짧을 때 아래 정렬)는 안쪽
+          min-h-full 래퍼에게 넘긴다. 넘치면 min-h-full은 컨텐츠 실제 높이로 자라 justify-end가
+          무력화되고 위에서 아래로 자연스럽게 쌓여 스크롤이 정상 동작한다. */}
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex min-h-full flex-col justify-end gap-3">
+          {showIntro && (
+            <div className="flex items-end gap-2 self-start">
+              <div className="flex max-w-[85%] flex-col gap-2 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3">
+                <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
+                  {intro!.text}
+                </Text>
                 <div className="flex gap-2">
                   <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500">
-                    {PERSONA_SENDER_NAME[active]}
+                    {PERSONA_SENDER_NAME[intro!.persona]}
                   </span>
                   <button
                     type="button"
-                    onClick={() => saveNote(m.content)}
-                    disabled={savedNotes.includes(m.content)}
+                    onClick={() => saveNote(intro!.text)}
+                    disabled={savedNotes.includes(intro!.text)}
                     className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
                   >
-                    {savedNotes.includes(m.content) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
+                    {savedNotes.includes(intro!.text) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+          {history.length === 0 && !showIntro && (
+            <Text variant="body-sm" className="text-neutral-400">
+              {PERSONA_LABEL[active]}에게 궁금한 걸 질문해보세요.
+            </Text>
+          )}
+          {history.map((m, i) => (
+            <div key={i} className={`flex items-end gap-2 ${m.role === 'user' ? 'flex-row-reverse self-end' : 'self-start'}`}>
+              <div
+                className={`flex max-w-[85%] flex-col gap-2 px-4 py-3 ${
+                  m.role === 'user'
+                    ? 'rounded-bl-xl rounded-tl-xl rounded-tr-xl bg-green-100 text-green-900'
+                    : 'rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 text-neutral-900'
+                }`}
+              >
+                <Text variant="body-md">{m.content}</Text>
+                {m.role === 'assistant' && (
+                  <div className="flex gap-2">
+                    <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500">
+                      {PERSONA_SENDER_NAME[active]}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => saveNote(m.content)}
+                      disabled={savedNotes.includes(m.content)}
+                      className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
+                    >
+                      {savedNotes.includes(m.content) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
+                    </button>
+                  </div>
+                )}
+              </div>
+              {m.t && (
+                <Text variant="caption-sm" className="shrink-0 text-neutral-400">
+                  {formatTime(m.t)}
+                </Text>
               )}
             </div>
-            {m.t && (
-              <Text variant="caption-sm" className="shrink-0 text-neutral-400">
-                {formatTime(m.t)}
-              </Text>
-            )}
-          </div>
-        ))}
-        {sending && (
-          <Text variant="body-sm" className="text-neutral-400">
-            답변 작성 중...
-          </Text>
-        )}
+          ))}
+          {sending && (
+            <Text variant="body-sm" className="text-neutral-400">
+              답변 작성 중...
+            </Text>
+          )}
+        </div>
       </div>
       {/* Figma 823:53615 — 입력창과 안내 문구는 4px 간격으로 붙어있는 한 묶음(메시지 영역과의
           24px 간격은 바깥 Card의 gap-6가 담당). */}
