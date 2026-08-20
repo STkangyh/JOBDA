@@ -1,0 +1,51 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # CI: 모든 push/PR에서 실행 — 빌드 깨지면 여기서 막힘
+      - name: Build
+        working-directory: frontend
+        run: |
+          echo "VITE_API_BASE_URL=http://1.201.116.204" > .env
+          npm ci
+          npm run build
+
+      # CD: main push에서만 — dist를 서버 임시 폴더로 업로드
+      - name: Upload dist to server
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "frontend/dist/**"
+          target: "~/jobda-dist"
+          strip_components: 2
+
+      # CD: 웹 루트로 교체 (Caddy가 /var/www/jobda 서빙)
+      - name: Publish to web root
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            sudo rm -rf /var/www/jobda/*
+            sudo cp -r ~/jobda-dist/* /var/www/jobda/
+            rm -rf ~/jobda-dist
