@@ -39,11 +39,68 @@ function averageProfile(a: ProfileAxis[], b: ProfileAxis[]): ProfileAxis[] {
   return a.map((axis, i) => ({ ...axis, value: (axis.value + (b[i]?.value ?? axis.value)) / 2 }))
 }
 
+// 사이드바 세번째 아이콘(history)이 진행 상태와 무관하게 항상 이 화면으로 연결되므로(사용자
+// 명시적 요청 — 체험맵으로 대신 보내지 말 것), 아직 한쪽 세션도 안 끝난 상태를 빈 화면(return
+// null)으로 방치하지 않고 이 화면 자체가 안내 + 이어하기 CTA를 보여준다.
+function ComprehensiveReportPending({ session1Done, session2Done }: { session1Done: boolean; session2Done: boolean }) {
+  const nextHref = !session1Done ? '/session1' : '/session2'
+  const nextLabel = !session1Done ? '세션1 시작하기' : '세션2 이어하기'
+
+  return (
+    <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
+      <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
+
+      <div className="flex min-w-0 flex-1 flex-col gap-6">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
+          <div className="hidden lg:block" />
+          <Indicator current="직무 리포트" />
+          <div className="hidden items-center justify-end gap-[18px] lg:flex">
+            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
+              <CloudSavedIcon className="size-5" />
+            </div>
+            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
+              <ProfileIcon className="size-5" />
+            </div>
+          </div>
+        </div>
+
+        <Text variant="headline-lg" emphasis className="text-white">
+          종합 리포트
+        </Text>
+
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 rounded-xl bg-neutral-900 p-12 text-center">
+          <Text variant="title-lg" emphasis className="text-neutral-200">
+            두 세션을 모두 마치면 여기에 종합 리포트가 표시됩니다.
+          </Text>
+          <div className="flex flex-col gap-1">
+            <Text variant="body-lg" className={session1Done ? 'text-green-300' : 'text-neutral-500'}>
+              세션1 · {PROCESS_STEPS[SESSION1_STEP_INDEX]} — {session1Done ? '완료' : '진행 전'}
+            </Text>
+            <Text variant="body-lg" className={session2Done ? 'text-green-300' : 'text-neutral-500'}>
+              세션2 · {PROCESS_STEPS[SESSION2_STEP_INDEX]} — {session2Done ? '완료' : '진행 전'}
+            </Text>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="secondary" onClick={() => (window.location.href = '/')}>
+              홈으로
+            </Button>
+            <Button onClick={() => (window.location.href = nextHref)}>{nextLabel}</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function ComprehensiveReport() {
   const s1Report = useSession1((s) => s.report)
   const s2Report = useSession((s) => s.report)
+  const session1Stage = useSession1((s) => s.currentStage)
+  const session2Stage = useSession((s) => s.currentStage)
 
-  if (!s1Report || !s2Report) return null
+  if (!s1Report || !s2Report) {
+    return <ComprehensiveReportPending session1Done={session1Stage === 'report'} session2Done={session2Stage === 'report'} />
+  }
 
   const behaviorGroups = [
     [...s1Report.strengths, ...s2Report.strengths],

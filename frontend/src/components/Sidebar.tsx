@@ -29,10 +29,13 @@ const ICON: Record<SidebarItem, ComponentType<IconProps>> = {
 // 실제 라우트가 있는 목적지만 연결 — 나머지(search/work/message/memo)는 대응하는 화면이
 // 아직 없어서 시각적 상태만 있고 클릭해도 아무 데도 안 감(가짜 링크를 만들지 않음).
 // data는 Figma 823:57686(Desktop-116, 세션2 자료함)에서 Pressed 상태로 확인돼 세션2의
-// materials 스테이지로 연결(아래 NavButton의 data 특수 처리 참고).
+// materials 스테이지로 연결(아래 NavButton의 data 특수 처리 참고). history(네비게이션바
+// 세번째 아이콘)는 진행 상태와 무관하게 항상 종합 리포트 탭으로 연결 — 아직 아무 세션도
+// 안 끝났으면 ComprehensiveReport 자체가 안내/이어하기 화면을 보여준다(체험맵으로 대신
+// 보내지 않음, 사용자 명시적 요청).
 const ROUTE: Partial<Record<SidebarItem, string>> = {
   apps: '/',
-  history: '/journey-map',
+  history: '/comprehensive-report',
   data: '/session2',
 }
 
