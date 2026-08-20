@@ -5,7 +5,7 @@ import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
 import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../components/icons'
-import { useSession } from '../store/session'
+import { useSession, feedbackSessionsRemaining } from '../store/session'
 import productImage from '../assets/illustrations/product-angle-1.png'
 
 // Figma "관계자 협업" 라운드의 1차 피드백 상태 — 823:55090("Desktop - 130")/823:55255
@@ -34,6 +34,8 @@ const FEEDBACK_FAIL =
 export function SeniorFeedback() {
   const draft = useSession((s) => s.draft)
   const goTo = useSession((s) => s.goTo)
+  const currentStage = useSession((s) => s.currentStage)
+  const remaining = feedbackSessionsRemaining(currentStage, false)
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
@@ -80,7 +82,7 @@ export function SeniorFeedback() {
                   <div className="flex items-end gap-1">
                     <WarningIcon className="size-5 shrink-0 text-error-200" />
                     <Text variant="body-sm" className="text-neutral-400">
-                      가능 피드백 세션 2회 남음
+                      가능 피드백 세션 {remaining}회 남음
                     </Text>
                   </div>
                 </div>

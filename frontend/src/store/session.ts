@@ -105,6 +105,26 @@ function specComplete(spec: SpecDraft): boolean {
   return flatFieldsFilled && sizeFilled
 }
 
+// "가능 피드백 세션 N회 남음" — Workspace/SeniorFeedback/FinalFeedback/VendorCompare 네 화면에
+// 각자 하드코딩된 숫자(3/2/2/1/1)로 흩어져 있던 걸 currentStage 하나로 계산하도록 통일.
+// 세션1의 S1_ROUNDS.length - currentRoundIndex와 같은 성격 — 실제 사용자가 피드백을 요청한
+// 횟수를 세는 게 아니라, 시나리오상 남은 라운드 수를 currentStage(실제 store 상태)에서
+// 유도한다. workspace 스테이지는 초안 작성/최종본 수정 두 국면을 공유해서 editingFinal도 받는다.
+export function feedbackSessionsRemaining(stage: Stage, editingFinal: boolean): number {
+  switch (stage) {
+    case 'workspace':
+      return editingFinal ? 2 : 3
+    case 'senior_feedback':
+      return 2
+    case 'final_feedback':
+      return 1
+    case 'vendor_compare':
+      return 1
+    default:
+      return 0
+  }
+}
+
 function computeScores(state: SessionState): Scores {
   const intent_delivery: Scores['intent_delivery'] = !specComplete(state.final)
     ? 1

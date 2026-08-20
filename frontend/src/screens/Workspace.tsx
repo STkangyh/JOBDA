@@ -6,7 +6,7 @@ import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
 import { WarningIcon, CloudSavedIcon, ProfileIcon, PlusIcon } from '../components/icons'
-import { useSession } from '../store/session'
+import { useSession, feedbackSessionsRemaining } from '../store/session'
 import type { PartSpecSize } from '../types'
 import productImage from '../assets/illustrations/product-angle-1.png'
 
@@ -490,9 +490,9 @@ function DraftSubmitButton() {
 export function Workspace() {
   const draftSubmitted = useSession((s) => s.draftSubmitted)
   const finalSubmitted = useSession((s) => s.finalSubmitted)
+  const currentStage = useSession((s) => s.currentStage)
   const editingFinal = draftSubmitted && !finalSubmitted
-  // Figma 실측: 초안 작성 중엔 "3회 남음", 1차 피드백을 받고 최종본을 수정하는 동안엔 "2회 남음".
-  const remaining = editingFinal ? 2 : 3
+  const remaining = feedbackSessionsRemaining(currentStage, editingFinal)
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">

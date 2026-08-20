@@ -5,7 +5,7 @@ import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
 import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../components/icons'
-import { useSession } from '../store/session'
+import { useSession, feedbackSessionsRemaining } from '../store/session'
 
 // Figma "관계자 협업" 라운드의 2차 피드백 상태 — 823:55878("Desktop - 135") 실측. 같은 노드에
 // "수정 방향 선택"(3지 선다) UI까지 이어져 있지만 그건 이 앱에서 별도 화면(branch_select, 다른
@@ -21,6 +21,8 @@ export function FinalFeedback() {
   const askedBudget = useSession((s) => s.askedBudget)
   const final = useSession((s) => s.final)
   const goTo = useSession((s) => s.goTo)
+  const currentStage = useSession((s) => s.currentStage)
+  const remaining = feedbackSessionsRemaining(currentStage, false)
 
   // Figma 실측 문구(설계팀: 스테이브 접합 사내 불가 / 구매팀: 예산 초과 가능성) — 사전에 관련
   // 담당자에게 물어봤는지(askedCapability/askedBudget) 여부에 따라 톤이 바뀌는 기존 게이팅 로직은
@@ -87,7 +89,7 @@ export function FinalFeedback() {
                   <div className="flex items-end gap-1">
                     <WarningIcon className="size-5 shrink-0 text-error-200" />
                     <Text variant="body-sm" className="text-neutral-400">
-                      가능 피드백 세션 1회 남음
+                      가능 피드백 세션 {remaining}회 남음
                     </Text>
                   </div>
                 </div>

@@ -6,7 +6,7 @@ import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
 import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../components/icons'
-import { useSession } from '../store/session'
+import { useSession, feedbackSessionsRemaining } from '../store/session'
 import type { VendorOption } from '../types'
 
 const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
@@ -170,6 +170,8 @@ export function VendorCompare() {
   const vendors = useSession((s) => s.vendors)
   const updateVendor = useSession((s) => s.updateVendor)
   const submitVendors = useSession((s) => s.submitVendors)
+  const currentStage = useSession((s) => s.currentStage)
+  const remaining = feedbackSessionsRemaining(currentStage, false)
 
   const [phase, setPhase] = useState<'edit' | 'confirm'>('edit')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -278,7 +280,7 @@ export function VendorCompare() {
                       <div className="flex items-end gap-1">
                         <WarningIcon className="size-5 shrink-0 text-error-200" />
                         <Text variant="body-sm" className="text-neutral-400">
-                          가능 피드백 세션 1회 남음
+                          가능 피드백 세션 {remaining}회 남음
                         </Text>
                       </div>
                     </div>
