@@ -47,15 +47,18 @@ const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed
   },
 }
 
-// 이슈 #2 (백엔드 #14): work_overview/job_meaning은 항상 채워지는 서술 문자열.
-// branch에 따라 실제로 뭘 했는지가 달라지므로 work_overview만 branch별로 분기.
-const WORK_OVERVIEW: Record<ReportRequest['branch'], string> = {
+// 이슈 #2 (백엔드 #14): work_overview/job_meaning은 항상 채워지는 서술 문자열인데,
+// BACKEND_SPEC_v2.md의 POST /api/report 응답에는 strengths/cautions/missed 셋뿐이고
+// 이 두 필드는 아예 없다 — 실제 백엔드가 필드를 추가하기 전까지는 client.ts의 실제 API
+// 경로도(목데이터뿐 아니라) 이 상수로 채워야 해서 export한다. branch에 따라 실제로 뭘 했는지가
+// 달라지므로 work_overview만 branch별로 분기.
+export const WORK_OVERVIEW: Record<ReportRequest['branch'], string> = {
   outsourcing: '오크 원목 하우징의 CMF 시방서를 작성하고 외주 업체를 비교해 목재 파트 실현 방법을 선택했습니다.',
   sheet_wrap: '오크 원목 하우징의 CMF 시방서를 작성하고 시트지 래핑으로 목재 파트 실현 방법을 선택했습니다.',
   wood_dropped: '오크 원목 하우징의 CMF 시방서를 작성했지만 목재 파트를 포기하고 다른 재질로 방향을 바꿨습니다.',
 }
 
-const JOB_MEANING = '제약 속에서 디자인 의도와 현실의 타협점을 찾는 실무 감각을 경험했습니다.'
+export const JOB_MEANING = '제약 속에서 디자인 의도와 현실의 타협점을 찾는 실무 감각을 경험했습니다.'
 
 // "내 직무 이해 프로필" — 새 축을 위해 별도 입력을 새로 받지 않고, 이미 계산된
 // scores/branch/findings(부록 A 판정 근거)만으로 4축을 도출한다. 실제 백엔드(v4) 응답에는

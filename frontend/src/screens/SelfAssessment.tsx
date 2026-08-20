@@ -67,11 +67,19 @@ export function SelfAssessment() {
   const setSelfAssessment = useSession((s) => s.setSelfAssessment)
   const finishAssessment = useSession((s) => s.finishAssessment)
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState(false)
 
+  // finishAssessment는 실제 백엔드(/api/report)를 호출한다 — 이게 실패해도(네트워크 오류,
+  // 5xx 등) catch가 없으면 버튼만 조용히 "제출하기"로 돌아가고 왜 안 넘어갔는지 사용자는
+  // 알 방법이 없었다(실제로 이런 증상 신고가 들어왔었음). 실패 시 재시도할 수 있게 에러
+  // 문구를 보여준다.
   const submit = async () => {
     setSubmitting(true)
+    setError(false)
     try {
       await finishAssessment()
+    } catch {
+      setError(true)
     } finally {
       setSubmitting(false)
     }
@@ -124,6 +132,12 @@ export function SelfAssessment() {
             </div>
           </div>
         </Card>
+
+        {error && (
+          <Text variant="body-md" className="self-end text-error-200">
+            리포트를 생성하지 못했어요. 잠시 후 다시 시도해주세요.
+          </Text>
+        )}
 
         <Button
           variant="primary"

@@ -3,7 +3,6 @@ import { useSession1 } from '../store/session1'
 import { Sidebar, type SidebarItem } from '../components/Sidebar'
 import { Indicator } from '../components/Indicator'
 import { Text } from '../components/Text'
-import { Button } from '../components/Button'
 import { ProfileSpectrum } from '../components/ProfileSpectrum'
 import { WorkProcessChain } from '../components/WorkProcessChain'
 import { CloudSavedIcon, ProfileIcon } from '../components/icons'
@@ -74,12 +73,6 @@ function ComprehensiveReportPending() {
           <Text variant="body-lg" className="text-neutral-500">
             {PROCESS_STEPS[SESSION2_STEP_INDEX]} — 진행 전
           </Text>
-          <div className="flex gap-3">
-            <Button variant="secondary" onClick={() => (window.location.href = '/')}>
-              홈으로
-            </Button>
-            <Button onClick={() => (window.location.href = '/session2')}>세션 이어하기</Button>
-          </div>
         </div>
       </div>
     </div>
@@ -238,15 +231,6 @@ export function ComprehensiveReport() {
             {meaning}
           </Text>
         ))}
-
-        <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => (window.location.href = '/')}>
-            홈으로
-          </Button>
-          <Button variant="secondary" onClick={() => (window.location.href = '/journey-map')}>
-            체험맵 보기
-          </Button>
-        </div>
       </div>
     </div>
   )
