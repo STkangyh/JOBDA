@@ -4,11 +4,13 @@ import illustration from '../../assets/illustrations/job-detail-banner.png'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
 import { CancelIcon } from '../../components/icons'
-import { PROCESS_STEPS, SESSION1_STEP_INDEX, SESSION2_STEP_INDEX } from '../../data/processSteps'
+import { PROCESS_STEPS, SESSION2_STEP_INDEX } from '../../data/processSteps'
 
-// 실제로 구현된 세션 2개: 6번(모형 제작 및 설계 검토 = prototype_revision/세션1),
-// 8번(시방서 작성 및 설계 이관 = cmf_outsourcing/세션2)만 선택 가능하게 함.
-const AVAILABLE_STEP_INDICES = [SESSION1_STEP_INDEX, SESSION2_STEP_INDEX]
+// 세션1(6번, 모형 제작 및 설계 검토)은 배포에서 제외하기로 결정 — 사용자 요청. 8번(시방서
+// 작성 및 설계 이관 = cmf_outsourcing/세션2)만 선택 가능하게 함. /session1 라우트 자체는
+// 남겨두지만(직접 URL 진입은 가능) 이 화면이 유일한 발견 경로라 여기서 막으면 실질적으로
+// 배포 플로우에서 제외된다.
+const AVAILABLE_STEP_INDICES = [SESSION2_STEP_INDEX]
 
 // Figma "Desktop - 64" (652:16286) — 직무 상세 페이지. 브랜드/GNB 없이 전체화면 다크 레이아웃.
 export function JobDetail({
