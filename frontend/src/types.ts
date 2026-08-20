@@ -207,6 +207,11 @@ export interface SessionState {
   draft: SpecDraft
   draftParts: PartSpec[]
   draftSubmitted: boolean
+  // 수정안 제출(1회차) 이후 선배 디자이너가 재승인했지만 아직 설계팀·구매팀에 인계하지는
+  // 않은 중간 상태 — Stage enum을 늘리지 않고(다른 화면과 동시에 건드릴 위험) currentStage는
+  // 계속 'workspace'로 두고 이 플래그로 Workspace.tsx 안에서 "수정안 제출" -> "시방서 인계"
+  // 2단계 버튼 전환을 구현한다(VendorCompare.tsx의 로컬 phase 상태와 같은 패턴).
+  finalApproved: boolean
   finalSubmitted: boolean
   final: SpecDraft
   revisitCount: number

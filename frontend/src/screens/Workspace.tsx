@@ -48,14 +48,18 @@ const CMF_NOTES_DRAFT = ['화이트 오크 재질의 흡기구', '목재 접합'
 // Figma 823:55090 — 1차 피드백(한도 견본 판정표 요청) 이후 CMF 결정 사항에 태그가 하나 늘어남.
 const CMF_NOTES_FINAL = [...CMF_NOTES_DRAFT, '한도 견본 판정표']
 
-// Figma 823:55090/823:55255 실측 문구. draft.limitSampleAttached는 초안 제출 시점 값이라
-// final을 수정하는 동안에도(=이 값 자체는 안 바뀜) "그때 받은 피드백"을 그대로 재현할 수 있다.
+// Figma 823:55090/823:55255 실측 문구.
 const FEEDBACK_PASS = '항목은 다 있네요. 이대로 설계팀·구매팀 검토로 넘기세요.'
 const FEEDBACK_FAIL =
   '목재와 같이 결과물이 일정하지 않은 소재는 한도 견본 판정표라고 "이 색으로 해주세요"가 아니라 "이 정도까지는 받겠습니다"를 알려줘야 해요. 공용 서식 폴더의 한도 견본 판정표 양식을 참고해서 별첨해주세요.'
 
 function DesignRecapCard({ editingFinal, remaining }: { editingFinal: boolean; remaining: number }) {
-  const limitSampleAttached = useSession((s) => s.draft.limitSampleAttached)
+  // QA 리포트("관계자 협업 무한 루프") 재현 결과 실제 버그였음: 이 배너가 draft.limitSampleAttached를
+  // 봐서, 사용자가 "시방서 수정" 화면에서 한도 견본 판정표를 첨부해(final.limitSampleAttached가
+  // true로 바뀜) 제출 버튼이 활성화돼도 배너는 계속 FAIL로 남아있었음 — 방금 고친 걸 화면이
+  // 계속 "안 고쳤다"고 말하는 것처럼 보여서 무한 루프처럼 느껴짐. 지금 편집 중인 문서(final)의
+  // 실제 첨부 상태를 봐야 한다.
+  const limitSampleAttached = useSession((s) => s.final.limitSampleAttached)
 
   return (
     <Card className="flex flex-col gap-8 p-6">
@@ -240,8 +244,14 @@ function FinalSpecCard() {
   )
 }
 
+// QA 리포트("관계자 협업 무한 루프", 원안 5단계) 재현 결과 요구된 2단계 구조: "수정안 제출"을
+// 누른다고 바로 설계팀·구매팀에 인계되는 게 아니라, 먼저 선배 디자이너의 재승인(메신저 메시지)을
+// 받고 나서 버튼이 "시방서 인계"로 바뀌어야 그때 실제로 다음 단계(final_feedback)로 넘어간다.
+// currentStage는 이 두 단계 동안 계속 'workspace'라 finalApproved 플래그로 로컬 전환한다.
 function FinalSubmitButton() {
   const final = useSession((s) => s.final)
+  const finalApproved = useSession((s) => s.finalApproved)
+  const approveFinal = useSession((s) => s.approveFinal)
   const submitFinal = useSession((s) => s.submitFinal)
   // Figma 823:54925의 "로딩 중..." 버튼 상태 — session1/Workspace.tsx ReviewAndChoice와 동일하게
   // 실제 지연은 없지만(클라이언트 계산) 라운드 전환감을 주기 위해 1200ms 붙잡아둔다.
@@ -251,10 +261,11 @@ function FinalSubmitButton() {
   // 한다 — 나머지 필드는 계속 편집 가능하게 두되 CTA를 막지는 않는다(사용자 요청).
   const requiredMissing = !final.limitSampleAttached
 
-  const handleSubmit = () => {
+  const handleClick = () => {
     setIsSubmitting(true)
     setTimeout(() => {
-      submitFinal()
+      if (finalApproved) submitFinal()
+      else approveFinal()
       setIsSubmitting(false)
     }, 1200)
   }
@@ -263,10 +274,10 @@ function FinalSubmitButton() {
     <Button
       variant="primary"
       className="h-[72px] w-full shrink-0 !rounded-xl !text-2xl"
-      disabled={requiredMissing || isSubmitting}
-      onClick={handleSubmit}
+      disabled={(!finalApproved && requiredMissing) || isSubmitting}
+      onClick={handleClick}
     >
-      {isSubmitting ? '로딩 중...' : '수정안 제출'}
+      {isSubmitting ? '로딩 중...' : finalApproved ? '시방서 인계' : '수정안 제출'}
     </Button>
   )
 }

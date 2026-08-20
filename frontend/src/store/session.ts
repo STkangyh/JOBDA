@@ -22,6 +22,11 @@ import type {
 
 const REQUIRED_FIELDS: ('material' | 'color' | 'finish' | 'method')[] = ['material', 'color', 'finish', 'method']
 
+// QA 버그 리포트("관계자 협업 무한 루프")의 원안 5단계 실측: 수정안 재제출이 받아들여지면
+// 선배 디자이너가 메신저로 재승인 메시지를 보내고, 그걸 본 사용자가 직접 "시방서 인계" 버튼을
+// 눌러야 설계팀·구매팀으로 넘어간다(자동 전환 아님).
+const SENIOR_APPROVAL_MESSAGE = '이번엔 한도 견본 판정표까지 잘 붙였네요. 이대로 시방서 인계 누르면 설계팀·구매팀으로 넘어갑니다.'
+
 const emptyDraft = (): SpecDraft => ({
   material: '',
   color: '',
@@ -67,6 +72,7 @@ const initialState = (): SessionState => ({
   draft: emptyDraft(),
   draftParts: Array.from({ length: PART_COUNT }, emptyPartSpec),
   draftSubmitted: false,
+  finalApproved: false,
   finalSubmitted: false,
   final: emptyDraft(),
   revisitCount: 0,
@@ -89,6 +95,7 @@ interface SessionActions {
   updateDraft: (fields: Partial<SpecDraft>) => void
   submitDraft: () => void
   updateFinal: (fields: Partial<SpecDraft>) => void
+  approveFinal: () => void
   submitFinal: () => void
   chooseBranch: (branch: Branch) => void
   updateVendor: (index: number, fields: Partial<VendorOption>) => void
@@ -251,6 +258,23 @@ export const useSession = create<SessionState & SessionActions>()(
       },
 
       updateFinal: (fields) => set((s) => ({ final: { ...s.final, ...fields } })),
+      // "수정안 제출"(1회차) — 아직 설계팀·구매팀에 인계하는 게 아니라, 선배 디자이너가 수정
+      // 사항을 확인하고 재승인하는 단계. currentStage는 그대로 'workspace'에 둔 채 승인
+      // 메시지를 메신저에 꽂아 넣고, Workspace.tsx가 finalApproved를 보고 버튼을
+      // "시방서 인계"로 바꾼다 — 실제 인계(currentStage 전환)는 submitFinal이 담당.
+      approveFinal: () => {
+        set((s) => ({
+          finalApproved: true,
+          chatHistory: {
+            ...s.chatHistory,
+            senior: [
+              ...s.chatHistory.senior,
+              { role: 'assistant', content: SENIOR_APPROVAL_MESSAGE, t: Date.now() },
+            ],
+          },
+        }))
+        pushLog(set, get, 'submit', { target: 'final_approval' })
+      },
       submitFinal: () => {
         set({ finalSubmitted: true, currentStage: 'final_feedback' })
         pushLog(set, get, 'submit', { target: 'final' })
@@ -265,6 +289,7 @@ export const useSession = create<SessionState & SessionActions>()(
             branch,
             revisitCount: s.revisitCount + 1,
             draftSubmitted: false,
+            finalApproved: false,
             finalSubmitted: false,
             currentStage: 'workspace',
             currentStep: 's2',

@@ -100,8 +100,13 @@
   --text-caption-sm--line-height: 1.2;
 }
 
+/* color-scheme: light dark였을 때 OS/브라우저가 다크 모드면 스크롤바·폼 컨트롤 같은 네이티브
+   UI만 어둡게 렌더링됐음 — 정작 페이지 자체는 모든 화면이 항상 라이트로 고정되어 있어서(Card는
+   dark:text-neutral-100 상속을 일부러 끊고 always bg-white로 고정, 아래 dark: 유틸도 실제로
+   쓰이는 화면이 없음) 흰 배경 위에 검은 스크롤바가 뜨는 불일치가 생겼다. 이 앱은 아직 다크 테마를
+   실제로 구현하지 않았으므로 네이티브 UI도 항상 라이트로 고정. */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 body {
