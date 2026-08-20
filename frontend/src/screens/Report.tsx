@@ -47,7 +47,6 @@ function QuoteGroup({ items }: { items: string[] }) {
 export function Report() {
   const report = useSession((s) => s.report)
   const actionLogs = useSession((s) => s.actionLogs)
-  const resetSession = useSession((s) => s.resetSession)
 
   if (!report) return null
 
@@ -173,16 +172,20 @@ export function Report() {
           {report.job_meaning}
         </Text>
 
-        <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => (window.location.href = '/')}>
-            홈으로
+        {/* Figma 823:52946 실측(Frame 2147227540, Component 216 + Component 212): CTA는 가로
+            3개 나열이 아니라 "홈으로 가기"/"다음 세션으로 이동" 세로 2단 스택이었음 — 예전에
+            임의로 3개(체험맵 보기/다시 체험하기 추가)로 늘려뒀던 걸 실측대로 되돌림. */}
+        <div className="flex w-[340px] flex-col gap-3 self-end">
+          <Button
+            variant="secondary"
+            className="h-[72px] w-full !rounded-xl !border-0 !bg-neutral-200 !text-2xl !text-neutral-600"
+            onClick={() => (window.location.href = '/')}
+          >
+            홈으로 가기
           </Button>
-          {/* session1/Report.tsx와 대칭 — 목적지는 journey-map이 알아서 정한다: 세션1도 끝났으면
-              종합 리포트, 아직이면 진행 상태 표. */}
-          <Button variant="secondary" onClick={() => (window.location.href = '/journey-map')}>
-            체험맵 보기
+          <Button className="h-[72px] w-full !rounded-xl !text-2xl" onClick={() => (window.location.href = '/journey-map')}>
+            다음 세션으로 이동
           </Button>
-          <Button onClick={() => resetSession()}>다시 체험하기</Button>
         </div>
       </div>
     </div>
