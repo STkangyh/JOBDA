@@ -20,13 +20,14 @@ import type {
   VendorOption,
 } from '../types'
 
-const REQUIRED_FIELDS: ('size' | 'method' | 'cmf' | 'colorChip')[] = ['size', 'method', 'cmf', 'colorChip']
+const REQUIRED_FIELDS: ('material' | 'color' | 'finish' | 'method')[] = ['material', 'color', 'finish', 'method']
 
 const emptyDraft = (): SpecDraft => ({
-  size: '',
+  material: '',
+  color: '',
+  finish: '',
+  size: { depth: '', width: '', height: '', thickness: '' },
   method: '',
-  cmf: '',
-  colorChip: '',
   limitSampleAttached: false,
   limitSampleFileName: null,
   vendorNotes: '',
@@ -99,7 +100,9 @@ interface SessionActions {
 }
 
 function specComplete(spec: SpecDraft): boolean {
-  return REQUIRED_FIELDS.every((k) => spec[k].toString().trim().length > 0)
+  const flatFieldsFilled = REQUIRED_FIELDS.every((k) => spec[k].trim().length > 0)
+  const sizeFilled = Object.values(spec.size).every((v) => v.trim().length > 0)
+  return flatFieldsFilled && sizeFilled
 }
 
 function computeScores(state: SessionState): Scores {

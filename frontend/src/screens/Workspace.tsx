@@ -11,10 +11,11 @@ import type { PartSpecSize } from '../types'
 import productImage from '../assets/illustrations/product-angle-1.png'
 
 // Figma "관계자 협업" 라운드 — 초안 작성은 823:53712~823:54461("Desktop - 123~128", 부품 탭
-// 6개 + 탭별 독립 시방서), 선임 피드백 반영 후 최종본 수정은 823:55090/823:55255("시방서 수정")
-// 실측. 최종본 수정 화면은 여전히 시방서 항목을 소재/컬러/마감/사이즈/제작 방식 5줄로 보여주지만
-// 실제 데이터 모델(store/session.ts의 SpecDraft)은 색·재질·마감을 cmf 필드 하나로 묶어 받는다
-// (REQUIRED_FIELDS는 size/method/cmf/colorChip 4개뿐) — 이건 draftParts와 무관하게 그대로 유지.
+// 6개 + 탭별 독립 시방서), 선임 피드백 반영 후 최종본 수정은 823:54925("Desktop - 105", "시방서
+// 수정") 실측. get_design_context로 재확인해보니 예전에 size/method/cmf/colorChip flat 4필드로
+// 다르게 만들어뒀던 게 실제로는 틀렸음 — 최종본 수정 화면도 초안 작성과 완전히 같은 소재/컬러
+// (+첨부 버튼)/마감/사이즈(4분할)/제작방식 구성이라 SpecDraft를 PartSpec과 같은 필드셋으로
+// 맞춤(FinalSpecCard 참고).
 const DRAFT_DESCRIPTION =
   '이번 공기청정기의 외부 CMF 소재는 오크 재질의 원목을 사용하고자 합니다. 색상은 자연스러운 원목의 색상을 살릴 수 있는 오크 내추럴 컬러로 하며, 목재 접합 설비를 활용한 제작 공정을 거치고자 합니다.'
 
@@ -87,7 +88,8 @@ function DesignRecapCard({ editingFinal, remaining }: { editingFinal: boolean; r
           </div>
         </div>
         {editingFinal ? (
-          <div className={`rounded-md p-5 ${limitSampleAttached ? 'bg-green-50' : 'border border-amber-400 bg-white'}`}>
+          // Figma 823:54925 실측: FAIL 상태도 경고 테두리가 아니라 bg-green-200 평문 박스였음.
+          <div className={`rounded-md p-5 ${limitSampleAttached ? 'bg-green-50' : 'bg-green-200'}`}>
             <Text variant="body-lg" className="whitespace-pre-line text-neutral-700">
               {limitSampleAttached ? FEEDBACK_PASS : FEEDBACK_FAIL}
             </Text>
@@ -116,35 +118,24 @@ function FieldRow({ label, children }: { label: string; children: ReactNode }) {
 const FIELD_INPUT_CLASS =
   'h-[50px] flex-1 rounded-md bg-neutral-50 px-4 text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none'
 
-// Figma 823:55090/823:55255("시방서 수정") — 1차 피드백 이후 최종본을 수정하는 화면. 부품 탭이
-// 아니라 여전히 사이즈/제작방식/CMF/컬러칩 flat 4필드 + 한도견본판정표 첨부 + 관계부서
-// 전달사항으로 구성돼 있어(draftParts와는 별개), 이 카드는 손대지 않고 그대로 둔다.
+// Figma 823:54925("Desktop - 105", "시방서 수정") — 1차 피드백 이후 최종본을 수정하는 화면.
+// 부품 태그는 탭이 아니라 정적 표시(첫 번째만 강조)지만, 그 아래 필드 구성 자체는 초안 작성
+// 화면(DraftPartsCard)과 완전히 동일 — 소재/컬러(+첨부)/마감/사이즈(4분할)/제작방식. 제출
+// 버튼은 이 카드 안이 아니라 Figma에서 업무노트 카드 바로 아래(오른쪽 컬럼)에 있어서
+// FinalSubmitButton으로 분리했다. "관계부서 전달사항"은 이 프레임엔 없었지만, computeFindings의
+// deadline_margin_ignored 판정이 참조하는 유일한 자유 입력이라 그대로 남겨둠.
 function FinalSpecCard() {
   const final = useSession((s) => s.final)
   const updateFinal = useSession((s) => s.updateFinal)
-  const submitFinal = useSession((s) => s.submitFinal)
-  // Figma 823:55255의 "로딩 중..." 버튼 상태 — session1/Workspace.tsx ReviewAndChoice와 동일하게
-  // 실제 지연은 없지만(클라이언트 계산) 라운드 전환감을 주기 위해 1200ms 붙잡아둔다.
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // 1차 피드백이 지적한 건 한도 견본 판정표 누락 하나뿐이라, 그것만 첨부하면 넘어갈 수 있어야
-  // 한다 — 나머지 4필드는 계속 편집 가능하게 두되 CTA를 막지는 않는다(사용자 요청).
-  const requiredMissing = !final.limitSampleAttached
-
+  // Figma 823:54925의 컬러 옆 Add 버튼 주석: "누르면 OS 기본 파일 탐색기가 열립니다" — 초안
+  // 화면과 달리 컬러칩/한도 견본 중 고르는 메뉴 없이 한도 견본 판정표 하나만 첨부한다.
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
     updateFinal({ limitSampleAttached: true, limitSampleFileName: file.name })
-  }
-
-  const handleSubmit = () => {
-    setIsSubmitting(true)
-    setTimeout(() => {
-      submitFinal()
-      setIsSubmitting(false)
-    }, 1200)
   }
 
   return (
@@ -158,7 +149,7 @@ function FinalSpecCard() {
             <span
               key={tag}
               className={`shrink-0 rounded-full px-3 py-2 text-caption-lg ${
-                i === 0 ? 'bg-green-200 text-green-900' : 'bg-neutral-100 text-neutral-500'
+                i === 0 ? 'bg-green-300 text-green-900' : 'bg-neutral-100 text-neutral-500'
               }`}
             >
               {tag}
@@ -168,70 +159,82 @@ function FinalSpecCard() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <FieldRow label="사이즈">
+        <FieldRow label="소재">
           <input
-            value={final.size}
-            onChange={(e) => updateFinal({ size: e.target.value })}
-            placeholder="예: 가로 220 x 세로 340 x 두께 18mm"
+            value={final.material}
+            onChange={(e) => updateFinal({ material: e.target.value })}
+            placeholder="예: 화이트 오크 원목"
             className={FIELD_INPUT_CLASS}
           />
+        </FieldRow>
+        <FieldRow label="컬러">
+          <div className="flex flex-1 items-center gap-2">
+            <input
+              value={final.color}
+              onChange={(e) => updateFinal({ color: e.target.value })}
+              placeholder="예: 오크 내추럴"
+              className={FIELD_INPUT_CLASS}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="한도 견본 판정표 첨부"
+              className="flex size-[50px] shrink-0 items-center justify-center rounded-md bg-neutral-50 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+            >
+              <PlusIcon className="size-5" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,.pdf,.doc,.docx"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+        </FieldRow>
+        {final.limitSampleAttached && (
+          <div className="flex items-center justify-between rounded-md bg-green-50 px-4 py-3 sm:ml-[108px]">
+            <Text variant="body-md" className="text-green-800 underline">
+              {final.limitSampleFileName ?? '한도 견본 판정표.docs'}
+            </Text>
+            <button
+              type="button"
+              onClick={() => updateFinal({ limitSampleAttached: false, limitSampleFileName: null })}
+              className="text-caption-sm text-neutral-400 transition-colors hover:text-neutral-600"
+            >
+              제거
+            </button>
+          </div>
+        )}
+        <FieldRow label="마감">
+          <input
+            value={final.finish}
+            onChange={(e) => updateFinal({ finish: e.target.value })}
+            placeholder="예: 오일 마감"
+            className={FIELD_INPUT_CLASS}
+          />
+        </FieldRow>
+        <FieldRow label="사이즈">
+          <div className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4">
+            {SIZE_FIELDS.map(({ key, label, unit }) => (
+              <input
+                key={key}
+                value={final.size[key]}
+                onChange={(e) => updateFinal({ size: { ...final.size, [key]: e.target.value } })}
+                placeholder={`${label}(${unit})`}
+                className="h-[50px] rounded-md bg-neutral-50 px-3 text-body-md text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+              />
+            ))}
+          </div>
         </FieldRow>
         <FieldRow label="제작 방식">
           <input
             value={final.method}
             onChange={(e) => updateFinal({ method: e.target.value })}
-            placeholder="예: 오크 원목 스테이브 접합, 오일 마감"
+            placeholder="예: 오크 원목 스테이브 접합"
             className={FIELD_INPUT_CLASS}
           />
         </FieldRow>
-        <FieldRow label="CMF">
-          <input
-            value={final.cmf}
-            onChange={(e) => updateFinal({ cmf: e.target.value })}
-            placeholder="예: Color 내추럴 오크 / Material 원목 / Finish 오일"
-            className={FIELD_INPUT_CLASS}
-          />
-        </FieldRow>
-        <FieldRow label="컬러칩">
-          <input
-            value={final.colorChip}
-            onChange={(e) => updateFinal({ colorChip: e.target.value })}
-            placeholder="예: 오크 내추럴 #4"
-            className={FIELD_INPUT_CLASS}
-          />
-        </FieldRow>
-
-        <div className="flex flex-col gap-2 pt-2">
-          {final.limitSampleAttached ? (
-            <div className="flex items-center justify-between rounded-md bg-green-50 px-4 py-3">
-              <Text variant="body-md" className="text-green-800 underline">
-                {final.limitSampleFileName ?? '한도 견본 판정표.docs'}
-              </Text>
-              <button
-                type="button"
-                onClick={() => updateFinal({ limitSampleAttached: false, limitSampleFileName: null })}
-                className="text-caption-sm text-neutral-400 transition-colors hover:text-neutral-600"
-              >
-                제거
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="self-start rounded-md bg-neutral-50 px-4 py-3 text-body-md text-neutral-700 transition-colors hover:bg-neutral-100"
-            >
-              한도 견본 판정표 첨부
-            </button>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,.pdf,.doc,.docx"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </div>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -246,16 +249,38 @@ function FinalSpecCard() {
           className="rounded-md bg-neutral-50 px-4 py-3 text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
         />
       </div>
-
-      <Button
-        variant="primary"
-        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-        disabled={requiredMissing || isSubmitting}
-        onClick={handleSubmit}
-      >
-        {isSubmitting ? '로딩 중...' : '최종본 제출'}
-      </Button>
     </Card>
+  )
+}
+
+function FinalSubmitButton() {
+  const final = useSession((s) => s.final)
+  const submitFinal = useSession((s) => s.submitFinal)
+  // Figma 823:54925의 "로딩 중..." 버튼 상태 — session1/Workspace.tsx ReviewAndChoice와 동일하게
+  // 실제 지연은 없지만(클라이언트 계산) 라운드 전환감을 주기 위해 1200ms 붙잡아둔다.
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // 1차 피드백이 지적한 건 한도 견본 판정표 누락 하나뿐이라, 그것만 첨부하면 넘어갈 수 있어야
+  // 한다 — 나머지 필드는 계속 편집 가능하게 두되 CTA를 막지는 않는다(사용자 요청).
+  const requiredMissing = !final.limitSampleAttached
+
+  const handleSubmit = () => {
+    setIsSubmitting(true)
+    setTimeout(() => {
+      submitFinal()
+      setIsSubmitting(false)
+    }, 1200)
+  }
+
+  return (
+    <Button
+      variant="primary"
+      className="h-[72px] w-full shrink-0 !rounded-xl !text-2xl"
+      disabled={requiredMissing || isSubmitting}
+      onClick={handleSubmit}
+    >
+      {isSubmitting ? '로딩 중...' : '수정안 제출'}
+    </Button>
   )
 }
 
@@ -503,7 +528,7 @@ export function Workspace() {
                 { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
               ]}
             />
-            {!editingFinal && <DraftSubmitButton />}
+            {editingFinal ? <FinalSubmitButton /> : <DraftSubmitButton />}
           </div>
         </div>
       </div>
