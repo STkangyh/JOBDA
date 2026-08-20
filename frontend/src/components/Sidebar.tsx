@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import brandLogo from '../assets/brand-logo.png'
 import { AppsIcon, SearchIcon, HomeRepairServiceIcon, DataUsageIcon, DatabaseIcon, MailIcon, EditIcon, type IconProps } from './icons'
+import { useSession } from '../store/session'
 
 export type SidebarItem = 'apps' | 'search' | 'work' | 'history' | 'data' | 'message' | 'memo'
 
@@ -25,11 +26,14 @@ const ICON: Record<SidebarItem, ComponentType<IconProps>> = {
   memo: EditIcon,
 }
 
-// 실제 라우트가 있는 목적지만 연결 — 나머지(search/work/data/message/memo)는 대응하는 화면이
+// 실제 라우트가 있는 목적지만 연결 — 나머지(search/work/message/memo)는 대응하는 화면이
 // 아직 없어서 시각적 상태만 있고 클릭해도 아무 데도 안 감(가짜 링크를 만들지 않음).
+// data는 Figma 823:57686(Desktop-116, 세션2 자료함)에서 Pressed 상태로 확인돼 세션2의
+// materials 스테이지로 연결(아래 NavButton의 data 특수 처리 참고).
 const ROUTE: Partial<Record<SidebarItem, string>> = {
   apps: '/',
   history: '/journey-map',
+  data: '/session2',
 }
 
 const BOTTOM_ITEMS: readonly SidebarItem[] = ['data', 'message', 'memo']
@@ -45,11 +49,16 @@ function NavButton({
 }) {
   const Icon = ICON[item]
   const href = ROUTE[item]
+  // 세션2 스토어를 여기서 직접 건드리는 유일한 예외 — data는 세션2 자료함(materials
+  // 스테이지)으로 가는 지름길이라, 다른 화면(세션1/탐색)에서 눌러도 세션2 진행 중이던
+  // 스테이지를 덮어쓰고 이동한다(재입장 시 자료함부터 다시 보게 됨, 되돌릴 방법 있음).
+  const goToMaterials = useSession((s) => s.goTo)
   return (
     <button
       type="button"
       onClick={() => {
         onSelect?.(item)
+        if (item === 'data') goToMaterials('materials')
         if (href) window.location.href = href
       }}
       className={`flex size-14 shrink-0 items-center justify-center transition-colors ${
