@@ -97,7 +97,6 @@ export function ComprehensiveReport() {
   ].filter((g) => g.length > 0)
 
   const profile = s1Report ? averageProfile(s1Report.profile, s2Report.profile) : s2Report.profile
-  const jobMeanings = [...new Set([s1Report?.job_meaning, s2Report.job_meaning].filter(Boolean))]
   const burdenNotes = [s1Report?.burdenNote, s2Report.burdenNote].filter(Boolean)
 
   return (
@@ -226,11 +225,6 @@ export function ComprehensiveReport() {
           </div>
         </div>
 
-        {jobMeanings.map((meaning, i) => (
-          <Text key={i} variant="body-md" className="text-neutral-500">
-            {meaning}
-          </Text>
-        ))}
       </div>
     </div>
   )
