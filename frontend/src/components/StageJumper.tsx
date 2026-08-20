@@ -12,7 +12,7 @@ export function StageJumper<T extends string>({ stages, current, onJump }: Stage
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+    <div className="fixed bottom-4 right-4 z-50 hidden">
       {open && (
         <div className="flex max-w-[220px] flex-col gap-1 rounded-lg border border-dashed border-amber-400 bg-neutral-900/95 p-2 shadow-xl">
           {stages.map((s) => (
