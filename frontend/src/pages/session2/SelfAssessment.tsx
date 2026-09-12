@@ -86,7 +86,7 @@ export function SelfAssessment() {
   }
 
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
+    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
       <div className="hidden w-[83px] shrink-0 lg:block" aria-hidden />
 
       <div className="flex min-w-0 flex-1 flex-col gap-[18px]">

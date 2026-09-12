@@ -187,7 +187,7 @@ export function VendorCompare() {
   }
 
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
+    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
       <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">

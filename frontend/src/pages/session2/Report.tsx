@@ -72,7 +72,7 @@ export function Report() {
   const understandingPercent = draftParts.length > 0 ? (reasonedParts / draftParts.length) * 100 : 0
 
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
+    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
       <div className="hidden shrink-0 lg:block">
         <div className="flex size-[83px] items-center justify-center rounded-xl bg-neutral-900 p-2">
           <img src={brandLogo} alt="JOB:SIM" className="size-[67px] rounded-lg object-cover" />

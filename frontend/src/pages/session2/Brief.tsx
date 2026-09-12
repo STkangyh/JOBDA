@@ -56,11 +56,11 @@ export function Brief() {
   const goTo = useSession((s) => s.goTo)
 
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
+    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
       <Sidebar active="apps" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <IndicatorHeader current="브리프" />
+        <IndicatorHeader current="브리프" gridCols="grid-cols-1 lg:grid-cols-[300px_1fr_300px]" />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr_300px]">
           <div className="flex flex-col gap-4">

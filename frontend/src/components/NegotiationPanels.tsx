@@ -220,9 +220,9 @@ interface WorkNotesCardProps {
 export function WorkNotesCard({ groups }: WorkNotesCardProps) {
   const savedNotes = useSession((s) => s.savedNotes)
 
-  // h-full: 라운드/피드백 화면에서 Messenger와 나란한 그리드 칸에 바로 들어갈 때 행 높이만큼
-  // 늘어나게 함. flex-1: Workspace.tsx처럼 "초안 제출" 버튼과 flex-col로 한 칸을 나눠 쓸 때는
-  // flex-basis가 h-full보다 우선이라 남는 공간만 채우고 버튼을 밀어내지 않는다.
+  // h-full: Messenger와 나란한 그리드 칸에 자기 혼자 들어가서 행 높이만큼 늘어나게 함(항상
+  // 이래야 메신저와 높이가 정확히 일치한다 — 제출 버튼 등 다른 요소와 이 칸을 나눠 쓰면 안 됨,
+  // Workspace.tsx 참고).
   return (
     <Card className="flex h-full flex-1 flex-col gap-6 p-6">
       <Text variant="title-lg" emphasis className="text-green-900">

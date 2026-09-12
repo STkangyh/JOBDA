@@ -108,8 +108,7 @@ const FIELD_INPUT_CLASS =
 // 부품 태그는 탭이 아니라 정적 표시(첫 번째만 강조)지만, 그 아래 필드 구성 자체는 초안 작성
 // 화면(DraftPartsCard)과 완전히 동일 — 소재/컬러(+첨부)/마감/사이즈(4분할)/제작방식. 카드는
 // 제작 방식 필드 바로 다음에 끝나며(pb-40px) 그 외 자유 입력 필드는 없다. 제출 버튼은 이 카드
-// 안이 아니라 Figma에서 업무노트 카드 바로 아래(오른쪽 컬럼)에 있어서 FinalSubmitButton으로
-// 분리했다.
+// 안이 아니라 별도(FinalSubmitButton)로 분리했다 — 배치는 아래 Workspace() 참고.
 function FinalSpecCard() {
   const final = useSession((s) => s.final)
   const updateFinal = useSession((s) => s.updateFinal)
@@ -255,7 +254,7 @@ function FinalSubmitButton() {
   return (
     <Button
       variant="primary"
-      className="h-[72px] w-full shrink-0 !rounded-xl !text-2xl"
+      className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
       disabled={(!finalApproved && requiredMissing) || isSubmitting}
       onClick={handleClick}
     >
@@ -266,8 +265,8 @@ function FinalSubmitButton() {
 
 // Figma 823:53712~823:54461(Desktop-123~128) — 초안 작성은 부품 탭 6개가 실제 탭이었다. 탭을
 // 누르면 그 부품의 소재/컬러/마감/사이즈/제작방식/선택근거가 바뀌어 보인다(draftParts[i]).
-// "초안 제출" 버튼은 이 카드 안이 아니라 Figma에서 업무노트 카드 바로 아래(오른쪽 컬럼)에
-// 있어서 DraftSubmitButton으로 분리했다.
+// "초안 제출" 버튼은 이 카드 안이 아니라 별도(DraftSubmitButton)로 분리했다 — 배치는 아래
+// Workspace() 참고.
 function DraftPartsCard() {
   const draftParts = useSession((s) => s.draftParts)
   const updateDraftPart = useSession((s) => s.updateDraftPart)
@@ -458,7 +457,7 @@ function DraftSubmitButton() {
   return (
     <Button
       variant="primary"
-      className="h-[72px] w-full shrink-0 !rounded-xl !text-2xl"
+      className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
       disabled={requiredMissing || isSubmitting}
       onClick={handleSubmit}
     >
@@ -475,7 +474,7 @@ export function Workspace() {
   const remaining = feedbackSessionsRemaining(currentStage, editingFinal)
 
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
+    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
       {/* Figma "Roleplay" 사이드바 아이템(823:62680, home_repair_service 글리프)이 이 라운드
           화면에서 눌림 상태 — 우리 Sidebar의 'work' 슬롯과 같은 아이콘(HomeRepairServiceIcon). */}
       <Sidebar active="work" topItems={['apps', 'work', 'history']} className="shrink-0" />
@@ -490,18 +489,24 @@ export function Workspace() {
             <div className="flex flex-col gap-[18px]">
               <DesignRecapCard editingFinal={editingFinal} remaining={remaining} />
               {editingFinal ? <FinalSpecCard /> : <DraftPartsCard />}
-            </div>
-
-            <div className="flex flex-col gap-[18px]">
-              <WorkNotesCard
-                groups={[
-                  { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-                  { label: '제조 제약', tags: NOTE_TAGS.constraints },
-                  { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
-                ]}
-              />
+              {/* 메신저/업무노트가 h-full로 그리드 행 높이만큼 늘어나는 것과 맞춰(다른 세션2
+                  화면들과 동일한 패턴), 카드들은 원래 크기 그대로 두고 이 빈 칸이 남는 세로
+                  공간을 흡수해서 제출 버튼을 항상 칸 맨 아래로 붙인다. 예전에는 이 버튼을
+                  업무노트 카드와 같은 칸에 두고 업무노트의 flex-1로 공간을 나눴는데, 그러면
+                  업무노트 카드 자체가 메신저보다 버튼 높이만큼 짧아져 버튼이 위로 올라와
+                  업무노트 영역을 침범하는 것처럼 보였다 — 업무노트는 항상 자기 칸에 혼자 있어야
+                  h-full로 메신저와 정확히 같은 높이가 된다. */}
+              <div className="flex-1" />
               {editingFinal ? <FinalSubmitButton /> : <DraftSubmitButton />}
             </div>
+
+            <WorkNotesCard
+              groups={[
+                { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
+                { label: '제조 제약', tags: NOTE_TAGS.constraints },
+                { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
+              ]}
+            />
           </div>
         </div>
       </div>
