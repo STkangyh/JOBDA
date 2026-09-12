@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Sidebar, type SidebarItem } from '../components/Sidebar'
-import { Indicator } from '../components/Indicator'
+import { IndicatorHeader } from '../components/IndicatorHeader'
 import { Card } from '../components/Card'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
-import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../components/icons'
+import { WarningIcon } from '../components/icons'
 import { useSession, feedbackSessionsRemaining } from '../store/session'
 import type { VendorOption } from '../types'
 
@@ -191,135 +191,128 @@ export function VendorCompare() {
       <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
-          <div className="hidden lg:block" />
-          <Indicator current="피드백 수정" />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
-            </div>
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <ProfileIcon className="size-5" />
-            </div>
-          </div>
+        <div className="flex flex-col gap-4">
+          <IndicatorHeader current="피드백 수정" gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" />
 
-          <Messenger defaultActive="engineering" intro={{ persona: 'senior', text: SENIOR_VENDOR_INTRO }} />
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
+            <Messenger defaultActive="engineering" intro={{ persona: 'senior', text: SENIOR_VENDOR_INTRO }} />
 
-          <div className="flex flex-col gap-6">
-            {phase === 'edit' ? (
-              <>
-                <Card className="flex flex-col gap-3 p-6">
-                  <Text variant="title-lg" emphasis className="text-green-900">
-                    외주 업체 탐색
-                  </Text>
-                  <Text variant="body-lg" className="text-neutral-700">
-                    필요한 업체를 찾고 아래 항목에 맞게 리스트에 정리하세요.
-                  </Text>
-                  <Text variant="body-sm" className="text-neutral-400">
-                    아래 업체 정보 참고자료를 확인하고, 그 아래 리스트에 직접 정리하세요.
-                  </Text>
-                </Card>
-
-                <Card className="flex flex-col gap-6 p-6">
-                  <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-6">
+              {phase === 'edit' ? (
+                <>
+                  <Card className="flex flex-col gap-3 p-6">
                     <Text variant="title-lg" emphasis className="text-green-900">
-                      업체 정보 참고자료
+                      외주 업체 탐색
+                    </Text>
+                    <Text variant="body-lg" className="text-neutral-700">
+                      필요한 업체를 찾고 아래 항목에 맞게 리스트에 정리하세요.
                     </Text>
                     <Text variant="body-sm" className="text-neutral-400">
-                      실제 후보 업체 4곳의 상세 정보입니다. 이 정보를 바탕으로 아래 리스트를 정리하세요.
+                      아래 업체 정보 참고자료를 확인하고, 그 아래 리스트에 직접 정리하세요.
                     </Text>
-                  </div>
-                  <ReferenceVendorTable />
-                </Card>
+                  </Card>
 
-                <Card className="flex flex-col gap-6 p-6">
-                  <Text variant="title-lg" emphasis className="text-green-900">
-                    외주 업체 리스트
-                  </Text>
-                  <VendorTable editable vendors={vendors} onChange={updateVendor} />
-                </Card>
-
-                {/* 메신저/업무노트가 h-full로 그리드 행 높이만큼 늘어나는 것과 맞춰, 카드들은
-                    원래 크기 그대로 두고 이 빈 칸이 남는 세로 공간을 흡수해서 제출 버튼을
-                    항상 칸 맨 아래로 붙인다(카드 억지로 늘리는 것보다 자연스러움). */}
-                <div className="flex-1" />
-
-                <Button
-                  variant="primary"
-                  className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-                  disabled={!complete}
-                  onClick={() => setPhase('confirm')}
-                >
-                  비교 결과 확인하기
-                </Button>
-              </>
-            ) : (
-              <>
-                <Card className="flex flex-col gap-6 p-6">
-                  <div className="flex items-center justify-between">
-                    <Text variant="title-lg" emphasis className="text-green-900">
-                      외주 업체 선정
-                    </Text>
-                    <button
-                      type="button"
-                      onClick={() => setPhase('edit')}
-                      className="text-body-sm text-neutral-500 underline hover:text-neutral-700"
-                    >
-                      목록 다시 수정하기
-                    </button>
-                  </div>
-                  <Text variant="body-lg" className="text-neutral-700">
-                    가장 적합한 조건의 업체가 무엇인지 고민하고 구매팀에게 제안하세요.
-                  </Text>
-
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-end justify-between">
-                      <Text variant="title-md" emphasis className="text-green-900">
-                        3차 피드백
+                  <Card className="flex flex-col gap-6 p-6">
+                    <div className="flex flex-col gap-1">
+                      <Text variant="title-lg" emphasis className="text-green-900">
+                        업체 정보 참고자료
                       </Text>
-                      <div className="flex items-end gap-1">
-                        <WarningIcon className="size-5 shrink-0 text-error-200" />
-                        <Text variant="body-sm" className="text-neutral-400">
-                          가능 피드백 세션 {remaining}회 남음
+                      <Text variant="body-sm" className="text-neutral-400">
+                        실제 후보 업체 4곳의 상세 정보입니다. 이 정보를 바탕으로 아래 리스트를 정리하세요.
+                      </Text>
+                    </div>
+                    <ReferenceVendorTable />
+                  </Card>
+
+                  <Card className="flex flex-col gap-6 p-6">
+                    <Text variant="title-lg" emphasis className="text-green-900">
+                      외주 업체 리스트
+                    </Text>
+                    <VendorTable editable vendors={vendors} onChange={updateVendor} />
+                  </Card>
+
+                  {/* 메신저/업무노트가 h-full로 그리드 행 높이만큼 늘어나는 것과 맞춰, 카드들은
+                      원래 크기 그대로 두고 이 빈 칸이 남는 세로 공간을 흡수해서 제출 버튼을
+                      항상 칸 맨 아래로 붙인다(카드 억지로 늘리는 것보다 자연스러움). */}
+                  <div className="flex-1" />
+
+                  <Button
+                    variant="primary"
+                    className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
+                    disabled={!complete}
+                    onClick={() => setPhase('confirm')}
+                  >
+                    비교 결과 확인하기
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Card className="flex flex-col gap-6 p-6">
+                    <div className="flex items-center justify-between">
+                      <Text variant="title-lg" emphasis className="text-green-900">
+                        외주 업체 선정
+                      </Text>
+                      <button
+                        type="button"
+                        onClick={() => setPhase('edit')}
+                        className="text-body-sm text-neutral-500 underline hover:text-neutral-700"
+                      >
+                        목록 다시 수정하기
+                      </button>
+                    </div>
+                    <Text variant="body-lg" className="text-neutral-700">
+                      가장 적합한 조건의 업체가 무엇인지 고민하고 구매팀에게 제안하세요.
+                    </Text>
+
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-end justify-between">
+                        <Text variant="title-md" emphasis className="text-green-900">
+                          3차 피드백
+                        </Text>
+                        <div className="flex items-end gap-1">
+                          <WarningIcon className="size-5 shrink-0 text-error-200" />
+                          <Text variant="body-sm" className="text-neutral-400">
+                            가능 피드백 세션 {remaining}회 남음
+                          </Text>
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-green-200 px-4 py-4">
+                        <Text variant="body-md" className="text-neutral-700">
+                          {PURCHASING_FEEDBACK}
                         </Text>
                       </div>
                     </div>
-                    <div className="rounded-md bg-green-200 px-4 py-4">
-                      <Text variant="body-md" className="text-neutral-700">
-                        {PURCHASING_FEEDBACK}
-                      </Text>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
 
-                <Card className="flex flex-col gap-6 p-6">
-                  <Text variant="title-lg" emphasis className="text-green-900">
-                    외주 업체 리스트
-                  </Text>
-                  <VendorTable editable={false} vendors={vendors} onChange={updateVendor} />
-                </Card>
+                  <Card className="flex flex-col gap-6 p-6">
+                    <Text variant="title-lg" emphasis className="text-green-900">
+                      외주 업체 리스트
+                    </Text>
+                    <VendorTable editable={false} vendors={vendors} onChange={updateVendor} />
+                  </Card>
 
-                <div className="flex-1" />
+                  <div className="flex-1" />
 
-                <Button
-                  variant="primary"
-                  className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-                  disabled={isSubmitting}
-                  onClick={handleSubmit}
-                >
-                  {isSubmitting ? '로딩중' : '업체 비교 자료 제출'}
-                </Button>
-              </>
-            )}
+                  <Button
+                    variant="primary"
+                    className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
+                    disabled={isSubmitting}
+                    onClick={handleSubmit}
+                  >
+                    {isSubmitting ? '로딩중' : '업체 비교 자료 제출'}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            <WorkNotesCard
+              groups={[
+                { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
+                { label: '제조 제약', tags: NOTE_TAGS.constraints },
+                { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
+              ]}
+            />
           </div>
-
-          <WorkNotesCard
-            groups={[
-              { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-              { label: '제조 제약', tags: NOTE_TAGS.constraints },
-              { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
-            ]}
-          />
         </div>
       </div>
     </div>

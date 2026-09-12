@@ -4,11 +4,11 @@ import avatarLipro from '../assets/illustrations/avatar-lipro.png'
 import avatarParkChaeim from '../assets/illustrations/avatar-parkchaeim.png'
 import avatarKimBujang from '../assets/illustrations/avatar-kimbujang.png'
 import { Sidebar } from '../components/Sidebar'
-import { Indicator } from '../components/Indicator'
+import { IndicatorHeader } from '../components/IndicatorHeader'
 import { Card } from '../components/Card'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
-import { CheckBoxIcon, CloudSavedIcon, ProfileIcon } from '../components/icons'
+import { CheckBoxIcon } from '../components/icons'
 import { useSession } from '../store/session'
 
 const GOALS = ['설계팀과의 소통 오류가 없도록 시방서를 정확히 작성', '예산 범위 안에서 목재 파트 생산 방법 결정', '발주 일정 안에 외주업체 선정 완료']
@@ -60,18 +60,7 @@ export function Brief() {
       <Sidebar active="apps" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
-          <div className="hidden lg:block" />
-          <Indicator current="브리프" />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
-            </div>
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <ProfileIcon className="size-5" />
-            </div>
-          </div>
-        </div>
+        <IndicatorHeader current="브리프" />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr_300px]">
           <div className="flex flex-col gap-4">

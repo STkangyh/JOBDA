@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import conceptAImage from '../../assets/illustrations/session1-concept-a.png'
 import { Sidebar, type SidebarItem } from '../../components/Sidebar'
-import { Indicator } from '../../components/Indicator'
+import { Indicator, INDICATOR_STEPS_S1 } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
@@ -9,7 +9,6 @@ import { CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { useSession1 } from '../../store/session1'
 import { S1_DOCS, S1_DOC_CATEGORIES } from '../../data/session1Docs'
 
-const INDICATOR_STEPS_S1 = ['브리프', '자료탐색', '설계 수정1', '설계 수정2', '설계 확정', '자기 평가', '직무 리포트'] as const
 const HIGHLIGHTED_CATEGORY = '제품 디자인, 설계 자료'
 // Figma 744:17197 사이드바 실측: apps/work/history(검색 아이콘 없음), work가 active.
 const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']

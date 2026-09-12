@@ -1,14 +1,13 @@
 import { Sidebar, type SidebarItem } from '../../components/Sidebar'
-import { Indicator } from '../../components/Indicator'
+import { IndicatorHeader } from '../../components/IndicatorHeader'
+import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
 import { ProfileSpectrum } from '../../components/ProfileSpectrum'
 import { WorkProcessChain } from '../../components/WorkProcessChain'
-import { CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { SESSION1_STEP_INDEX } from '../../data/processSteps'
 import { useSession1 } from '../../store/session1'
 
-const INDICATOR_STEPS_S1 = ['브리프', '자료탐색', '설계 수정1', '설계 수정2', '설계 확정', '자기 평가', '직무 리포트'] as const
 const NEXT_EXPLORATIONS = ['동일 직무의 다른 업무', '유사 직무 비교', '필요한 기초 역량 체험', '현직자 인터뷰, 교육과정 추천']
 // Figma 744:17446 사이드바 실측: apps/search/work/history 4개, history가 active.
 const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'search', 'work', 'history']
@@ -45,18 +44,7 @@ export function Session1Report() {
       <div className="flex min-w-0 flex-1 flex-col gap-6 pb-6">
         {/* 브리프/자료함/라운드 화면과 같은 헤더 행 — AppHeader(배너+검색+프로필) 대신
             인디케이터+저장상태/프로필 아이콘으로 통일. */}
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
-          <div className="hidden lg:block" />
-          <Indicator current="직무 리포트" steps={INDICATOR_STEPS_S1} />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
-            </div>
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
-              <ProfileIcon className="size-5" />
-            </div>
-          </div>
-        </div>
+        <IndicatorHeader current="직무 리포트" steps={INDICATOR_STEPS_S1} iconBg="bg-neutral-800" />
 
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <Text variant="headline-lg" emphasis className="text-white">

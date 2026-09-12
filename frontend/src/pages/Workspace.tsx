@@ -1,11 +1,11 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { Sidebar } from '../components/Sidebar'
-import { Indicator } from '../components/Indicator'
+import { IndicatorHeader } from '../components/IndicatorHeader'
 import { Card } from '../components/Card'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
 import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
-import { WarningIcon, CloudSavedIcon, ProfileIcon, PlusIcon } from '../components/icons'
+import { WarningIcon, PlusIcon } from '../components/icons'
 import { useSession, feedbackSessionsRemaining } from '../store/session'
 import type { PartSpecSize } from '../types'
 import productImage from '../assets/illustrations/product-angle-1.png'
@@ -499,34 +499,27 @@ export function Workspace() {
       <Sidebar active="work" topItems={['apps', 'work', 'history']} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
-          <div className="hidden lg:block" />
-          <Indicator current="관계자 협업" />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
+        <div className="flex flex-col gap-4">
+          <IndicatorHeader current="관계자 협업" gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" />
+
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
+            <Messenger defaultActive="senior" intro={{ persona: 'senior', text: SENIOR_INTRO }} />
+
+            <div className="flex flex-col gap-[18px]">
+              <DesignRecapCard editingFinal={editingFinal} remaining={remaining} />
+              {editingFinal ? <FinalSpecCard /> : <DraftPartsCard />}
             </div>
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <ProfileIcon className="size-5" />
+
+            <div className="flex flex-col gap-[18px]">
+              <WorkNotesCard
+                groups={[
+                  { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
+                  { label: '제조 제약', tags: NOTE_TAGS.constraints },
+                  { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
+                ]}
+              />
+              {editingFinal ? <FinalSubmitButton /> : <DraftSubmitButton />}
             </div>
-          </div>
-
-          <Messenger defaultActive="senior" intro={{ persona: 'senior', text: SENIOR_INTRO }} />
-
-          <div className="flex flex-col gap-[18px]">
-            <DesignRecapCard editingFinal={editingFinal} remaining={remaining} />
-            {editingFinal ? <FinalSpecCard /> : <DraftPartsCard />}
-          </div>
-
-          <div className="flex flex-col gap-[18px]">
-            <WorkNotesCard
-              groups={[
-                { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-                { label: '제조 제약', tags: NOTE_TAGS.constraints },
-                { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
-              ]}
-            />
-            {editingFinal ? <FinalSubmitButton /> : <DraftSubmitButton />}
           </div>
         </div>
       </div>

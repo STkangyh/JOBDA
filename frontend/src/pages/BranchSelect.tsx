@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Sidebar, type SidebarItem } from '../components/Sidebar'
-import { Indicator } from '../components/Indicator'
+import { IndicatorHeader } from '../components/IndicatorHeader'
 import { Card } from '../components/Card'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
-import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../components/icons'
+import { WarningIcon } from '../components/icons'
 import { useSession } from '../store/session'
 import type { Branch } from '../types'
 
@@ -71,18 +71,7 @@ export function BranchSelect() {
       <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
-          <div className="hidden lg:block" />
-          <Indicator current="피드백 수정" />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
-            </div>
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <ProfileIcon className="size-5" />
-            </div>
-          </div>
-        </div>
+        <IndicatorHeader current="피드백 수정" />
 
         <div className="flex flex-col gap-6">
           <Card className="flex items-center justify-center p-6">

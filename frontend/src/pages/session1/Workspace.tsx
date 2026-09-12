@@ -3,8 +3,9 @@ import { Text } from '../../components/Text'
 import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
 import { Sidebar, type SidebarItem } from '../../components/Sidebar'
-import { Indicator } from '../../components/Indicator'
-import { WarningIcon, CloudSavedIcon, ProfileIcon } from '../../components/icons'
+import { IndicatorHeader } from '../../components/IndicatorHeader'
+import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
+import { WarningIcon } from '../../components/icons'
 import { S1_ROUNDS, S1_PERSONA_LABEL, useSession1, type S1Persona } from '../../store/session1'
 
 const PERSONAS: S1Persona[] = ['engineering', 'purchasing', 'senior']
@@ -293,7 +294,6 @@ function WorkNotes() {
   )
 }
 
-const INDICATOR_STEPS_S1 = ['브리프', '자료탐색', '설계 수정1', '설계 수정2', '설계 확정', '자기 평가', '직무 리포트'] as const
 // round index -> indicator label. "자료탐색"은 별도 화면(Materials)이 생겼으니 라운드 화면에서는
 // 안 씀 — 이전엔 자료탐색 화면이 없어서 라운드1을 임시로 그 라벨에 매핑해뒀던 실수였음.
 const ROUND_STEP_LABELS = ['설계 수정1', '설계 수정2', '설계 확정'] as const
@@ -306,23 +306,14 @@ export function Session1Workspace() {
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
       <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        {/* Figma(744:15857 등)와 동일하게 인디케이터는 가운데 컬럼 폭에만, 저장상태/프로필
-            아이콘은 우측 상단에 — 브리프에서 정리한 것과 같은 3열 헤더 행. */}
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
-          <div className="hidden lg:block" />
-          <Indicator current={step} steps={INDICATOR_STEPS_S1} />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
-            </div>
-            <div className="flex size-[50px] items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <ProfileIcon className="size-5" />
-            </div>
-          </div>
+        <div className="flex flex-col gap-4">
+          <IndicatorHeader current={step} steps={INDICATOR_STEPS_S1} gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" />
 
-          <Messenger />
-          <ReviewAndChoice />
-          <WorkNotes />
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
+            <Messenger />
+            <ReviewAndChoice />
+            <WorkNotes />
+          </div>
         </div>
       </div>
     </div>

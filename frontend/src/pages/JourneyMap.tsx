@@ -1,9 +1,8 @@
 import { Sidebar, type SidebarItem } from '../components/Sidebar'
-import { Indicator } from '../components/Indicator'
+import { IndicatorHeader } from '../components/IndicatorHeader'
 import { Card } from '../components/Card'
 import { Text } from '../components/Text'
 import { Button } from '../components/Button'
-import { CloudSavedIcon, ProfileIcon } from '../components/icons'
 import { PROCESS_STEPS, SESSION1_STEP_INDEX, SESSION2_STEP_INDEX } from '../data/processSteps'
 import { S1_RATING_SCALE, S1_ROUNDS, useSession1 } from '../store/session1'
 import { useSession } from '../store/session'
@@ -52,21 +51,7 @@ export function JourneyMap() {
       <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        {/* 이 화면은 아래 콘텐츠가 3컬럼 그리드가 아니라 단일 카드라 Figma 근거는 없지만,
-            인디케이터 폭은 다른 화면들과 시각적으로 일관돼야 해서 동일한 grid-cols-3
-            가운데 컬럼 폭으로 맞춘다(사용자 확인 — 118/121/145에서 폭이 들쭉날쭉했음). */}
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
-          <div className="hidden lg:block" />
-          <Indicator current="직무 리포트" />
-          <div className="hidden items-center justify-end gap-[18px] lg:flex">
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <CloudSavedIcon className="size-5" />
-            </div>
-            <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-              <ProfileIcon className="size-5" />
-            </div>
-          </div>
-        </div>
+        <IndicatorHeader current="직무 리포트" />
 
         <div className="flex flex-col gap-1">
           <Text variant="headline-lg" emphasis>

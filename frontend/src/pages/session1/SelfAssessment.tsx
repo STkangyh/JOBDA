@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { useSession } from '../store/session'
-import { Text } from '../components/Text'
-import { Card } from '../components/Card'
-import { Button } from '../components/Button'
-import { Indicator } from '../components/Indicator'
-import { RATING_SCALE, type RatingScale } from '../types'
+import { Text } from '../../components/Text'
+import { Card } from '../../components/Card'
+import { Button } from '../../components/Button'
+import { IndicatorHeader } from '../../components/IndicatorHeader'
+import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
+import { S1_RATING_SCALE, useSession1, type S1RatingScale } from '../../store/session1'
 
 type RatingField = 'interestScore' | 'expectationGap' | 'repeatWillingness'
 
@@ -14,22 +14,14 @@ const QUESTIONS: { field: RatingField; label: string }[] = [
   { field: 'repeatWillingness', label: '이 업무가 계속 수행하고 싶나요?' },
 ]
 
-function RatingRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: RatingScale
-  onChange: (v: RatingScale) => void
-}) {
+function RatingRow({ label, value, onChange }: { label: string; value: S1RatingScale; onChange: (v: S1RatingScale) => void }) {
   return (
     <div className="flex flex-col gap-3">
       <Text variant="title-md" emphasis className="text-green-900">
         {label}
       </Text>
       <div className="flex gap-3">
-        {RATING_SCALE.map((option) => {
+        {S1_RATING_SCALE.map((option) => {
           const selected = value === option
           return (
             <button
@@ -51,35 +43,16 @@ function RatingRow({
   )
 }
 
-// Figma "Desktop - 117"(823:52645, 파일 x6feHLgVMyg8sh8C2jVPE1) — 세션1 자기평가
-// (744:15050/Desktop-87)와 문항 텍스트가 동일해 같은 5점 척도 UI를 그대로 재사용한다.
-// 이 프레임은 브랜드 로고 + 인디케이터(자기 평가 활성)만 보이고, Brief/Report처럼 사이드바
-// 아이콘이나 저장/프로필 아이콘은 없다.
-// 다만 진행률 바 자체의 "크기"는 화면마다 달라 보이면 안 된다는 피드백 — 사이드바가 없다고
-// 인디케이터를 그냥 단독 배치하면 3컬럼 그리드의 가운데 칸(다른 화면들의 실제 폭)보다 훨씬
-// 넓어져서 화면마다 진행률 바 길이가 들쭉날쭉해 보였음. 사이드바 폭(83px)+간격(24px)만큼
-// 빈 공간을 그대로 예약해서, 다른 화면과 같은 3등분 그리드 계산이 나오게 맞춤(로고/아이콘
-// 없이 폭만 맞추는 용도).
-// (참고: 세션1의 SelfAssessment.tsx는 현재 이 인디케이터조차 없이 완전히 헤더가 빈 상태 —
-// Figma 기준으로는 세션1 쪽도 나중에 인디케이터를 추가하는 게 맞아 보임.)
-export function SelfAssessment() {
-  const value = useSession((s) => s.selfAssessment)
-  const setSelfAssessment = useSession((s) => s.setSelfAssessment)
-  const finishAssessment = useSession((s) => s.finishAssessment)
+export function Session1SelfAssessment() {
+  const value = useSession1((s) => s.selfAssessment)
+  const setSelfAssessment = useSession1((s) => s.setSelfAssessment)
+  const finishAssessment = useSession1((s) => s.finishAssessment)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState(false)
 
-  // finishAssessment는 실제 백엔드(/api/report)를 호출한다 — 이게 실패해도(네트워크 오류,
-  // 5xx 등) catch가 없으면 버튼만 조용히 "제출하기"로 돌아가고 왜 안 넘어갔는지 사용자는
-  // 알 방법이 없었다(실제로 이런 증상 신고가 들어왔었음). 실패 시 재시도할 수 있게 에러
-  // 문구를 보여준다.
   const submit = async () => {
     setSubmitting(true)
-    setError(false)
     try {
-      await finishAssessment()
-    } catch {
-      setError(true)
+      finishAssessment()
     } finally {
       setSubmitting(false)
     }
@@ -89,12 +62,8 @@ export function SelfAssessment() {
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
       <div className="hidden w-[83px] shrink-0 lg:block" aria-hidden />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-3">
-          <div className="hidden lg:block" />
-          <Indicator current="자기 평가" />
-          <div className="hidden lg:block" />
-        </div>
+      <div className="mx-auto flex min-w-0 max-w-3xl flex-1 flex-col gap-[18px]">
+        <IndicatorHeader current="자기 평가" steps={INDICATOR_STEPS_S1} icons={false} />
 
         <Card className="flex flex-col gap-[48px] p-6">
           <div className="flex flex-col gap-3">
@@ -132,12 +101,6 @@ export function SelfAssessment() {
             </div>
           </div>
         </Card>
-
-        {error && (
-          <Text variant="body-md" className="self-end text-error-200">
-            리포트를 생성하지 못했어요. 잠시 후 다시 시도해주세요.
-          </Text>
-        )}
 
         <Button
           variant="primary"

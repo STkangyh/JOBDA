@@ -12,6 +12,9 @@ export const INDICATOR_STEPS = [
 ] as const
 export type IndicatorStep = (typeof INDICATOR_STEPS)[number]
 
+// 세션1 전용 스텝 라벨 — 예전엔 session1/*.tsx 5개 파일에 각각 동일한 배열이 복붙돼 있었음.
+export const INDICATOR_STEPS_S1 = ['브리프', '자료탐색', '설계 수정1', '설계 수정2', '설계 확정', '자기 평가', '직무 리포트'] as const
+
 interface IndicatorProps {
   current: string
   /** 세션마다 스텝 라벨이 달라서(예: 세션1은 "설계 수정1/2") 커스텀 스텝 배열을 받을 수 있게 함. */
