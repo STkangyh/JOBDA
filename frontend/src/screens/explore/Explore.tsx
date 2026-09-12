@@ -33,7 +33,7 @@ const NEW_ARRIVAL: JobPreview[] = [
   { id: 'software-engineer', title: '소프트웨어 엔지니어', image: softwareEngineerImg },
   { id: 'product-designer', title: '생활 가전 제품 디자이너', image: productDesignerImg, real: true },
   { id: 'academy-instructor', title: '학원 강사', image: academyInstructorImg },
-  { id: 'security-officer', title: '보안 담당자', image: securityOfficerImg },
+  { id: 'career-counselor', title: '직업 상담사', image: careerCounselorImg },
   { id: 'b2b-manager', title: 'B2B 솔루션 매니저', image: b2bManagerImg },
 ]
 
