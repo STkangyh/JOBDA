@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { useSession } from '../store/session'
-import { Text } from '../components/Text'
-import { Card } from '../components/Card'
-import { Button } from '../components/Button'
-import { IndicatorHeader } from '../components/IndicatorHeader'
-import { RATING_SCALE, type RatingScale } from '../types'
+import { useSession } from '../../store/session'
+import { Text } from '../../components/Text'
+import { Card } from '../../components/Card'
+import { Button } from '../../components/Button'
+import { IndicatorHeader } from '../../components/IndicatorHeader'
+import { RATING_SCALE, type RatingScale } from '../../types'
 
 type RatingField = 'interestScore' | 'expectationGap' | 'repeatWillingness'
 

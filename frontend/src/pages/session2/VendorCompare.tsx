@@ -1,19 +1,19 @@
 import { useState } from 'react'
-import { Sidebar, type SidebarItem } from '../components/Sidebar'
-import { IndicatorHeader } from '../components/IndicatorHeader'
-import { Card } from '../components/Card'
-import { Text } from '../components/Text'
-import { Button } from '../components/Button'
-import { Messenger, WorkNotesCard } from '../components/NegotiationPanels'
-import { WarningIcon } from '../components/icons'
-import { useSession, feedbackSessionsRemaining } from '../store/session'
-import type { VendorOption } from '../types'
+import { Sidebar, type SidebarItem } from '../../components/Sidebar'
+import { IndicatorHeader } from '../../components/IndicatorHeader'
+import { Card } from '../../components/Card'
+import { Text } from '../../components/Text'
+import { Button } from '../../components/Button'
+import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
+import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
+import { useSession, feedbackSessionsRemaining } from '../../store/session'
+import { SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
+import type { VendorOption } from '../../types'
 
 const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 
 const NOTE_TAGS = {
-  userNeeds: ['저소음', '공간 효율', '따뜻함', '관리 용이', '인테리어 오브제 느낌'],
-  constraints: ['파팅라인 단차 0.5mm 이격할 것', '전면부 하우징은 하나로', '에어케어 제품과 내부 설계 공유'],
+  ...SESSION2_NOTE_TAGS,
   cmf: ['화이트 오크 재질의 흡기구', '목재 접합', '한도 견본 판정표'],
 }
 
@@ -269,12 +269,7 @@ export function VendorCompare() {
                         <Text variant="title-md" emphasis className="text-green-900">
                           3차 피드백
                         </Text>
-                        <div className="flex items-end gap-1">
-                          <WarningIcon className="size-5 shrink-0 text-error-200" />
-                          <Text variant="body-sm" className="text-neutral-400">
-                            가능 피드백 세션 {remaining}회 남음
-                          </Text>
-                        </div>
+                        <FeedbackRemainingBadge remaining={remaining} />
                       </div>
                       <div className="rounded-md bg-green-200 px-4 py-4">
                         <Text variant="body-md" className="text-neutral-700">

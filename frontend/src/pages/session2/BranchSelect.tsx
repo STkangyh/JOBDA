@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Sidebar, type SidebarItem } from '../components/Sidebar'
-import { IndicatorHeader } from '../components/IndicatorHeader'
-import { Card } from '../components/Card'
-import { Text } from '../components/Text'
-import { Button } from '../components/Button'
-import { WarningIcon } from '../components/icons'
-import { useSession } from '../store/session'
-import type { Branch } from '../types'
+import { Sidebar, type SidebarItem } from '../../components/Sidebar'
+import { IndicatorHeader } from '../../components/IndicatorHeader'
+import { Card } from '../../components/Card'
+import { Text } from '../../components/Text'
+import { Button } from '../../components/Button'
+import { WarningIcon } from '../../components/icons'
+import { useSession } from '../../store/session'
+import type { Branch } from '../../types'
 
 const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 

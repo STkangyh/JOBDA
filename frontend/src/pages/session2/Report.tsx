@@ -1,11 +1,11 @@
-import { useSession } from '../store/session'
-import { Card } from '../components/Card'
-import { Text } from '../components/Text'
-import { Button } from '../components/Button'
-import { IndicatorHeader } from '../components/IndicatorHeader'
-import { DotMatrix } from '../components/DotMatrix'
-import { RATING_SCALE } from '../types'
-import brandLogo from '../assets/brand-logo.png'
+import { useSession } from '../../store/session'
+import { Card } from '../../components/Card'
+import { Text } from '../../components/Text'
+import { Button } from '../../components/Button'
+import { IndicatorHeader } from '../../components/IndicatorHeader'
+import { DotMatrix } from '../../components/DotMatrix'
+import { RATING_SCALE } from '../../types'
+import brandLogo from '../../assets/brand-logo.png'
 
 // Figma "Desktop - 121"(823:52946, 파일 x6feHLgVMyg8sh8C2jVPE1) 전면 재실측 — 예전 구현은
 // 실제로는 이 프레임이 아니라 종합 리포트(ComprehensiveReport.tsx, Desktop-101)의 다크 테마를
