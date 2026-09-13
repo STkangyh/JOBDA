@@ -114,7 +114,7 @@ function Messenger() {
   )
 }
 
-function ReviewAndChoice() {
+function ReviewAndChoice({ isSubmitting, setIsSubmitting }: { isSubmitting: boolean; setIsSubmitting: (v: boolean) => void }) {
   const currentRoundIndex = useSession1((s) => s.currentRoundIndex)
   const roundAnswers = useSession1((s) => s.roundAnswers)
   const selectChoice = useSession1((s) => s.selectChoice)
@@ -132,7 +132,9 @@ function ReviewAndChoice() {
 
   // Figma 744:16874 등(라운드 전환 로딩 상태) — 제출 직후 다음 라운드 내용이 채워지기 전까지
   // 짧게 로딩 표시. 실제 응답 지연은 없지만(클라이언트 계산이라 즉시 끝남) 그 순간을 재현.
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  // isSubmitting은 Session1Workspace()로 끌어올려져 헤더의 로딩 스피너(IndicatorHeader loading)와
+  // 공유된다 — 예전엔 여기서 WarningIcon에 animate-spin을 얹어 대신 썼는데, 실제 스피너 디자인
+  // (Figma 823:55379 "Component 220")이 따로 있어서 그쪽으로 옮기고 이 자리는 원래 아이콘으로 되돌림.
   const handleSubmit = () => {
     setIsSubmitting(true)
     setTimeout(() => {
@@ -168,7 +170,7 @@ function ReviewAndChoice() {
           </Text>
           {!isLastRound && (
             <div className="flex items-end gap-1">
-              <WarningIcon className={`size-5 shrink-0 text-error-200 ${isSubmitting ? 'animate-spin' : ''}`} />
+              <WarningIcon className="size-5 shrink-0 text-error-200" />
               <Text variant="body-sm" className="text-neutral-400">
                 가능 피드백 세션 {remaining}회 남음
               </Text>
@@ -301,17 +303,23 @@ const ROUND_STEP_LABELS = ['설계 수정1', '설계 수정2', '설계 확정'] 
 export function Session1Workspace() {
   const currentRoundIndex = useSession1((s) => s.currentRoundIndex)
   const step = ROUND_STEP_LABELS[currentRoundIndex]
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
       <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <div className="flex flex-col gap-4">
-          <IndicatorHeader current={step} steps={INDICATOR_STEPS_S1} gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" />
+          <IndicatorHeader
+            current={step}
+            steps={INDICATOR_STEPS_S1}
+            gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]"
+            loading={isSubmitting}
+          />
 
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
             <Messenger />
-            <ReviewAndChoice />
+            <ReviewAndChoice isSubmitting={isSubmitting} setIsSubmitting={setIsSubmitting} />
             <WorkNotes />
           </div>
         </div>

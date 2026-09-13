@@ -90,7 +90,7 @@ export function SelfAssessment() {
       <div className="hidden w-[83px] shrink-0 lg:block" aria-hidden />
 
       <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
-        <IndicatorHeader current="자기 평가" icons={false} />
+        <IndicatorHeader current="자기 평가" icons={false} loading={submitting} />
 
         <Card className="flex flex-col gap-[48px] p-6">
           <div className="flex flex-col gap-3">

@@ -229,19 +229,19 @@ function FinalSpecCard() {
 // 누른다고 바로 설계팀·구매팀에 인계되는 게 아니라, 먼저 선배 디자이너의 재승인(메신저 메시지)을
 // 받고 나서 버튼이 "시방서 인계"로 바뀌어야 그때 실제로 다음 단계(final_feedback)로 넘어간다.
 // currentStage는 이 두 단계 동안 계속 'workspace'라 finalApproved 플래그로 로컬 전환한다.
-function FinalSubmitButton() {
+function FinalSubmitButton({ isSubmitting, setIsSubmitting }: { isSubmitting: boolean; setIsSubmitting: (v: boolean) => void }) {
   const final = useSession((s) => s.final)
   const finalApproved = useSession((s) => s.finalApproved)
   const approveFinal = useSession((s) => s.approveFinal)
   const submitFinal = useSession((s) => s.submitFinal)
-  // Figma 823:54925의 "로딩 중..." 버튼 상태 — session1/Workspace.tsx ReviewAndChoice와 동일하게
-  // 실제 지연은 없지만(클라이언트 계산) 라운드 전환감을 주기 위해 1200ms 붙잡아둔다.
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // 1차 피드백이 지적한 건 한도 견본 판정표 누락 하나뿐이라, 그것만 첨부하면 넘어갈 수 있어야
   // 한다 — 나머지 필드는 계속 편집 가능하게 두되 CTA를 막지는 않는다(사용자 요청).
   const requiredMissing = !final.limitSampleAttached
 
+  // Figma 823:54925의 "로딩 중..." 버튼 상태 — session1/Workspace.tsx ReviewAndChoice와 동일하게
+  // 실제 지연은 없지만(클라이언트 계산) 라운드 전환감을 주기 위해 1200ms 붙잡아둔다. isSubmitting은
+  // Workspace()로 끌어올려져 헤더의 로딩 스피너(IndicatorHeader loading)와도 공유된다.
   const handleClick = () => {
     setIsSubmitting(true)
     setTimeout(() => {
@@ -437,10 +437,9 @@ function DraftPartsCard() {
   )
 }
 
-function DraftSubmitButton() {
+function DraftSubmitButton({ isSubmitting, setIsSubmitting }: { isSubmitting: boolean; setIsSubmitting: (v: boolean) => void }) {
   const draftParts = useSession((s) => s.draftParts)
   const submitDraft = useSession((s) => s.submitDraft)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const requiredMissing = draftParts.some(
     (p) => !p.material.trim() || !p.color.trim() || !p.finish.trim() || !p.method.trim(),
@@ -472,6 +471,9 @@ export function Workspace() {
   const currentStage = useSession((s) => s.currentStage)
   const editingFinal = draftSubmitted && !finalSubmitted
   const remaining = feedbackSessionsRemaining(currentStage, editingFinal)
+  // 초안/수정안 제출 버튼의 로딩 상태 — 버튼 자체(FinalSubmitButton/DraftSubmitButton)뿐 아니라
+  // 헤더의 로딩 스피너(IndicatorHeader loading)도 같이 반응해야 해서 여기(부모)로 끌어올렸다.
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
@@ -481,7 +483,11 @@ export function Workspace() {
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <div className="flex flex-col gap-4">
-          <IndicatorHeader current="관계자 협업" gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" />
+          <IndicatorHeader
+            current="관계자 협업"
+            gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]"
+            loading={isSubmitting}
+          />
 
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
             <Messenger defaultActive="senior" intro={{ persona: 'senior', text: SENIOR_INTRO }} />
@@ -497,7 +503,11 @@ export function Workspace() {
                   업무노트 영역을 침범하는 것처럼 보였다 — 업무노트는 항상 자기 칸에 혼자 있어야
                   h-full로 메신저와 정확히 같은 높이가 된다. */}
               <div className="flex-1" />
-              {editingFinal ? <FinalSubmitButton /> : <DraftSubmitButton />}
+              {editingFinal ? (
+                <FinalSubmitButton isSubmitting={isSubmitting} setIsSubmitting={setIsSubmitting} />
+              ) : (
+                <DraftSubmitButton isSubmitting={isSubmitting} setIsSubmitting={setIsSubmitting} />
+              )}
             </div>
 
             <WorkNotesCard

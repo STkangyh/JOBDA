@@ -71,7 +71,7 @@ export function BranchSelect() {
       <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <IndicatorHeader current="피드백 수정" />
+        <IndicatorHeader current="피드백 수정" loading={isSubmitting} />
 
         <div className="flex flex-col gap-6">
           <Card className="flex items-center justify-center p-6">

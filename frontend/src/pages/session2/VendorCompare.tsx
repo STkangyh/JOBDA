@@ -192,7 +192,7 @@ export function VendorCompare() {
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <div className="flex flex-col gap-4">
-          <IndicatorHeader current="피드백 수정" gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" />
+          <IndicatorHeader current="피드백 수정" gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" loading={isSubmitting} />
 
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
             <Messenger defaultActive="engineering" intro={{ persona: 'senior', text: SENIOR_VENDOR_INTRO }} />
