@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Text } from '../../components/Text'
 import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
+import { ChoiceCard } from '../../components/ChoiceCard'
 import { Sidebar, type SidebarItem } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
@@ -187,37 +189,27 @@ function ReviewAndChoice({ isSubmitting, setIsSubmitting }: { isSubmitting: bool
           수정 방향 선택
         </Text>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {round.choices.map((choice, i) => {
-            const selected = answer.selectedChoice === i
-            return (
-              <button
-                key={choice.label}
-                onClick={() => selectChoice(i as 0 | 1)}
-                className={`flex flex-col items-start gap-1 rounded-md p-5 text-left transition-colors ${
-                  selected
-                    ? 'bg-green-400 text-neutral-900'
-                    : 'border border-neutral-200 bg-white hover:border-green-400 hover:bg-green-50'
-                }`}
-              >
-                <Text variant="caption-lg" className={selected ? 'text-green-800' : 'text-neutral-400'}>
-                  {String(i + 1).padStart(2, '0')}
+          {round.choices.map((choice, i) => (
+            <ChoiceCard
+              key={choice.label}
+              index={i}
+              title={choice.label}
+              selected={answer.selectedChoice === i}
+              onClick={() => selectChoice(i as 0 | 1)}
+              numberVariant="caption-lg"
+            >
+              {choice.sublabel && (
+                <Text variant="body-md" className="text-neutral-600">
+                  {choice.sublabel}
                 </Text>
-                <Text variant="title-lg" emphasis>
-                  {choice.label}
+              )}
+              {choice.optionalNote && (
+                <Text variant="body-sm" className="text-neutral-500">
+                  {choice.optionalNote}
                 </Text>
-                {choice.sublabel && (
-                  <Text variant="body-md" className="text-neutral-600">
-                    {choice.sublabel}
-                  </Text>
-                )}
-                {choice.optionalNote && (
-                  <Text variant="body-sm" className="text-neutral-500">
-                    {choice.optionalNote}
-                  </Text>
-                )}
-              </button>
-            )
-          })}
+              )}
+            </ChoiceCard>
+          ))}
         </div>
       </div>
 
@@ -234,14 +226,9 @@ function ReviewAndChoice({ isSubmitting, setIsSubmitting }: { isSubmitting: bool
         />
       </div>
 
-      <Button
-        variant="primary"
-        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-        disabled={!canSubmit || isSubmitting}
-        onClick={handleSubmit}
-      >
+      <PrimaryCTAButton disabled={!canSubmit || isSubmitting} onClick={handleSubmit}>
         {isSubmitting ? '로딩중' : round.roundNumber === S1_ROUNDS.length ? '최종 설계안 제출' : '수정안 제출'}
-      </Button>
+      </PrimaryCTAButton>
     </Card>
   )
 }

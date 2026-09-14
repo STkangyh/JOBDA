@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Text } from '../../components/Text'
 import { Card } from '../../components/Card'
 import { Checkbox } from '../../components/Checkbox'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { S1_ROUNDS, useSession1 } from '../../store/session1'
 
 // Figma의 "최종 제출물 점검" 화면(652:4376)은 세션2 용어(시방서/한도견본)가 잘못 섞인 미완성
@@ -69,14 +69,9 @@ export function Session1FinalCheck() {
         ))}
       </Card>
 
-      <Button
-        variant="primary"
-        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-        disabled={!allChecked}
-        onClick={confirmFinalCheck}
-      >
+      <PrimaryCTAButton disabled={!allChecked} onClick={confirmFinalCheck}>
         최종 결과물 제출
-      </Button>
+      </PrimaryCTAButton>
     </div>
   )
 }

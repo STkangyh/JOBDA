@@ -3,7 +3,8 @@ import { Sidebar } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
+import { ChoiceCard } from '../../components/ChoiceCard'
 import { WarningIcon } from '../../components/icons'
 import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
@@ -164,37 +165,20 @@ export function FinalFeedback() {
                     수정 방향 선택
                   </Text>
                   <div className="grid grid-cols-1 gap-[9px] sm:grid-cols-3">
-                    {OPTIONS.map((o, i) => {
-                      const isSelected = selected === o.branch
-                      return (
-                        <button
-                          key={o.branch}
-                          onClick={() => setSelected(o.branch)}
-                          className={`flex flex-1 flex-col items-start gap-1 rounded-md p-5 text-left transition-colors ${
-                            isSelected
-                              ? 'bg-green-400 text-neutral-900'
-                              : 'border border-neutral-200 bg-white hover:border-green-400 hover:bg-green-50'
-                          }`}
-                        >
-                          <Text variant="body-lg" emphasis className={isSelected ? 'text-green-800' : 'text-neutral-400'}>
-                            {String(i + 1).padStart(2, '0')}
-                          </Text>
-                          <Text variant="title-lg" emphasis className="text-neutral-900">
-                            {o.title}
-                          </Text>
-                          <div className="flex flex-col gap-0.5">
-                            {o.bullets.map((b) => (
-                              <div key={b} className="flex items-center gap-2">
-                                <span className="size-1 shrink-0 rounded-full bg-neutral-400" />
-                                <Text variant="body-md" className="text-neutral-600">
-                                  {b}
-                                </Text>
-                              </div>
-                            ))}
-                          </div>
-                        </button>
-                      )
-                    })}
+                    {OPTIONS.map((o, i) => (
+                      <ChoiceCard key={o.branch} index={i} title={o.title} selected={selected === o.branch} onClick={() => setSelected(o.branch)}>
+                        <div className="flex flex-col gap-0.5">
+                          {o.bullets.map((b) => (
+                            <div key={b} className="flex items-center gap-2">
+                              <span className="size-1 shrink-0 rounded-full bg-neutral-400" />
+                              <Text variant="body-md" className="text-neutral-600">
+                                {b}
+                              </Text>
+                            </div>
+                          ))}
+                        </div>
+                      </ChoiceCard>
+                    ))}
                   </div>
                 </div>
 
@@ -222,14 +206,9 @@ export function FinalFeedback() {
                   두고 이 빈 칸이 남는 세로 공간을 흡수해서 버튼을 칸 맨 아래로 밀어낸다. */}
               <div className="flex-1" />
 
-              <Button
-                variant="primary"
-                className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-                disabled={!canSubmit || isSubmitting}
-                onClick={handleSubmit}
-              >
+              <PrimaryCTAButton disabled={!canSubmit || isSubmitting} onClick={handleSubmit}>
                 {isSubmitting ? '로딩중' : '선택 제출'}
-              </Button>
+              </PrimaryCTAButton>
             </div>
 
             <WorkNotesCard

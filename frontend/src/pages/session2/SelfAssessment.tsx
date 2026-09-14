@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { useSession } from '../../store/session'
 import { Text } from '../../components/Text'
 import { Card } from '../../components/Card'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
-import { RATING_SCALE, type RatingScale } from '../../types'
+import { RatingRow } from '../../components/RatingRow'
+import { RATING_SCALE } from '../../types'
 
 type RatingField = 'interestScore' | 'expectationGap' | 'repeatWillingness'
 
@@ -13,43 +14,6 @@ const QUESTIONS: { field: RatingField; label: string }[] = [
   { field: 'expectationGap', label: '수행 과정이 예상과 달랐나요?' },
   { field: 'repeatWillingness', label: '이 업무가 계속 수행하고 싶나요?' },
 ]
-
-function RatingRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: RatingScale
-  onChange: (v: RatingScale) => void
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <Text variant="title-md" emphasis className="text-green-900">
-        {label}
-      </Text>
-      <div className="flex gap-3">
-        {RATING_SCALE.map((option) => {
-          const selected = value === option
-          return (
-            <button
-              key={option}
-              type="button"
-              onClick={() => onChange(option)}
-              className={`h-[72px] flex-1 rounded-xl px-3 py-6 text-center text-title-md transition-colors ${
-                selected
-                  ? 'bg-green-300 font-semibold text-neutral-900'
-                  : 'border border-green-900 text-neutral-500 hover:bg-green-50'
-              }`}
-            >
-              {option}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
 
 // Figma "Desktop - 117"(823:52645, 파일 x6feHLgVMyg8sh8C2jVPE1) — 세션1 자기평가
 // (744:15050/Desktop-87)와 문항 텍스트가 동일해 같은 5점 척도 UI를 그대로 재사용한다.
@@ -109,6 +73,7 @@ export function SelfAssessment() {
                 label={q.label}
                 value={value[q.field]}
                 onChange={(v) => setSelfAssessment({ [q.field]: v })}
+                scale={RATING_SCALE}
               />
             ))}
 
@@ -135,14 +100,9 @@ export function SelfAssessment() {
           </Text>
         )}
 
-        <Button
-          variant="primary"
-          className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-          onClick={submit}
-          disabled={submitting}
-        >
+        <PrimaryCTAButton onClick={submit} disabled={submitting}>
           {submitting ? '리포트 생성 중...' : '제출하기'}
-        </Button>
+        </PrimaryCTAButton>
       </div>
     </div>
   )

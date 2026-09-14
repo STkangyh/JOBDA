@@ -3,7 +3,7 @@ import { Sidebar } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { PlusIcon } from '../../components/icons'
@@ -252,14 +252,9 @@ function FinalSubmitButton({ isSubmitting, setIsSubmitting }: { isSubmitting: bo
   }
 
   return (
-    <Button
-      variant="primary"
-      className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-      disabled={(!finalApproved && requiredMissing) || isSubmitting}
-      onClick={handleClick}
-    >
+    <PrimaryCTAButton disabled={(!finalApproved && requiredMissing) || isSubmitting} onClick={handleClick}>
       {isSubmitting ? '로딩 중...' : finalApproved ? '시방서 인계' : '수정안 제출'}
-    </Button>
+    </PrimaryCTAButton>
   )
 }
 
@@ -454,14 +449,9 @@ function DraftSubmitButton({ isSubmitting, setIsSubmitting }: { isSubmitting: bo
   }
 
   return (
-    <Button
-      variant="primary"
-      className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-      disabled={requiredMissing || isSubmitting}
-      onClick={handleSubmit}
-    >
+    <PrimaryCTAButton disabled={requiredMissing || isSubmitting} onClick={handleSubmit}>
       {isSubmitting ? '로딩 중...' : '초안 제출'}
-    </Button>
+    </PrimaryCTAButton>
   )
 }
 

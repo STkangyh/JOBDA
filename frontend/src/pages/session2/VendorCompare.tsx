@@ -3,7 +3,7 @@ import { Sidebar, type SidebarItem } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
@@ -162,14 +162,9 @@ export function VendorCompare() {
                       항상 칸 맨 아래로 붙인다(카드 억지로 늘리는 것보다 자연스러움). */}
                   <div className="flex-1" />
 
-                  <Button
-                    variant="primary"
-                    className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-                    disabled={!complete}
-                    onClick={() => setPhase('confirm')}
-                  >
+                  <PrimaryCTAButton disabled={!complete} onClick={() => setPhase('confirm')}>
                     비교 결과 확인하기
-                  </Button>
+                  </PrimaryCTAButton>
                 </>
               ) : (
                 <>
@@ -214,14 +209,9 @@ export function VendorCompare() {
 
                   <div className="flex-1" />
 
-                  <Button
-                    variant="primary"
-                    className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-                    disabled={isSubmitting}
-                    onClick={handleSubmit}
-                  >
+                  <PrimaryCTAButton disabled={isSubmitting} onClick={handleSubmit}>
                     {isSubmitting ? '로딩중' : '업체 비교 자료 제출'}
-                  </Button>
+                  </PrimaryCTAButton>
                 </>
               )}
             </div>

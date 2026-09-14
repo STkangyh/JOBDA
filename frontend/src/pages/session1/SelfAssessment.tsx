@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Text } from '../../components/Text'
 import { Card } from '../../components/Card'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
-import { S1_RATING_SCALE, useSession1, type S1RatingScale } from '../../store/session1'
+import { RatingRow } from '../../components/RatingRow'
+import { BrandLogoBox } from '../../components/BrandLogoBox'
+import { S1_RATING_SCALE, useSession1 } from '../../store/session1'
 
 type RatingField = 'interestScore' | 'expectationGap' | 'repeatWillingness'
 
@@ -13,35 +15,6 @@ const QUESTIONS: { field: RatingField; label: string }[] = [
   { field: 'expectationGap', label: '수행 과정이 예상과 달랐나요?' },
   { field: 'repeatWillingness', label: '이 업무가 계속 수행하고 싶나요?' },
 ]
-
-function RatingRow({ label, value, onChange }: { label: string; value: S1RatingScale; onChange: (v: S1RatingScale) => void }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <Text variant="title-md" emphasis className="text-green-900">
-        {label}
-      </Text>
-      <div className="flex gap-3">
-        {S1_RATING_SCALE.map((option) => {
-          const selected = value === option
-          return (
-            <button
-              key={option}
-              type="button"
-              onClick={() => onChange(option)}
-              className={`h-[72px] flex-1 rounded-xl px-3 py-6 text-center text-title-md transition-colors ${
-                selected
-                  ? 'bg-green-300 font-semibold text-neutral-900'
-                  : 'border border-green-900 text-neutral-500 hover:bg-green-50'
-              }`}
-            >
-              {option}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
 
 export function Session1SelfAssessment() {
   const value = useSession1((s) => s.selfAssessment)
@@ -60,7 +33,10 @@ export function Session1SelfAssessment() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
-      <div className="hidden w-[83px] shrink-0 lg:block" aria-hidden />
+      {/* Figma 1184:11046("image 237") 실측 — 다른 세션1 화면들처럼 Sidebar를 쓰는 대신, 이
+          화면만 (Report.tsx와 같은) 로고 박스 하나로 헤더 폭을 맞춘다. 예전엔 이 자리가 빈
+          플레이스홀더라 Hero 영역에 로고가 빠진 것처럼 보였음(QA 지적). */}
+      <BrandLogoBox />
 
       <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
         <IndicatorHeader current="자기 평가" steps={INDICATOR_STEPS_S1} icons={false} loading={submitting} />
@@ -83,6 +59,7 @@ export function Session1SelfAssessment() {
                   label={q.label}
                   value={value[q.field]}
                   onChange={(v) => setSelfAssessment({ [q.field]: v })}
+                  scale={S1_RATING_SCALE}
                 />
               ))}
 
@@ -103,14 +80,9 @@ export function Session1SelfAssessment() {
             </div>
           </Card>
 
-          <Button
-            variant="primary"
-            className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-            onClick={submit}
-            disabled={submitting}
-          >
+          <PrimaryCTAButton onClick={submit} disabled={submitting}>
             {submitting ? '리포트 생성 중...' : '제출하기'}
-          </Button>
+          </PrimaryCTAButton>
         </div>
       </div>
     </div>

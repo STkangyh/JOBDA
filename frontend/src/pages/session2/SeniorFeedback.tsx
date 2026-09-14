@@ -2,7 +2,7 @@ import { Sidebar } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
@@ -84,13 +84,7 @@ export function SeniorFeedback() {
                   두고 이 빈 칸이 남는 세로 공간을 흡수해서 버튼을 칸 맨 아래로 밀어낸다. */}
               <div className="flex-1" />
 
-              <Button
-                variant="primary"
-                className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-                onClick={() => goTo('workspace')}
-              >
-                시방서 수정하러 가기
-              </Button>
+              <PrimaryCTAButton onClick={() => goTo('workspace')}>시방서 수정하러 가기</PrimaryCTAButton>
             </div>
 
             <WorkNotesCard

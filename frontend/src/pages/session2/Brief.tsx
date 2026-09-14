@@ -8,7 +8,9 @@ import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
-import { CheckBoxIcon } from '../../components/icons'
+import { CheckItem } from '../../components/CheckItem'
+import { Tag } from '../../components/Tag'
+import { CollaboratorsCard } from '../../components/CollaboratorsCard'
 import { useSession } from '../../store/session'
 
 const GOALS = ['설계팀과의 소통 오류가 없도록 시방서를 정확히 작성', '예산 범위 안에서 목재 파트 생산 방법 결정', '발주 일정 안에 외주업체 선정 완료']
@@ -29,25 +31,6 @@ const COLLABORATORS = [
   { img: avatarParkChaeim, name: '박책임', team: '설계팀' },
   { img: avatarKimBujang, name: '김부장', team: '구매팀' },
 ]
-
-function CheckItem({ children }: { children: string }) {
-  return (
-    <div className="flex items-center gap-1">
-      <CheckBoxIcon className="size-4 shrink-0 text-green-500" />
-      <Text variant="body-lg" className="text-neutral-600">
-        {children}
-      </Text>
-    </div>
-  )
-}
-
-function Tag({ children }: { children: string }) {
-  return (
-    <span className="shrink-0 rounded-[20px] border border-green-400 bg-green-50 px-3 py-2 text-body-lg font-medium text-green-900">
-      {children}
-    </span>
-  )
-}
 
 // Figma "Desktop - 115"(823:57540) — 세션2(시방서 작성 및 설계팀 이관) 브리프. 세션1 브리프
 // (744:15857)와 동일한 3컬럼 레이아웃 + 인디케이터 헤더 패턴, 협업 관계자만 구매팀 김부장이
@@ -165,27 +148,7 @@ export function Brief() {
               </Text>
             </Card>
 
-            <Card className="flex flex-col gap-6 p-6">
-              <Text variant="title-lg" emphasis className="text-green-900">
-                협업 관계자
-              </Text>
-              <div className="flex flex-wrap justify-between gap-y-6">
-                {COLLABORATORS.map((c) => (
-                  <div key={c.name} className="flex flex-col items-center gap-3">
-                    <img src={c.img} alt="" className="size-24 rounded-full bg-neutral-100 object-cover" />
-                    <div className="flex items-center gap-1">
-                      <Text variant="caption-sm" className="text-neutral-700">
-                        {c.name}
-                      </Text>
-                      <span className="size-0.5 rounded-full bg-neutral-400" />
-                      <Text variant="caption-sm" className="text-green-600">
-                        {c.team}
-                      </Text>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
+            <CollaboratorsCard collaborators={COLLABORATORS} />
 
             <Button
               variant="primary"

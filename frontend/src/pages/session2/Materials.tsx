@@ -3,7 +3,7 @@ import { Sidebar, type SidebarItem } from '../../components/Sidebar'
 import { Indicator } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { useSession } from '../../store/session'
 import specFormReference from '../../assets/illustrations/spec-form-reference.png'
@@ -146,13 +146,7 @@ export function Materials() {
           </Card>
         </div>
 
-        <Button
-          variant="primary"
-          className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-          onClick={() => goTo('workspace')}
-        >
-          업무 시작하기
-        </Button>
+        <PrimaryCTAButton onClick={() => goTo('workspace')}>업무 시작하기</PrimaryCTAButton>
       </div>
     </div>
   )

@@ -4,8 +4,8 @@ import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { DotMatrix } from '../../components/DotMatrix'
+import { BrandLogoBox } from '../../components/BrandLogoBox'
 import { RATING_SCALE } from '../../types'
-import brandLogo from '../../assets/brand-logo.png'
 
 // Figma "Desktop - 121"(823:52946, 파일 x6feHLgVMyg8sh8C2jVPE1) 전면 재실측 — 예전 구현은
 // 실제로는 이 프레임이 아니라 종합 리포트(ComprehensiveReport.tsx, Desktop-101)의 다크 테마를
@@ -73,11 +73,7 @@ export function Report() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <div className="hidden shrink-0 lg:block">
-        <div className="flex size-[83px] items-center justify-center rounded-xl bg-neutral-900 p-2">
-          <img src={brandLogo} alt="JOB:SIM" className="size-[67px] rounded-lg object-cover" />
-        </div>
-      </div>
+      <BrandLogoBox />
 
       <div className="flex min-w-0 flex-1 flex-col gap-[19px]">
         <IndicatorHeader current="직무 리포트" icons={false} />

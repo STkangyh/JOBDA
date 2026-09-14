@@ -2,7 +2,7 @@ import { useState } from 'react'
 import brandLogo from '../../assets/brand-logo.png'
 import illustration from '../../assets/illustrations/job-detail-banner.png'
 import { Text } from '../../components/Text'
-import { Button } from '../../components/Button'
+import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { CancelIcon } from '../../components/icons'
 import { PROCESS_STEPS, SESSION2_STEP_INDEX } from '../../data/processSteps'
 
@@ -90,14 +90,9 @@ export function JobDetail({
         </div>
       </div>
 
-      <Button
-        variant="primary"
-        className="h-[72px] w-[340px] self-end !rounded-xl !text-2xl"
-        disabled={selected === null}
-        onClick={() => selected !== null && onSubmit(selected)}
-      >
+      <PrimaryCTAButton disabled={selected === null} onClick={() => selected !== null && onSubmit(selected)}>
         업무 시작하기
-      </Button>
+      </PrimaryCTAButton>
     </div>
   )
 }

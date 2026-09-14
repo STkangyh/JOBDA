@@ -8,7 +8,9 @@ import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
-import { CheckBoxIcon } from '../../components/icons'
+import { CheckItem } from '../../components/CheckItem'
+import { Tag } from '../../components/Tag'
+import { CollaboratorsCard } from '../../components/CollaboratorsCard'
 import { useSession1 } from '../../store/session1'
 
 const GOALS = [
@@ -34,24 +36,6 @@ const COLLABORATORS = [
   { img: avatarParkChaeim, name: '박책임', team: '설계팀' },
 ]
 
-function CheckItem({ children }: { children: string }) {
-  return (
-    <div className="flex items-center gap-1">
-      <CheckBoxIcon className="size-4 shrink-0 text-green-500" />
-      <Text variant="body-lg" className="text-neutral-600">
-        {children}
-      </Text>
-    </div>
-  )
-}
-
-function Tag({ children }: { children: string }) {
-  return (
-    <span className="shrink-0 rounded-[20px] border border-green-400 bg-green-50 px-3 py-2 text-body-lg font-medium text-green-900">
-      {children}
-    </span>
-  )
-}
 
 // Figma "Desktop - 21"(744:15857) — 세션1 브리프 재설계. 기존엔 일반 라이트 테마 단일 카드
 // 레이아웃이었는데, 다른 세션1 화면들(Materials/Workspace)과 같은 다크 Sidebar+Indicator
@@ -174,27 +158,7 @@ export function Session1Brief() {
                 </Text>
               </Card>
 
-              <Card className="flex flex-col gap-6 p-6">
-                <Text variant="title-lg" emphasis className="text-green-900">
-                  협업 관계자
-                </Text>
-                <div className="flex flex-wrap justify-between gap-y-6">
-                  {COLLABORATORS.map((c) => (
-                    <div key={c.name} className="flex flex-col items-center gap-3">
-                      <img src={c.img} alt="" className="size-24 rounded-full bg-neutral-100 object-cover" />
-                      <div className="flex items-center gap-1">
-                        <Text variant="caption-sm" className="text-neutral-700">
-                          {c.name}
-                        </Text>
-                        <span className="size-0.5 rounded-full bg-neutral-400" />
-                        <Text variant="caption-sm" className="text-green-600">
-                          {c.team}
-                        </Text>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              <CollaboratorsCard collaborators={COLLABORATORS} />
 
               <Button
                 variant="primary"
