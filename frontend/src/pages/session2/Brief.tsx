@@ -102,7 +102,7 @@ export function Brief() {
                 </div>
               </div>
 
-              <img src={negotiationScene} alt="" className="h-[300px] w-full rounded-md bg-neutral-200 object-cover" />
+              <img src={negotiationScene} alt="" loading="lazy" className="h-[300px] w-full rounded-md bg-neutral-200 object-cover" />
 
               <div className="flex items-start gap-6">
                 <Tag>업무 미션</Tag>

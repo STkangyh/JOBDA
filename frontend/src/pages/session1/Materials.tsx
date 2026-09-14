@@ -102,7 +102,7 @@ export function Session1Materials() {
               </Text>
             </div>
             {doc.key === 'concept_a' && (
-              <img src={conceptAImage} alt="" className="w-full rounded-md bg-neutral-100 object-cover" />
+              <img src={conceptAImage} alt="" loading="lazy" className="w-full rounded-md bg-neutral-100 object-cover" />
             )}
           </Card>
         </div>

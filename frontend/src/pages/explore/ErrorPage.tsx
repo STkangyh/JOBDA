@@ -13,7 +13,7 @@ export function ErrorPage({
 }) {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-neutral-900/80 px-4 py-10">
-      <img src={illustration} alt="" className="w-full max-w-md" />
+      <img src={illustration} alt="" loading="lazy" className="w-full max-w-md" />
       <div className="flex flex-col items-center gap-2">
         <p className="text-[40px] font-semibold leading-tight text-error-200">Error</p>
         <p className="text-body-lg font-semibold text-neutral-50">{message}</p>

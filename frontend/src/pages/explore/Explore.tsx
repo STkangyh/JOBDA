@@ -97,7 +97,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                   onClick={() => selectCard(i)}
                   className="group relative h-[310px] w-[430px] shrink-0 overflow-hidden rounded-lg text-left transition-shadow hover:ring-4 hover:ring-white"
                 >
-                  <img src={job.image} alt="" className="absolute inset-0 size-full object-cover" />
+                  <img src={job.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
                   <div className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 shadow-[inset_0px_0px_30px_20px_white] transition-opacity group-hover:opacity-100" />
                   <p className="relative p-6 text-headline-md font-normal text-green-50 group-hover:font-semibold">
@@ -179,7 +179,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                     job.real ? 'transition-[filter] hover:brightness-110' : ''
                   }`}
                 >
-                  <img src={job.image} alt="" className="absolute inset-0 size-full object-cover" />
+                  <img src={job.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
                   <div className="relative flex items-end gap-2 p-3">
                     <span className="text-[48px] leading-none font-black text-green-500 italic [text-shadow:0px_4px_4px_rgba(0,0,0,0.25)]">

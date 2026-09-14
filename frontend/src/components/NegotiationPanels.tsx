@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Card } from './Card'
 import { Text } from './Text'
-import { ArrowUpwardIcon } from './icons'
+import { ArrowUpwardIcon, WarningIcon } from './icons'
 import { useSession } from '../store/session'
 import { PERSONA_LABEL, PERSONA_SENDER_NAME, type Persona } from '../types'
 
@@ -32,6 +32,11 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   const [active, setActive] = useState<Persona>(defaultActive)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  // apiChat이 네트워크 오류/503(llm_unavailable)로 실패해도 store의 sendMessage는 그냥 던지기만
+  // 해서, 여기서 안 잡으면 사용자는 입력만 사라지고 답장도 에러도 못 보는 채 멈춘다(백엔드
+  // handler 주석의 "frontend shows a retry button" 전제가 실제로는 구현 안 돼 있었음). 실패한
+  // 원문을 들고 있다가 재시도 버튼이 같은 텍스트로 다시 보낸다.
+  const [failed, setFailed] = useState<{ persona: Persona; text: string } | null>(null)
   const chatHistory = useSession((s) => s.chatHistory)
   const sendMessage = useSession((s) => s.sendMessage)
   const savedNotes = useSession((s) => s.savedNotes)
@@ -62,8 +67,11 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
     if (!text.trim() || sending) return
     setSending(true)
     setInput('')
+    setFailed(null)
     try {
       await sendMessage(active, text)
+    } catch {
+      setFailed({ persona: active, text })
     } finally {
       setSending(false)
     }
@@ -75,7 +83,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   useEffect(() => {
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [history.length, sending, showIntro])
+  }, [history.length, sending, showIntro, failed])
 
   return (
     <Card className="flex h-full max-h-[1400px] flex-col gap-6 p-6">
@@ -174,6 +182,21 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
             <Text variant="body-sm" className="text-neutral-400">
               답변 작성 중...
             </Text>
+          )}
+          {failed && failed.persona === active && (
+            <div className="flex items-center gap-2 self-start rounded-md border border-error-100 bg-error-100/20 px-3 py-2">
+              <WarningIcon className="size-4 shrink-0 text-error-200" />
+              <Text variant="body-sm" className="text-error-300">
+                메시지 전송에 실패했어요.
+              </Text>
+              <button
+                type="button"
+                onClick={() => send(failed.text)}
+                className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-error-300 transition-colors hover:bg-error-100/40"
+              >
+                재시도
+              </button>
+            </div>
           )}
         </div>
       </div>

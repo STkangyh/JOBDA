@@ -5,6 +5,7 @@ import { Card } from '../../components/Card'
 import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { RatingRow } from '../../components/RatingRow'
+import { ReportSkeleton } from '../../components/ReportSkeleton'
 import { RATING_SCALE } from '../../types'
 
 type RatingField = 'interestScore' | 'expectationGap' | 'repeatWillingness'
@@ -47,6 +48,21 @@ export function SelfAssessment() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // 리포트 생성 대기(1.8~3.7초 실측)를 버튼 텍스트만 바꿔서 보여주면 화면이 멈춘 것처럼 느껴짐 —
+  // Report.tsx와 같은 3컬럼 그리드 자리에 펄스 스켈레톤을 띄워 "이제 이 리포트가 채워질 것"을
+  // 미리 보여준다. 실제 리포트 도착 시 currentStage가 넘어가며 이 화면 자체가 Report로 교체된다.
+  if (submitting) {
+    return (
+      <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
+        <div className="hidden w-[83px] shrink-0 lg:block" aria-hidden />
+        <div className="flex min-w-0 flex-1 flex-col gap-[19px]">
+          <IndicatorHeader current="직무 리포트" icons={false} loading />
+          <ReportSkeleton />
+        </div>
+      </div>
+    )
   }
 
   return (

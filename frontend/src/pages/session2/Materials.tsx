@@ -141,7 +141,7 @@ export function Materials() {
               </Text>
             </div>
             <div className="overflow-hidden rounded-md bg-neutral-100">
-              <img src={viewer.image} alt={viewer.imageAlt} className="w-full object-contain" />
+              <img src={viewer.image} alt={viewer.imageAlt} loading="lazy" className="w-full object-contain" />
             </div>
           </Card>
         </div>

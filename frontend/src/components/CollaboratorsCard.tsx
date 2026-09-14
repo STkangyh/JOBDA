@@ -19,7 +19,7 @@ export function CollaboratorsCard({ collaborators }: { collaborators: Collaborat
       <div className="flex flex-wrap justify-between gap-y-6">
         {collaborators.map((c) => (
           <div key={c.name} className="flex flex-col items-center gap-3">
-            <img src={c.img} alt="" className="size-24 rounded-full bg-neutral-100 object-cover" />
+            <img src={c.img} alt="" loading="lazy" className="size-24 rounded-full bg-neutral-100 object-cover" />
             <div className="flex items-center gap-1">
               <Text variant="caption-sm" className="text-neutral-700">
                 {c.name}
