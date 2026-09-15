@@ -1,9 +1,25 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from './App'
 import { useSession } from './store/session'
+
+// Simulates a narrow viewport by making matchMedia report the narrow-viewport query as
+// matching, mirroring how a real narrow browser window would answer App.tsx's
+// useIsNarrowViewport().
+function mockNarrowViewport() {
+  vi.spyOn(window, 'matchMedia').mockReturnValue({
+    matches: true,
+    media: '(max-width: 1023px)',
+    onchange: null,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    addListener: () => {},
+    removeListener: () => {},
+    dispatchEvent: () => false,
+  } as MediaQueryList)
+}
 
 // App.tsx used to branch on window.location.pathname by hand, tracking a KNOWN_PATHS set in
 // lockstep with an if-chain — missing either one for a new screen silently fell through to
@@ -12,6 +28,10 @@ import { useSession } from './store/session'
 
 beforeEach(() => {
   useSession.getState().resetSession()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 function renderAt(path: string) {
@@ -50,5 +70,13 @@ describe('App routing', () => {
     await user.click(await screen.findByRole('button', { name: '확인' }))
 
     expect(await screen.findByText('New Arrival')).toBeInTheDocument()
+  })
+
+  it('shows MobileNotice instead of any route on a narrow viewport', async () => {
+    mockNarrowViewport()
+    renderAt('/')
+
+    expect(await screen.findByText('PC 화면에서 이용해주세요')).toBeInTheDocument()
+    expect(screen.queryByText('New Arrival')).not.toBeInTheDocument()
   })
 })

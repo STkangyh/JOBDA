@@ -1,10 +1,32 @@
-import { lazy, Suspense, type ComponentType } from 'react'
+import { lazy, Suspense, useEffect, useState, type ComponentType } from 'react'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 import { useSession } from './store/session'
 import { Explore } from './pages/explore/Explore'
 import { StageJumper } from './components/StageJumper'
+import { MobileNotice } from './components/MobileNotice'
 import { AsteriskIcon } from './components/icons'
 import type { Stage } from './types'
+
+// 화면들이 전부 Figma 데스크톱 프레임 그대로(고정폭 사이드바, grid-cols-5 등)라 좁은 화면에서는
+// 레이아웃이 깨진다 — Web Analytics로 실제 모바일 방문이 확인돼서(적지만 0은 아님), 반응형으로
+// 다시 짜는 대신 이 폭 아래에서는 안내 화면만 보여준다. "휴대폰이냐 아니냐"로 가르는 통상적인
+// 768px 대신, 이 앱이 이미 사이드바 등을 숨기는 실제 기준인 lg(1024px)에 맞춤 — 폴더블처럼
+// 펼쳤을 때 768~1023px로 나오는 기기도 놓치지 않는다. 기기 종류가 아니라 실제 렌더링 너비를
+// 실시간으로 재는 방식이라 어떤 화면 크기의 기기가 나와도 코드를 더 손댈 필요가 없다.
+const NARROW_VIEWPORT_QUERY = '(max-width: 1023px)'
+
+function useIsNarrowViewport(): boolean {
+  const [isNarrow, setIsNarrow] = useState(() => window.matchMedia(NARROW_VIEWPORT_QUERY).matches)
+
+  useEffect(() => {
+    const mql = window.matchMedia(NARROW_VIEWPORT_QUERY)
+    const onChange = () => setIsNarrow(mql.matches)
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [])
+
+  return isNarrow
+}
 
 // Explore("/")만 첫 진입에 항상 필요해서 static import로 남기고, 나머지는 전부 route 단위
 // lazy — 세션1/세션2/디자인시스템/체험맵/종합리포트는 한 방문에서 서로 배타적으로만 쓰이는데
@@ -88,6 +110,9 @@ function Session2Route() {
 // 선언 하나로 합치고, 없는 경로는 path="*"가 자동으로 받는다.
 function App() {
   const navigate = useNavigate()
+  const isNarrow = useIsNarrowViewport()
+
+  if (isNarrow) return <MobileNotice />
 
   return (
     <Suspense fallback={<RouteFallback />}>

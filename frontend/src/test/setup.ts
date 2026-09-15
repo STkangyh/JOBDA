@@ -8,3 +8,16 @@ import '@testing-library/jest-dom/vitest'
 afterEach(() => {
   cleanup()
 })
+
+// jsdom doesn't implement matchMedia at all (App.tsx's mobile-viewport check uses it) — a
+// minimal stub that always reports "not mobile" so tests exercise the desktop app by default.
+window.matchMedia ??= (query: string) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  addListener: () => {},
+  removeListener: () => {},
+  dispatchEvent: () => false,
+})
