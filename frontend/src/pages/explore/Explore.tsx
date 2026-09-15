@@ -97,7 +97,10 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                   onClick={() => selectCard(i)}
                   className="group relative h-[310px] w-[430px] shrink-0 overflow-hidden rounded-lg text-left transition-shadow hover:ring-4 hover:ring-white"
                 >
-                  <img src={job.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                  {/* 캐러셀 첫 카드는 스크롤 없이 바로 보여서 LCP(최대 콘텐츠풀 페인트) 후보가 됨
+                      — Lighthouse 실측으로 확인(lazy 걸었더니 LCP 18.5초로 튐). 첫 장만 즉시 로드,
+                      가로 스크롤해야 보이는 나머지만 lazy. */}
+                  <img src={job.image} alt="" loading={i === 0 ? 'eager' : 'lazy'} className="absolute inset-0 size-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent" />
                   <div className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 shadow-[inset_0px_0px_30px_20px_white] transition-opacity group-hover:opacity-100" />
                   <p className="relative p-6 text-headline-md font-normal text-green-50 group-hover:font-semibold">

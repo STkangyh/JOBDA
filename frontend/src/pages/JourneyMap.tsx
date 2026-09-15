@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Sidebar, type SidebarItem } from '../components/Sidebar'
 import { IndicatorHeader } from '../components/IndicatorHeader'
 import { Card } from '../components/Card'
@@ -19,6 +20,7 @@ const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 // AppHeader(배너+검색+프로필)가 아니라 브리프/자료함과 같은 인디케이터 헤더였음. 원래 다크
 // 테마+AppHeader로 잘못 만들었던 것을 실제 프레임대로 교체.
 export function JourneyMap() {
+  const navigate = useNavigate()
   const session1Stage = useSession1((s) => s.currentStage)
   const s1SelfAssessment = useSession1((s) => s.selfAssessment)
   const roundAnswers = useSession1((s) => s.roundAnswers)
@@ -109,10 +111,10 @@ export function JourneyMap() {
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => (window.location.href = '/')}>
+          <Button variant="secondary" onClick={() => navigate('/')}>
             홈으로 가기
           </Button>
-          <Button onClick={() => (window.location.href = nextHref)}>{nextLabel}</Button>
+          <Button onClick={() => navigate(nextHref)}>{nextLabel}</Button>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useSession } from '../../store/session'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
@@ -57,6 +58,7 @@ function BehaviorRow({ label, quotes, className }: { label: string; quotes: stri
 }
 
 export function Report() {
+  const navigate = useNavigate()
   const report = useSession((s) => s.report)
   const selfAssessment = useSession((s) => s.selfAssessment)
   const draftParts = useSession((s) => s.draftParts)
@@ -183,11 +185,11 @@ export function Report() {
               <Button
                 variant="secondary"
                 className="h-[72px] w-full !rounded-xl !border-0 !bg-neutral-200 !text-2xl !text-neutral-600"
-                onClick={() => (window.location.href = '/')}
+                onClick={() => navigate('/')}
               >
                 홈으로 가기
               </Button>
-              <Button className="h-[72px] w-full !rounded-xl !text-2xl" onClick={() => (window.location.href = '/journey-map')}>
+              <Button className="h-[72px] w-full !rounded-xl !text-2xl" onClick={() => navigate('/journey-map')}>
                 다음 세션으로 이동
               </Button>
             </div>

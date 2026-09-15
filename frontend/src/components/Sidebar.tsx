@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { useNavigate } from 'react-router-dom'
 import brandLogo from '../assets/brand-logo.png'
 import { AppsIcon, SearchIcon, HomeRepairServiceIcon, DataUsageIcon, DatabaseIcon, MailIcon, EditIcon, type IconProps } from './icons'
 import { useSession } from '../store/session'
@@ -56,13 +57,14 @@ function NavButton({
   // 스테이지)으로 가는 지름길이라, 다른 화면(세션1/탐색)에서 눌러도 세션2 진행 중이던
   // 스테이지를 덮어쓰고 이동한다(재입장 시 자료함부터 다시 보게 됨, 되돌릴 방법 있음).
   const goToMaterials = useSession((s) => s.goTo)
+  const navigate = useNavigate()
   return (
     <button
       type="button"
       onClick={() => {
         onSelect?.(item)
         if (item === 'data') goToMaterials('materials')
-        if (href) window.location.href = href
+        if (href) navigate(href)
       }}
       className={`flex size-14 shrink-0 items-center justify-center transition-colors ${
         active ? 'text-green-500' : 'text-green-50 hover:text-green-200'

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Sidebar, type SidebarItem } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
@@ -30,6 +31,7 @@ function QuoteGroup({ items }: { items: string[] }) {
 }
 
 export function Session1Report() {
+  const navigate = useNavigate()
   const report = useSession1((s) => s.report)
   const resetSession = useSession1((s) => s.resetSession)
 
@@ -131,10 +133,10 @@ export function Session1Report() {
         </Text>
 
         <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => (window.location.href = '/')}>
+          <Button variant="secondary" onClick={() => navigate('/')}>
             탐색 페이지로
           </Button>
-          <Button variant="secondary" onClick={() => (window.location.href = '/journey-map')}>
+          <Button variant="secondary" onClick={() => navigate('/journey-map')}>
             체험맵 보기
           </Button>
           <Button onClick={() => resetSession()}>다시 체험하기</Button>

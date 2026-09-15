@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useState, type ComponentType } from 'react'
+import { lazy, Suspense, type ComponentType } from 'react'
+import { Route, Routes, useNavigate } from 'react-router-dom'
 import { useSession } from './store/session'
 import { Explore } from './pages/explore/Explore'
 import { StageJumper } from './components/StageJumper'
@@ -62,98 +63,55 @@ const SESSION2_STAGES: { value: Stage; label: string }[] = [
   { value: 'report', label: '직무 리포트' },
 ]
 
-const KNOWN_PATHS = new Set([
-  '/',
-  '/design-system',
-  '/explore',
-  '/explore/job',
-  '/session1',
-  '/session2',
-  '/journey-map',
-  '/comprehensive-report',
-])
 // 직무 상세페이지 "업무 프로세스" 스텝 인덱스 -> 진입할 경로. 8번(시방서 작성 및 설계 이관)만
 // 세션2로 연결 — 6번(모형 제작 및 설계 검토/세션1)은 배포에서 제외돼 JobDetail.tsx에서 아예
 // 선택 불가능이라 여기 매핑도 필요 없음.
 const STEP_INDEX_TO_PATH: Record<number, string> = { 7: '/session2' }
 
-// 라우터 없이 pathname으로만 분기하는 최소 구현. 첫 진입 화면(홈)은 탐색 페이지("/", 별칭으로
-// "/explore"도 동일하게 렌더)이고, 세션 stage 화면은 "/session2"에서 뜬다. 그 외 경로는 전부
-// 오류 페이지로 떨어진다.
-function useSimpleRouter() {
-  const [pathname, setPathname] = useState(window.location.pathname)
-
-  useEffect(() => {
-    const onPopState = () => setPathname(window.location.pathname)
-    window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
-  }, [])
-
-  const navigate = (path: string) => {
-    window.history.pushState({}, '', path)
-    setPathname(path)
-  }
-
-  return { pathname, navigate }
-}
-
-function App() {
+// "/session2"는 URL이 하나뿐이고 실제 화면은 Zustand의 currentStage로만 갈린다(주소창에
+// 단계가 안 드러남 — 알려진 한계, StageJumper로 우회).
+function Session2Route() {
+  const stage = useSession((s) => s.currentStage)
+  const goTo = useSession((s) => s.goTo)
+  const Screen: ComponentType = stage === 'report' ? Report : SCREENS[stage]
   return (
-    <Suspense fallback={<RouteFallback />}>
-      <AppRoutes />
-    </Suspense>
+    <>
+      <Screen />
+      <StageJumper stages={SESSION2_STAGES} current={stage} onJump={goTo} />
+    </>
   )
 }
 
-function AppRoutes() {
-  const stage = useSession((s) => s.currentStage)
-  const goTo = useSession((s) => s.goTo)
-  const { pathname, navigate } = useSimpleRouter()
+// react-router-dom(이미 package.json에 있었지만 안 쓰이고 있었음)으로 교체 — 이전엔 App.tsx의
+// pathname if-분기 + KNOWN_PATHS Set을 화면마다 손으로 맞춰야 해서, 새 화면을 추가할 때 한
+// 군데라도 빠뜨리면 조용히 ErrorPage로 떨어지는 실수가 나기 쉬웠다. <Routes>는 그 등록을
+// 선언 하나로 합치고, 없는 경로는 path="*"가 자동으로 받는다.
+function App() {
+  const navigate = useNavigate()
 
-  if (pathname === '/design-system') {
-    return <DesignSystem />
-  }
-
-  if (pathname === '/' || pathname === '/explore') {
-    return <Explore onOpenJob={() => navigate('/explore/job')} />
-  }
-
-  if (pathname === '/explore/job') {
-    return (
-      <JobDetail
-        onClose={() => navigate('/')}
-        onSubmit={(stepIndex) => navigate(STEP_INDEX_TO_PATH[stepIndex] ?? '/session2')}
-      />
-    )
-  }
-
-  if (pathname === '/session1') {
-    return <Session1App />
-  }
-
-  if (pathname === '/journey-map') {
-    return <JourneyMap />
-  }
-
-  if (pathname === '/comprehensive-report') {
-    return <ComprehensiveReport />
-  }
-
-  if (pathname === '/session2') {
-    const Screen: ComponentType = stage === 'report' ? Report : SCREENS[stage]
-    return (
-      <>
-        <Screen />
-        <StageJumper stages={SESSION2_STAGES} current={stage} onJump={goTo} />
-      </>
-    )
-  }
-
-  if (!KNOWN_PATHS.has(pathname)) {
-    return <ErrorPage onConfirm={() => navigate('/')} />
-  }
-
-  return null
+  return (
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        <Route path="/" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
+        <Route path="/explore" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
+        <Route
+          path="/explore/job"
+          element={
+            <JobDetail
+              onClose={() => navigate('/')}
+              onSubmit={(stepIndex) => navigate(STEP_INDEX_TO_PATH[stepIndex] ?? '/session2')}
+            />
+          }
+        />
+        <Route path="/design-system" element={<DesignSystem />} />
+        <Route path="/session1" element={<Session1App />} />
+        <Route path="/session2" element={<Session2Route />} />
+        <Route path="/journey-map" element={<JourneyMap />} />
+        <Route path="/comprehensive-report" element={<ComprehensiveReport />} />
+        <Route path="*" element={<ErrorPage onConfirm={() => navigate('/')} />} />
+      </Routes>
+    </Suspense>
+  )
 }
 
 export default App
