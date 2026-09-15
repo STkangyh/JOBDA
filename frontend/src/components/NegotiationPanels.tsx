@@ -226,6 +226,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           />
           <button
             type="submit"
+            aria-label="메시지 보내기"
             disabled={sending || !input.trim()}
             className="flex h-8 w-11 shrink-0 items-center justify-center rounded-[4px] bg-neutral-400 text-white transition-colors disabled:bg-neutral-200 disabled:text-neutral-400"
           >
