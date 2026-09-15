@@ -57,14 +57,26 @@ function Dot() {
 // Figma "Desktop - 76"(744:23143) — 탐색 페이지. macOS 메뉴바 목업은 항상 그래왔듯 제외.
 // New Arrival 캐로셀 + 실시간 인기 직무 Top 10을 전체 구현. 진짜 만들어진 직무는 1개뿐이라
 // 나머지는 시각적으로만 채우고(Figma 원본 목업 이미지 그대로) 클릭해도 입장은 안 되게 막았다.
+// 준비 안 된 직무를 눌렀을 때 캐로셀은 하단 패널 문구가 바뀌어서 피드백이 있지만, Top 10
+// 그리드는 아직 진짜 카드와 구분이 안 되는 채로 클릭해도 반응이 아예 없었다(div라 onClick도
+// 없음) — 사용자 입장에선 그냥 앱이 안 눌리는 것처럼 보임. 캐로셀과 같은 문구를 토스트로
+// 띄워서 최소한 "왜 안 되는지"는 알려준다.
+const NOT_READY_MESSAGE = '아직 준비 중인 직무예요. 곧 만나보실 수 있어요!'
+
 export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
   const [selected, setSelected] = useState(1)
+  const [toast, setToast] = useState(false)
   const carouselRef = useRef<HTMLDivElement>(null)
   const selectedJob = NEW_ARRIVAL[selected]
 
   const selectCard = (i: number) => {
     setSelected(i)
     if (NEW_ARRIVAL[i].real) onOpenJob()
+  }
+
+  const showNotReadyToast = () => {
+    setToast(true)
+    setTimeout(() => setToast(false), 2500)
   }
 
   const scrollCarousel = (dir: 1 | -1) => {
@@ -160,7 +172,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                 </div>
               </>
             ) : (
-              <p className="text-title-md font-medium text-neutral-500">아직 준비 중인 직무예요. 곧 만나보실 수 있어요!</p>
+              <p className="text-title-md font-medium text-neutral-500">{NOT_READY_MESSAGE}</p>
             )}
           </div>
         </div>
@@ -172,15 +184,12 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
           <div className="grid grid-cols-5 gap-3">
             {TOP10.map((job, i) => {
               const rank = i + 1
-              const Wrapper = job.real ? 'button' : 'div'
               return (
-                <Wrapper
+                <button
                   key={job.id}
-                  type={job.real ? 'button' : undefined}
-                  onClick={job.real ? onOpenJob : undefined}
-                  className={`relative flex h-[216px] items-end overflow-hidden rounded-xl ${
-                    job.real ? 'transition-[filter] hover:brightness-110' : ''
-                  }`}
+                  type="button"
+                  onClick={job.real ? onOpenJob : showNotReadyToast}
+                  className="relative flex h-[216px] items-end overflow-hidden rounded-xl text-left transition-[filter] hover:brightness-110"
                 >
                   <img src={job.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
@@ -190,12 +199,21 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                     </span>
                     <span className="text-[15px] leading-tight font-semibold text-neutral-50">{job.title}</span>
                   </div>
-                </Wrapper>
+                </button>
               )
             })}
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 rounded-full bg-neutral-800 px-5 py-3 text-body-md font-medium text-neutral-50 shadow-lg"
+        >
+          {NOT_READY_MESSAGE}
+        </div>
+      )}
     </div>
   )
 }
