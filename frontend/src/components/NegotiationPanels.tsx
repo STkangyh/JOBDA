@@ -178,10 +178,17 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
               )}
             </div>
           ))}
+          {/* 이전엔 작은 회색 텍스트 한 줄("답변 작성 중...")뿐이라 실제 응답 대기(2~4초
+              실측)를 잘 놓쳤다는 피드백 — 다른 관계자 말풍선과 같은 모양(rounded-br-xl 등)의
+              점 3개 바운스 애니메이션으로 바꿔서 "지금 뭔가 진행 중"이 시각적으로 분명하게 함. */}
           {sending && (
-            <Text variant="body-sm" className="text-neutral-400">
-              답변 작성 중...
-            </Text>
+            <div className="flex items-end gap-2 self-start">
+              <div className="flex items-center gap-1.5 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3.5">
+                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '0ms' }} />
+                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '150ms' }} />
+                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
           )}
           {failed && failed.persona === active && (
             <div className="flex items-center gap-2 self-start rounded-md border border-error-100 bg-error-100/20 px-3 py-2">
