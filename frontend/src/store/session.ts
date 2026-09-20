@@ -27,6 +27,13 @@ const REQUIRED_FIELDS: ('material' | 'color' | 'finish' | 'method')[] = ['materi
 // 눌러야 설계팀·구매팀으로 넘어간다(자동 전환 아님).
 const SENIOR_APPROVAL_MESSAGE = '이번엔 한도 견본 판정표까지 잘 붙였네요. 이대로 시방서 인계 누르면 설계팀·구매팀으로 넘어갑니다.'
 
+// Figma 823:56735(Desktop-139) 실측: "제안서 전달" CTA를 누르면 이 문구(선택된 업체명만
+// 끼워넣음)가 구매팀 메신저에 사용자 메시지로 그대로 들어간다 — 컴포즈 창에 미리 채워진
+// 초안이 곧 전송되는 것과 동일. 823:57101(Desktop-141)에서 김부장의 응답까지 실측.
+const purchasingProposalMessage = (vendorName: string) =>
+  `납기일, 가능 수량, 단가를 가장 우선 조건으로 고려한 결과 ${vendorName}이 목재 파트 발주에 가장 적합한 업체였습니다. 구매팀에서도 리스트 바탕으로 고려해보시고 최종 승인해주시면 감사하겠습니다.`
+const PURCHASING_ACK_MESSAGE = '넵 고려해보겠습니다. 보내주신 리스트에서 납기, 단가를 우선 고려해서 선정하고 결과 알려드릴게요.'
+
 const emptyDraft = (): SpecDraft => ({
   material: '',
   color: '',
@@ -53,11 +60,20 @@ const emptyPartSpec = (): PartSpec => ({
   attachmentFileName: null,
 })
 
-const emptyVendors = (): VendorOption[] => [
-  { name: '', leadTimeDays: '', quantity: '', unitPrice: '' },
-  { name: '', leadTimeDays: '', quantity: '', unitPrice: '' },
-  { name: '', leadTimeDays: '', quantity: '', unitPrice: '' },
-]
+// Figma 823:56196~823:57101(Desktop-137~141) 실측: 3곳이 아니라 4곳(우진목형/세림정밀목재/
+// 한재석 공방/대성우드 예시) — 업체 카드 개수 자체가 3에서 4로 늘어난다.
+const emptyVendor = (): VendorOption => ({
+  name: '',
+  location: '',
+  specialty: '',
+  deliveryHistory: '',
+  skillLevel: '',
+  oilFinish: '',
+  sampleQuality: '',
+  unitPrice: '',
+  capacity: '',
+})
+const emptyVendors = (): VendorOption[] => Array.from({ length: 4 }, emptyVendor)
 
 const initialState = (): SessionState => ({
   sessionId: crypto.randomUUID(),
@@ -78,6 +94,8 @@ const initialState = (): SessionState => ({
   revisitCount: 0,
   branch: null,
   vendors: emptyVendors(),
+  selectedVendorIndex: 0,
+  vendorProposed: false,
   vendorSubmitted: false,
   // Figma 823:52645(Desktop-117) 주석: 세션1(744:15050/Desktop-87)과 동일하게 기본값은 "보통".
   selfAssessment: { interestScore: '보통', expectationGap: '보통', repeatWillingness: '보통', burdenNote: '' },
@@ -99,6 +117,8 @@ interface SessionActions {
   submitFinal: () => void
   chooseBranch: (branch: Branch) => void
   updateVendor: (index: number, fields: Partial<VendorOption>) => void
+  selectVendor: (index: number) => void
+  proposeVendor: () => void
   submitVendors: () => void
   setSelfAssessment: (fields: Partial<SelfAssessment>) => void
   finishAssessment: () => Promise<void>
@@ -143,7 +163,18 @@ function computeScores(state: SessionState): Scores {
 
   let cost_control: Scores['cost_control'] = 2
   if (state.branch === 'outsourcing') {
-    const validVendors = state.vendors.filter((v) => v.name && v.leadTimeDays && v.quantity && v.unitPrice)
+    const validVendors = state.vendors.filter(
+      (v) =>
+        v.name &&
+        v.location &&
+        v.specialty &&
+        v.deliveryHistory &&
+        v.skillLevel &&
+        v.oilFinish &&
+        v.sampleQuality &&
+        v.unitPrice &&
+        v.capacity,
+    )
     if (!state.askedBudget) cost_control = 1
     else if (validVendors.length >= 3) cost_control = 3
     else cost_control = 2
@@ -165,7 +196,18 @@ function computeFindings(state: SessionState): Finding[] {
   if (!state.askedBudget) add('budget_never_asked')
 
   if (state.branch === 'outsourcing') {
-    const validVendors = state.vendors.filter((v) => v.name && v.leadTimeDays && v.quantity && v.unitPrice)
+    const validVendors = state.vendors.filter(
+      (v) =>
+        v.name &&
+        v.location &&
+        v.specialty &&
+        v.deliveryHistory &&
+        v.skillLevel &&
+        v.oilFinish &&
+        v.sampleQuality &&
+        v.unitPrice &&
+        v.capacity,
+    )
     if (validVendors.length >= 3) add('vendor_compared_three')
     else if (state.vendorSubmitted) add('vendor_criteria_incomplete')
   }
@@ -310,6 +352,26 @@ export const useSession = create<SessionState & SessionActions>()(
         set((s) => ({
           vendors: s.vendors.map((v, i) => (i === index ? { ...v, ...fields } : v)),
         })),
+      selectVendor: (index) => set({ selectedVendorIndex: index }),
+      // "제안서 전달"(139 CTA) — 아직 최종 제출이 아니라 구매팀에게 제안하고 검토 응답을
+      // 받는 단계. approveFinal과 같은 패턴: currentStage는 그대로 'vendor_compare'에 두고
+      // 구매팀 메신저에 제안 메시지 + 응답을 꽂아 넣는다. 실제 인계(currentStage 전환)는
+      // submitVendors가 담당.
+      proposeVendor: () => {
+        const vendorName = get().vendors[get().selectedVendorIndex]?.name || '선택한 업체'
+        set((s) => ({
+          vendorProposed: true,
+          chatHistory: {
+            ...s.chatHistory,
+            purchasing: [
+              ...s.chatHistory.purchasing,
+              { role: 'user', content: purchasingProposalMessage(vendorName), t: Date.now() },
+              { role: 'assistant', content: PURCHASING_ACK_MESSAGE, t: Date.now() },
+            ],
+          },
+        }))
+        pushLog(set, get, 'submit', { target: 'vendor_proposal' })
+      },
       submitVendors: () => {
         set({ vendorSubmitted: true, currentStage: 'self_assessment' })
         pushLog(set, get, 'submit', { target: 'vendor_report' })
@@ -342,7 +404,31 @@ export const useSession = create<SessionState & SessionActions>()(
 
       resetSession: () => set(initialState()),
     }),
-    { name: 'coad-hackerton-session' },
+    {
+      name: 'coad-hackerton-session',
+      version: 1,
+      // v0 -> v1: VendorOption이 업체 3곳 x (납기일/가능 수량/단가) 3필드였다가 Figma
+      // 823:56423 등 재확인 결과 4곳 x 8기준(업체 소재지~수용량)으로 바뀌었다(types.ts
+      // VendorOption 주석 참고).
+      //
+      // migrate만으론 부족했다(QA 지적, 실제로 재현됨) — zustand persist(v5)는
+      // `typeof stored.version === 'number'`일 때만 migrate를 호출하는데, 이번이 이 스토어
+      // 최초의 버전 필드라 옛 저장분엔 version 자체가 아예 없다(undefined) → 조건이 항상
+      // false라 migrate가 조용히 스킵되고 옛 3칸짜리 vendors가 그대로 병합됐다. merge는
+      // version 유무와 무관하게 항상 호출되므로 여기서 모양을 직접 검증해 고친다.
+      migrate: (persistedState) => persistedState as SessionState,
+      merge: (persistedState, currentState) => {
+        const merged = { ...currentState, ...(persistedState as Partial<SessionState>) }
+        const vendorsShapeOk =
+          Array.isArray(merged.vendors) && merged.vendors.length === 4 && merged.vendors.every((v) => typeof v?.location === 'string')
+        if (!vendorsShapeOk) {
+          merged.vendors = emptyVendors()
+          merged.selectedVendorIndex = 0
+          merged.vendorProposed = false
+        }
+        return merged
+      },
+    },
   ),
 )
 

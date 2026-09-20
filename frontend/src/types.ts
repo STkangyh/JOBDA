@@ -157,11 +157,20 @@ export interface PartSpec {
   attachmentFileName: string | null
 }
 
+// Figma 823:56423(Desktop-138) 실측: "납기일/가능 수량/단가" 3필드가 아니라 업체 소재지/주력
+// 분야/납품 이력/기술 수준/오일 마감/샘플 수준/발주 단가/수용량 8개 기준이었다 — "3차 피드백"
+// 배너 문구(823:57101)가 "납기일, 가능 수량, 단가"를 언급해서 예전 구현자가 그 문구를 표
+// 기준으로 착각한 것으로 보인다(실제 표엔 그 이름 그대로인 항목이 없음).
 export interface VendorOption {
   name: string
-  leadTimeDays: number | ''
-  quantity: number | ''
+  location: string
+  specialty: string
+  deliveryHistory: string
+  skillLevel: string
+  oilFinish: string
+  sampleQuality: string
   unitPrice: number | ''
+  capacity: number | ''
 }
 
 export type Stage =
@@ -217,6 +226,14 @@ export interface SessionState {
   revisitCount: number
   branch: Branch | null
   vendors: VendorOption[]
+  // Figma 823:56735(Desktop-139) 주석: "왼쪽 항목 선택된 것이 디폴트 값입니다" — 첫 번째
+  // 업체(0)가 기본 선택. VendorCompare.tsx가 체크박스로 하나만 고르게 하고, 제안서
+  // 전달(proposeVendor)/수정안 제출(submitVendors) 모두 이 인덱스를 그대로 쓴다.
+  selectedVendorIndex: number
+  // 제안서 전달(139 CTA) 이후 ~ 수정안 제출(141 CTA) 이전의 중간 상태 — finalApproved와 같은
+  // 패턴: currentStage는 계속 'vendor_compare'로 두고 이 플래그로 로컬 phase 전환 + 구매팀
+  // 메신저에 제안/응답 메시지를 꽂아 넣는다.
+  vendorProposed: boolean
   vendorSubmitted: boolean
   selfAssessment: SelfAssessment
   actionLogs: ActionLog[]
