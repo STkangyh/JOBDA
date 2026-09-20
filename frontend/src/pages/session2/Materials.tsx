@@ -4,7 +4,7 @@ import { Indicator } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
 import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
-import { CloudSavedIcon, ProfileIcon } from '../../components/icons'
+import { CloudSavedIcon, DownloadIcon, ProfileIcon } from '../../components/icons'
 import { useSession } from '../../store/session'
 import specFormReference from '../../assets/illustrations/spec-form-reference.png'
 import limitSampleReference from '../../assets/illustrations/limit-sample-reference.png'
@@ -52,6 +52,7 @@ export function Materials() {
   const goTo = useSession((s) => s.goTo)
   const [selectedDoc, setSelectedDoc] = useState<SpecDoc>('spec_form')
   const viewer = VIEWER_CONTENT[selectedDoc]
+  const viewerFileName = SPEC_DOCS.find((d) => d.key === selectedDoc)?.fileName ?? viewer.title
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
@@ -133,9 +134,21 @@ export function Materials() {
               열람 자료
             </Text>
             <div className="flex flex-col gap-3">
-              <Text variant="title-lg" emphasis>
-                {viewer.title}
-              </Text>
+              <div className="flex items-center gap-1">
+                <Text variant="title-lg" emphasis>
+                  {viewer.title}
+                </Text>
+                {/* Figma 1341:10735 실측: 양식 폴더에서 파일을 열면(=선택되면) 열람 자료 제목
+                    옆에 다운로드 버튼이 뜬다. hover=neutral-500, pressed=neutral-700(QA 지정). */}
+                <a
+                  href={viewer.image}
+                  download={viewerFileName}
+                  aria-label={`${viewerFileName} 다운로드`}
+                  className="flex size-6 shrink-0 items-center justify-center text-neutral-400 transition-colors hover:text-neutral-500 active:text-neutral-700"
+                >
+                  <DownloadIcon className="size-[18px]" />
+                </a>
+              </div>
               <Text variant="body-lg" className="text-neutral-600">
                 {viewer.description}
               </Text>
