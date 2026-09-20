@@ -75,10 +75,17 @@ export function Report() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <BrandLogoBox />
-
       <div className="flex min-w-0 flex-1 flex-col gap-[19px]">
-        <IndicatorHeader current="직무 리포트" icons={false} />
+        {/* session1/session2 SelfAssessment.tsx와 동일한 이유(Figma 실측 결과 로고는 인디케이터와
+            한 행에만 걸쳐 있고, 그 행과 콘텐츠가 같은 부모 아래 세로로 이어진 하나의 컬럼이다) —
+            로고를 페이지 전체 높이의 별도 컬럼(바깥 flex row의 형제)으로 빼두면 콘텐츠 그리드가
+            로고 폭+간격만큼 밀려나 Figma보다 좁아진다(QA 지적). */}
+        <div className="flex items-start gap-6">
+          <BrandLogoBox />
+          <div className="min-w-0 flex-1">
+            <IndicatorHeader current="직무 리포트" icons={false} />
+          </div>
+        </div>
 
         {/* Figma 캔버스(1728px)의 442/855/340 고정폭을 그대로 쓰면 실제 브라우저 폭(예: 1280px)에서
             가운데 컬럼이 300px도 안 남아 긴 인용구가 세로로 짜부라짐 — 같은 비율을 fr로 유지해
