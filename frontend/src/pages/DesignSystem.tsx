@@ -4,6 +4,8 @@ import { Chip } from '../components/Chip'
 import { Checkbox } from '../components/Checkbox'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
+import { PrimaryCTAButton } from '../components/PrimaryCTAButton'
+import { IndicatorHeader } from '../components/IndicatorHeader'
 import { Sidebar, type SidebarItem } from '../components/Sidebar'
 import { Indicator, INDICATOR_STEPS, type IndicatorStep } from '../components/Indicator'
 import {
@@ -21,6 +23,7 @@ import {
   AppsIcon,
   DatabaseIcon,
   MailIcon,
+  AsteriskIcon,
 } from '../components/icons'
 
 const NEUTRAL_STEPS = [50, 75, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
@@ -120,6 +123,10 @@ export function DesignSystem() {
   const [checked, setChecked] = useState(true)
   const [sidebarActive, setSidebarActive] = useState<SidebarItem>('apps')
   const [step, setStep] = useState<IndicatorStep>('관계자 협업')
+  // 실제 화면에서는 제출 버튼 클릭 후 1200ms만 보이고 사라져서(Workspace.tsx 등) 눈으로 확인하기
+  // 번거로웠다 — 토글로 계속 켜둔 채 스피너 3종(헤더 별표/제출 버튼/메신저 답변 대기 점 3개)을
+  // 한 번에 비교할 수 있게 함.
+  const [loading, setLoading] = useState(true)
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-10">
@@ -290,6 +297,63 @@ export function DesignSystem() {
         <Card className="p-4">
           <Text variant="body-md">카드 컴포넌트 내부입니다.</Text>
         </Card>
+      </Section>
+
+      <Section title="Loading">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={() => setLoading((v) => !v)}>
+              {loading ? '로딩 끄기' : '로딩 켜기'}
+            </Button>
+            <Text variant="caption-sm" className="text-neutral-500">
+              실제 화면에서는 제출 후 1200ms만 보이는 상태(Workspace 등)를 켜둔 채로 확인합니다.
+            </Text>
+          </div>
+
+          <div>
+            <Text variant="body-sm" className="mb-2 text-neutral-600">
+              헤더 스피너 (IndicatorHeader loading)
+            </Text>
+            <div className="bg-neutral-100 p-4">
+              <IndicatorHeader current="관계자 협업" gridCols="grid-cols-1 lg:grid-cols-[120px_1fr_120px]" loading={loading} />
+            </div>
+          </div>
+
+          <div>
+            <Text variant="body-sm" className="mb-2 text-neutral-600">
+              제출 버튼 (PrimaryCTAButton)
+            </Text>
+            <PrimaryCTAButton disabled={loading} onClick={() => {}}>
+              {loading ? '로딩 중...' : '초안 제출'}
+            </PrimaryCTAButton>
+          </div>
+
+          <div>
+            <Text variant="body-sm" className="mb-2 text-neutral-600">
+              메신저 답변 대기 (Messenger sending indicator)
+            </Text>
+            {loading ? (
+              <div className="flex w-fit items-center gap-1.5 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3.5">
+                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '0ms' }} />
+                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '150ms' }} />
+                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '300ms' }} />
+              </div>
+            ) : (
+              <Text variant="caption-sm" className="text-neutral-400">
+                (로딩 꺼짐 — 토글 켜서 확인)
+              </Text>
+            )}
+          </div>
+
+          <div>
+            <Text variant="body-sm" className="mb-2 text-neutral-600">
+              라우트 전환 스피너 (App.tsx RouteFallback)
+            </Text>
+            <div className="flex size-8 items-center justify-center rounded-full bg-neutral-950 text-neutral-500">
+              <AsteriskIcon className={`size-5 ${loading ? 'animate-spin' : ''}`} />
+            </div>
+          </div>
+        </div>
       </Section>
     </div>
   )
