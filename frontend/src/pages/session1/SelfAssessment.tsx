@@ -33,18 +33,29 @@ export function Session1SelfAssessment() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
-      {/* Figma 1184:11046("image 237") 실측 — 다른 세션1 화면들처럼 Sidebar를 쓰는 대신, 이
-          화면만 (Report.tsx와 같은) 로고 박스 하나로 헤더 폭을 맞춘다. 예전엔 이 자리가 빈
-          플레이스홀더라 Hero 영역에 로고가 빠진 것처럼 보였음(QA 지적). */}
-      <BrandLogoBox />
-
       <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
-        <IndicatorHeader current="자기 평가" steps={INDICATOR_STEPS_S1} icons={false} loading={submitting} />
+        {/* Figma 823:52713(Desktop-118) 실측: 로고와 인디케이터가 한 행에 나란히 있고, 그
+            행과 카드가 같은 부모 아래 세로로 이어진 하나의 컬럼이다 — 로고를 페이지 전체
+            높이의 별도 컬럼(바깥 flex row의 형제)으로 빼두면 카드가 로고 폭+간격만큼 밀려나
+            Figma보다 좁아진다(QA 지적). 로고는 이 행 안에서만 폭을 차지하고, 카드/버튼은
+            이 컬럼의 전체 폭을 그대로 쓴다. */}
+        <div className="flex items-start gap-6">
+          <BrandLogoBox />
+          <div className="min-w-0 flex-1">
+            <IndicatorHeader current="자기 평가" steps={INDICATOR_STEPS_S1} icons={false} loading={submitting} />
+          </div>
+        </div>
 
-        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-[18px]">
-          <Card className="flex flex-col gap-[48px] p-6">
+        <div className="flex w-full flex-1 flex-col gap-[18px]">
+          {/* Figma 823:52713(Desktop-118) 실측: 카드가 h-[920px] 고정값으로 뷰포트 거의 전체
+              높이를 차지한다 — flex-1로 남는 세로 공간을 카드 자신이 흡수하게 해서 아래
+              spacer 없이도 카드가 버튼 바로 위까지 늘어나게 한다(그냥 두면 카드 밑에 페이지
+              배경색 여백이 크게 남아 Figma보다 훨씬 짧아 보였다, QA 지적). */}
+          <Card className="flex flex-1 flex-col gap-[48px] p-6">
             <div className="flex flex-col gap-3">
-              <Text variant="headline-md" emphasis>
+              {/* Figma 실측: "Emphasis/Headline/Large"(32px) — headline-md(24px)는 한 단계
+                  작았다. */}
+              <Text variant="headline-lg" emphasis>
                 방금 수행한 업무, 어떠셨나요?
               </Text>
               <Text variant="title-lg" className="text-neutral-600">
@@ -64,7 +75,7 @@ export function Session1SelfAssessment() {
               ))}
 
               <div className="flex flex-col gap-3">
-                <Text variant="title-md" emphasis className="text-green-900">
+                <Text variant="title-lg" emphasis className="text-green-900">
                   업무 중 부담을 느낀 부분이 있었나요?
                 </Text>
                 <div className="rounded-xl border border-neutral-600 p-6">

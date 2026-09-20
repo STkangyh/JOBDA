@@ -6,6 +6,7 @@ import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { RatingRow } from '../../components/RatingRow'
 import { ReportSkeleton } from '../../components/ReportSkeleton'
+import { BrandLogoBox } from '../../components/BrandLogoBox'
 import { RATING_SCALE } from '../../types'
 
 type RatingField = 'interestScore' | 'expectationGap' | 'repeatWillingness'
@@ -17,16 +18,10 @@ const QUESTIONS: { field: RatingField; label: string }[] = [
 ]
 
 // Figma "Desktop - 117"(823:52645, 파일 x6feHLgVMyg8sh8C2jVPE1) — 세션1 자기평가
-// (744:15050/Desktop-87)와 문항 텍스트가 동일해 같은 5점 척도 UI를 그대로 재사용한다.
-// 이 프레임은 브랜드 로고 + 인디케이터(자기 평가 활성)만 보이고, Brief/Report처럼 사이드바
-// 아이콘이나 저장/프로필 아이콘은 없다.
-// 다만 진행률 바 자체의 "크기"는 화면마다 달라 보이면 안 된다는 피드백 — 사이드바가 없다고
-// 인디케이터를 그냥 단독 배치하면 3컬럼 그리드의 가운데 칸(다른 화면들의 실제 폭)보다 훨씬
-// 넓어져서 화면마다 진행률 바 길이가 들쭉날쭉해 보였음. 사이드바 폭(83px)+간격(24px)만큼
-// 빈 공간을 그대로 예약해서, 다른 화면과 같은 3등분 그리드 계산이 나오게 맞춤(로고/아이콘
-// 없이 폭만 맞추는 용도).
-// (참고: 세션1의 SelfAssessment.tsx는 현재 이 인디케이터조차 없이 완전히 헤더가 빈 상태 —
-// Figma 기준으로는 세션1 쪽도 나중에 인디케이터를 추가하는 게 맞아 보임.)
+// (823:52713/Desktop-118)와 문항 텍스트가 동일해 같은 5점 척도 UI를 그대로 재사용한다.
+// 이 프레임은 사이드바 대신 브랜드 로고 박스 + 인디케이터(자기 평가 활성)만 보이고,
+// Brief/Report처럼 저장/프로필 아이콘은 없다 — 이전엔 로고 자리가 빈 스페이서 div라 로고가
+// 아예 안 보였다(QA 지적, session1/SelfAssessment.tsx의 BrandLogoBox와 동일하게 맞춤).
 export function SelfAssessment() {
   const value = useSession((s) => s.selfAssessment)
   const setSelfAssessment = useSession((s) => s.setSelfAssessment)
@@ -56,7 +51,7 @@ export function SelfAssessment() {
   if (submitting) {
     return (
       <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-        <div className="hidden w-[83px] shrink-0 lg:block" aria-hidden />
+        <BrandLogoBox />
         <div className="flex min-w-0 flex-1 flex-col gap-[19px]">
           <IndicatorHeader current="직무 리포트" icons={false} loading />
           <ReportSkeleton />
@@ -67,14 +62,27 @@ export function SelfAssessment() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <div className="hidden w-[83px] shrink-0 lg:block" aria-hidden />
-
       <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
-        <IndicatorHeader current="자기 평가" icons={false} loading={submitting} />
+        {/* Figma 823:52713(Desktop-118) 실측: 로고와 인디케이터가 한 행에 나란히 있고, 그
+            행과 카드가 같은 부모 아래 세로로 이어진 하나의 컬럼이다 — 로고를 페이지 전체
+            높이의 별도 컬럼(바깥 flex row의 형제)으로 빼두면 카드가 로고 폭+간격만큼 밀려나
+            Figma보다 좁아진다(QA 지적). 로고는 이 행 안에서만 폭을 차지하고, 카드/버튼은
+            이 컬럼의 전체 폭을 그대로 쓴다. */}
+        <div className="flex items-start gap-6">
+          <BrandLogoBox />
+          <div className="min-w-0 flex-1">
+            <IndicatorHeader current="자기 평가" icons={false} loading={submitting} />
+          </div>
+        </div>
 
-        <Card className="flex flex-col gap-[48px] p-6">
+        {/* Figma 823:52713(Desktop-118) 실측: 카드가 h-[920px] 고정값으로 뷰포트 거의 전체
+            높이를 차지한다 — 콘텐츠 크기만큼만 차지하게 두면 카드 밑에 페이지 배경색 여백이
+            크게 남아 Figma보다 훨씬 짧아 보였다(QA 지적). flex-1로 남는 세로 공간을 카드
+            자신이 흡수하게 해서 아래 spacer 없이도 카드가 버튼 바로 위까지 늘어나게 한다. */}
+        <Card className="flex flex-1 flex-col gap-[48px] p-6">
           <div className="flex flex-col gap-3">
-            <Text variant="headline-md" emphasis>
+            {/* Figma 823:52713(Desktop-118) 실측: "Emphasis/Headline/Large"(32px). */}
+            <Text variant="headline-lg" emphasis>
               방금 수행한 업무, 어떠셨나요?
             </Text>
             <Text variant="title-lg" className="text-neutral-600">
@@ -94,7 +102,7 @@ export function SelfAssessment() {
             ))}
 
             <div className="flex flex-col gap-3">
-              <Text variant="title-md" emphasis className="text-green-900">
+              <Text variant="title-lg" emphasis className="text-green-900">
                 업무 중 부담을 느낀 부분이 있었나요?
               </Text>
               <div className="rounded-xl border border-neutral-600 p-6">

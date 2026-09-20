@@ -14,7 +14,7 @@ interface RatingRowProps<T extends string> {
 export function RatingRow<T extends string>({ label, value, onChange, scale }: RatingRowProps<T>) {
   return (
     <div className="flex flex-col gap-3">
-      <Text variant="title-md" emphasis className="text-green-900">
+      <Text variant="title-lg" emphasis className="text-green-900">
         {label}
       </Text>
       <div className="flex gap-3">
@@ -25,7 +25,7 @@ export function RatingRow<T extends string>({ label, value, onChange, scale }: R
               key={option}
               type="button"
               onClick={() => onChange(option)}
-              className={`h-[72px] flex-1 rounded-xl px-3 py-6 text-center text-title-md transition-colors ${
+              className={`h-[72px] flex-1 rounded-xl px-3 py-6 text-center text-title-lg transition-colors ${
                 selected
                   ? 'bg-green-300 font-semibold text-neutral-900'
                   : 'border border-green-900 text-neutral-500 hover:bg-green-50'
