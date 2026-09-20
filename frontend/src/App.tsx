@@ -72,14 +72,16 @@ const SCREENS: Record<Exclude<Stage, 'report'>, ComponentType> = {
   self_assessment: SelfAssessment,
 }
 
-// 임시 개발용 StageJumper가 쓰는 세션2 단계 목록/라벨.
+// 임시 개발용 StageJumper가 쓰는 세션2 단계 목록/라벨. branch_select("방향 선택")는 FinalFeedback.tsx로
+// 병합돼 이제 정상 플로우로는 도달하지 않는 화면이라(FinalFeedback.tsx 주석 참고) 목록에서 뺌 —
+// Stage enum 자체는 다른 에이전트가 동시에 건드릴 수 있어 그대로 두고(BranchSelect.tsx도 남겨둠),
+// 이 개발용 점프 목록만 정리한다.
 const SESSION2_STAGES: { value: Stage; label: string }[] = [
   { value: 'brief', label: '브리프' },
   { value: 'materials', label: '자료탐색' },
   { value: 'workspace', label: '관계자 협업' },
   { value: 'senior_feedback', label: '1차 피드백' },
   { value: 'final_feedback', label: '최종 피드백' },
-  { value: 'branch_select', label: '방향 선택' },
   { value: 'vendor_compare', label: '업체 비교' },
   { value: 'self_assessment', label: '자기 평가' },
   { value: 'report', label: '직무 리포트' },
