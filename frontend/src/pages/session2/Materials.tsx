@@ -52,7 +52,9 @@ export function Materials() {
   const goTo = useSession((s) => s.goTo)
   const [selectedDoc, setSelectedDoc] = useState<SpecDoc>('spec_form')
   const viewer = VIEWER_CONTENT[selectedDoc]
-  const viewerFileName = SPEC_DOCS.find((d) => d.key === selectedDoc)?.fileName ?? viewer.title
+  // 다운로드 대상은 실제 문서가 아니라 참고 이미지(PNG)라서, 목록에 보이는 표시용 파일명
+  // 그대로("...docs")를 download 속성에 쓰면 확장자가 실제 내용물과 달라 열리지 않는다.
+  const viewerFileName = `${SPEC_DOCS.find((d) => d.key === selectedDoc)?.tagLabel ?? viewer.title}.png`
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
