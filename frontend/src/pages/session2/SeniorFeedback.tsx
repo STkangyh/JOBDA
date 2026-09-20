@@ -31,10 +31,13 @@ export function SeniorFeedback() {
       <Sidebar active="work" topItems={['apps', 'work', 'history']} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="flex flex-col gap-4">
+        {/* Workspace.tsx와 동일한 이유(사이드바는 부모 행의 기본 stretch로 뷰포트 전체 높이를
+            받는데 이 래퍼는 flex-1이 없어 헤더+그리드 콘텐츠 높이만큼만 차지해 사이드바보다
+            짧아 보였음) — flex-1/min-h-0을 그리드까지 끌고 내려간다. */}
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
           <IndicatorHeader current="관계자 협업" gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" />
 
-          <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
+          <div className="grid min-h-0 flex-1 grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
             <Messenger defaultActive="senior" intro={{ persona: 'senior', text: SENIOR_INTRO }} />
 
             <div className="flex flex-col gap-[18px]">
@@ -78,22 +81,22 @@ export function SeniorFeedback() {
                   )}
                 </div>
               </Card>
-
-              {/* 메신저/업무노트는 h-full로 그리드 행 높이만큼 늘어나는데 이 칸은 카드 하나만큼만
-                  차지해서 버튼이 카드 바로 아래 붙고 그 밑은 빈 여백으로 남았음 — 카드는 그대로
-                  두고 이 빈 칸이 남는 세로 공간을 흡수해서 버튼을 칸 맨 아래로 밀어낸다. */}
-              <div className="flex-1" />
-
-              <PrimaryCTAButton onClick={() => goTo('workspace')}>시방서 수정하러 가기</PrimaryCTAButton>
             </div>
 
-            <WorkNotesCard
-              groups={[
-                { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-                { label: '제조 제약', tags: NOTE_TAGS.constraints },
-                { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
-              ]}
-            />
+            {/* Figma(Workspace.tsx 1184:11043 실측과 동일 패턴) — 제출류 버튼은 시방서 카드 밑이
+                아니라 업무노트 칸 밑에 붙고, 업무노트 카드 자체는 메신저보다 버튼 높이만큼
+                짧다. WorkNotesCard의 flex-1이 남는 세로 공간을 흡수해서 버튼을 칸 맨 아래로
+                붙이고, 이 래퍼의 h-full이 메신저와 전체 높이를 맞춘다. */}
+            <div className="flex h-full flex-col gap-[18px]">
+              <WorkNotesCard
+                groups={[
+                  { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
+                  { label: '제조 제약', tags: NOTE_TAGS.constraints },
+                  { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
+                ]}
+              />
+              <PrimaryCTAButton onClick={() => goTo('workspace')}>시방서 수정하러 가기</PrimaryCTAButton>
+            </div>
           </div>
         </div>
       </div>

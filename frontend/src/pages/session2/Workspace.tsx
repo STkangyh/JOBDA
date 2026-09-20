@@ -472,41 +472,46 @@ export function Workspace() {
       <Sidebar active="work" topItems={['apps', 'work', 'history']} className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="flex flex-col gap-4">
+        {/* 사이드바는 부모 행(align-items 기본값 stretch)을 따라 자동으로 뷰포트 전체 높이만큼
+            늘어나는데, 이 안쪽 래퍼는 flex-1이 없어서 헤더+그리드 콘텐츠 높이만큼만 차지하고
+            그 아래는 배경색만 이어져 사이드바보다 짧아 보였다 — flex-1로 남는 세로 공간을
+            래퍼까지, min-h-0로 그리드까지 끌고 내려가야 Messenger/WorkNotesCard의 h-full이
+            실제로 사이드바와 같은 높이를 받는다. */}
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
           <IndicatorHeader
             current="관계자 협업"
             gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]"
             loading={isSubmitting}
           />
 
-          <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
+          <div className="grid min-h-0 flex-1 grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
             <Messenger defaultActive="senior" intro={{ persona: 'senior', text: SENIOR_INTRO }} />
 
             <div className="flex flex-col gap-[18px]">
               <DesignRecapCard editingFinal={editingFinal} remaining={remaining} />
               {editingFinal ? <FinalSpecCard /> : <DraftPartsCard />}
-              {/* 메신저/업무노트가 h-full로 그리드 행 높이만큼 늘어나는 것과 맞춰(다른 세션2
-                  화면들과 동일한 패턴), 카드들은 원래 크기 그대로 두고 이 빈 칸이 남는 세로
-                  공간을 흡수해서 제출 버튼을 항상 칸 맨 아래로 붙인다. 예전에는 이 버튼을
-                  업무노트 카드와 같은 칸에 두고 업무노트의 flex-1로 공간을 나눴는데, 그러면
-                  업무노트 카드 자체가 메신저보다 버튼 높이만큼 짧아져 버튼이 위로 올라와
-                  업무노트 영역을 침범하는 것처럼 보였다 — 업무노트는 항상 자기 칸에 혼자 있어야
-                  h-full로 메신저와 정확히 같은 높이가 된다. */}
-              <div className="flex-1" />
+            </div>
+
+            {/* Figma(node 1184:11043) 실측: 제출 버튼은 시방서 카드 밑이 아니라 업무노트 칸
+                밑에 붙어 있고, 업무노트 카드 자체는 메신저보다 버튼 높이만큼 짧다 — 예전엔 그
+                짧아지는 모양을 침범처럼 보이는 버그로 보고 버튼을 가운데 칸으로 옮겼었는데,
+                실제 디자인이 의도한 모습이었다. WorkNotesCard의 flex-1이 남는 세로 공간을
+                흡수해서 버튼을 칸 맨 아래로 붙이고, 이 래퍼의 h-full이 메신저와 전체 높이를
+                맞춘다. */}
+            <div className="flex h-full flex-col gap-[18px]">
+              <WorkNotesCard
+                groups={[
+                  { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
+                  { label: '제조 제약', tags: NOTE_TAGS.constraints },
+                  { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
+                ]}
+              />
               {editingFinal ? (
                 <FinalSubmitButton isSubmitting={isSubmitting} setIsSubmitting={setIsSubmitting} />
               ) : (
                 <DraftSubmitButton isSubmitting={isSubmitting} setIsSubmitting={setIsSubmitting} />
               )}
             </div>
-
-            <WorkNotesCard
-              groups={[
-                { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-                { label: '제조 제약', tags: NOTE_TAGS.constraints },
-                { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
-              ]}
-            />
           </div>
         </div>
       </div>
