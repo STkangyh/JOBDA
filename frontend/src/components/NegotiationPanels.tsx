@@ -4,6 +4,7 @@ import { Text } from './Text'
 import { ArrowUpwardIcon, WarningIcon } from './icons'
 import { useSession } from '../store/session'
 import { PERSONA_LABEL, PERSONA_SENDER_NAME, type Persona } from '../types'
+import { track, useTrackView } from '../lib/analytics'
 
 function formatTime(t: number): string {
   const d = new Date(t)
@@ -50,6 +51,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   )
 
   const history = chatHistory[active]
+  useTrackView({ kind: 'tab', name: `messenger:${active}` })
   const showIntro = intro && intro.persona === active
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -198,7 +200,10 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
               </Text>
               <button
                 type="button"
-                onClick={() => send(failed.text)}
+                onClick={() => {
+                  track('chat_retry', { actor: failed.persona })
+                  send(failed.text)
+                }}
                 className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-error-300 transition-colors hover:bg-error-100/40"
               >
                 재시도

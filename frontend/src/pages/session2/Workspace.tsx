@@ -11,6 +11,7 @@ import { useSession, feedbackSessionsRemaining } from '../../store/session'
 import { DRAFT_DESCRIPTION, SENIOR_INTRO, FEEDBACK_PASS, FEEDBACK_FAIL, SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
 import type { PartSpecSize } from '../../types'
 import productImage from '../../assets/illustrations/product-angle-1.png'
+import { useTrackView } from '../../lib/analytics'
 
 // Figma "관계자 협업" 라운드 — 초안 작성은 823:53712~823:54461("Desktop - 123~128", 부품 탭
 // 6개 + 탭별 독립 시방서), 선임 피드백 반영 후 최종본 수정은 823:54925("Desktop - 105", "시방서
@@ -460,6 +461,7 @@ export function Workspace() {
   const finalSubmitted = useSession((s) => s.finalSubmitted)
   const currentStage = useSession((s) => s.currentStage)
   const editingFinal = draftSubmitted && !finalSubmitted
+  useTrackView({ kind: 'panel', name: `workspace_mode:${editingFinal ? 'final' : 'draft'}` })
   const remaining = feedbackSessionsRemaining(currentStage, editingFinal)
   // 초안/수정안 제출 버튼의 로딩 상태 — 버튼 자체(FinalSubmitButton/DraftSubmitButton)뿐 아니라
   // 헤더의 로딩 스피너(IndicatorHeader loading)도 같이 반응해야 해서 여기(부모)로 끌어올렸다.

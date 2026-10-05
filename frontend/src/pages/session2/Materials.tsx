@@ -8,6 +8,7 @@ import { CloudSavedIcon, DownloadIcon, ProfileIcon } from '../../components/icon
 import { useSession } from '../../store/session'
 import specFormReference from '../../assets/illustrations/spec-form-reference.png'
 import limitSampleReference from '../../assets/illustrations/limit-sample-reference.png'
+import { track, useTrackView } from '../../lib/analytics'
 
 // Figma 823:57686/1059:8248(Desktop-116)·856:20439/1059:8245(Desktop-146)로 재확인: "자료함"
 // 태그는 정적 나열이 아니라 6개 참고 카테고리 + 실제로 전환되는 2개(시방서 양식/한도 견본
@@ -52,6 +53,7 @@ export function Materials() {
   const goTo = useSession((s) => s.goTo)
   const [selectedDoc, setSelectedDoc] = useState<SpecDoc>('spec_form')
   const viewer = VIEWER_CONTENT[selectedDoc]
+  useTrackView({ kind: 'panel', name: `materials_doc:${selectedDoc}` })
   // 다운로드 대상은 실제 문서가 아니라 참고 이미지(PNG)라서, 목록에 보이는 표시용 파일명
   // 그대로("...docs")를 download 속성에 쓰면 확장자가 실제 내용물과 달라 열리지 않는다.
   const viewerFileName = `${SPEC_DOCS.find((d) => d.key === selectedDoc)?.tagLabel ?? viewer.title}.png`
@@ -145,6 +147,7 @@ export function Materials() {
                 <a
                   href={viewer.image}
                   download={viewerFileName}
+                  onClick={() => track('download', { doc: selectedDoc })}
                   aria-label={`${viewerFileName} 다운로드`}
                   className="flex size-6 shrink-0 items-center justify-center text-neutral-400 transition-colors hover:text-neutral-500 active:text-neutral-700"
                 >

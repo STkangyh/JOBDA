@@ -16,6 +16,7 @@ import { Sidebar, type SidebarItem } from '../../components/Sidebar'
 import { AppHeader } from '../../components/AppHeader'
 import { Text } from '../../components/Text'
 import { ArrowBackIosIcon, WorkIcon, ClockLoaderIcon } from '../../components/icons'
+import { track } from '../../lib/analytics'
 
 // Figma 744:23143 사이드바 실측: apps/work/history(검색 아이콘 없음, 브리프와 다름).
 const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
@@ -70,6 +71,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
   const selectedJob = NEW_ARRIVAL[selected]
 
   const selectCard = (i: number) => {
+    track('job_select', { job: NEW_ARRIVAL[i].id, ready: !!NEW_ARRIVAL[i].real, source: 'new_arrival' })
     setSelected(i)
     if (NEW_ARRIVAL[i].real) onOpenJob()
   }
@@ -188,7 +190,11 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                 <button
                   key={job.id}
                   type="button"
-                  onClick={job.real ? onOpenJob : showNotReadyToast}
+                  onClick={() => {
+                    track('job_select', { job: job.id.replace(/^top-/, ''), ready: !!job.real, source: 'top10', rank })
+                    if (job.real) onOpenJob()
+                    else showNotReadyToast()
+                  }}
                   className="relative flex h-[216px] items-end overflow-hidden rounded-xl text-left transition-[filter] hover:brightness-110"
                 >
                   <img src={job.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />

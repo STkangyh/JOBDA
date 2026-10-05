@@ -7,6 +7,7 @@ import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { DotMatrix } from '../../components/DotMatrix'
 import { BrandLogoBox } from '../../components/BrandLogoBox'
 import { RATING_SCALE } from '../../types'
+import { track } from '../../lib/analytics'
 
 // Figma "Desktop - 121"(823:52946, 파일 x6feHLgVMyg8sh8C2jVPE1) 전면 재실측 — 예전 구현은
 // 실제로는 이 프레임이 아니라 종합 리포트(ComprehensiveReport.tsx, Desktop-101)의 다크 테마를
@@ -192,11 +193,18 @@ export function Report() {
               <Button
                 variant="secondary"
                 className="h-[72px] w-full !rounded-xl !border-0 !bg-neutral-200 !text-2xl !text-neutral-600"
-                onClick={() => navigate('/')}
+                onClick={() => {
+                  track('cta', { name: 'go_home' })
+                  navigate('/')
+                }}
               >
                 홈으로 가기
               </Button>
-              <Button className="h-[72px] w-full !rounded-xl !text-2xl" onClick={() => navigate('/journey-map')}>
+              <Button className="h-[72px] w-full !rounded-xl !text-2xl" onClick={() => {
+                  track('cta', { name: 'next_session' })
+                  navigate('/journey-map')
+                }}
+              >
                 다음 세션으로 이동
               </Button>
             </div>

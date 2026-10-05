@@ -5,6 +5,7 @@ import { Text } from '../../components/Text'
 import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { CancelIcon } from '../../components/icons'
 import { PROCESS_STEPS, SESSION2_STEP_INDEX } from '../../data/processSteps'
+import { track } from '../../lib/analytics'
 
 // 세션1(6번, 모형 제작 및 설계 검토)은 배포에서 제외하기로 결정 — 사용자 요청. 8번(시방서
 // 작성 및 설계 이관 = cmf_outsourcing/세션2)만 선택 가능하게 함. /session1 라우트 자체는
@@ -90,7 +91,11 @@ export function JobDetail({
         </div>
       </div>
 
-      <PrimaryCTAButton disabled={selected === null} onClick={() => selected !== null && onSubmit(selected)}>
+      <PrimaryCTAButton disabled={selected === null} onClick={() => {
+          if (selected === null) return
+          track('job_start', { step: selected })
+          onSubmit(selected)
+        }}>
         업무 시작하기
       </PrimaryCTAButton>
     </div>

@@ -10,6 +10,7 @@ import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
 import { SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
 import type { VendorOption } from '../../types'
+import { useTrackView } from '../../lib/analytics'
 
 const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 
@@ -165,6 +166,7 @@ export function VendorCompare() {
   const remaining = feedbackSessionsRemaining(currentStage, false)
 
   const [phase, setPhase] = useState<'research' | 'select'>('research')
+  useTrackView({ kind: 'panel', name: `vendor_phase:${vendorProposed ? 'feedback' : phase}` })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const complete = vendors.every(

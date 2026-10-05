@@ -8,6 +8,7 @@ import { ProfileSpectrum } from '../../components/ProfileSpectrum'
 import { WorkProcessChain } from '../../components/WorkProcessChain'
 import { SESSION1_STEP_INDEX } from '../../data/processSteps'
 import { useSession1 } from '../../store/session1'
+import { track } from '../../lib/analytics'
 
 const NEXT_EXPLORATIONS = ['동일 직무의 다른 업무', '유사 직무 비교', '필요한 기초 역량 체험', '현직자 인터뷰, 교육과정 추천']
 // Figma 744:17446 사이드바 실측: apps/search/work/history 4개, history가 active.
@@ -133,10 +134,22 @@ export function Session1Report() {
         </Text>
 
         <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => navigate('/')}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              track('cta', { name: 'go_explore' })
+              navigate('/')
+            }}
+          >
             탐색 페이지로
           </Button>
-          <Button variant="secondary" onClick={() => navigate('/journey-map')}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              track('cta', { name: 'journey_map' })
+              navigate('/journey-map')
+            }}
+          >
             체험맵 보기
           </Button>
           <Button onClick={() => resetSession()}>다시 체험하기</Button>

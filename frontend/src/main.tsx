@@ -4,6 +4,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.tsx'
+import { ANALYTICS_ENABLED } from './lib/analytics/analytics'
+
+if (ANALYTICS_ENABLED) {
+  void import('./lib/analytics/supabase').then((m) => m.startSupabaseAnalytics())
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

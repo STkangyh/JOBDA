@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { markNextScreenVia } from '../lib/analytics'
 
 // 임시 개발용 도구 — 세션 플로우를 처음부터 다시 밟지 않고 특정 단계로 바로 점프해서
 // 테스트/데모하기 위한 버튼. Figma 근거 없음, 나중에 필요 없어지면 통째로 지우면 됨.
@@ -20,6 +21,7 @@ export function StageJumper<T extends string>({ stages, current, onJump }: Stage
               key={s.value}
               type="button"
               onClick={() => {
+                if (s.value !== current) markNextScreenVia('jumper')
                 onJump(s.value)
                 setOpen(false)
               }}

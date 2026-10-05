@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { logChat, track } from '../lib/analytics'
 import { chat as apiChat, report as apiReport, sessionLog as apiSessionLog } from '../api/client'
 import { PERSONA_HEADLINE_FIXED } from '../types'
 import type {
@@ -264,7 +265,36 @@ export const useSession = create<SessionState & SessionActions>()(
       sendMessage: async (persona, message) => {
         const s = get()
         const history = s.chatHistory[persona]
-        const res = await apiChat({ persona, history, message })
+        // 활동 이벤트(ask)엔 원문을 넣지 않고 원문은 chat_logs에 따로 저장 — message_id로 1:1 연결.
+        const messageId = crypto.randomUUID()
+        const startedAt = performance.now()
+        let res: Awaited<ReturnType<typeof apiChat>>
+        try {
+          res = await apiChat({ persona, history, message })
+        } catch (err) {
+          track('chat_error', { actor: persona, message_id: messageId, length: message.length })
+          logChat({
+            message_id: messageId,
+            persona,
+            message,
+            reply: null,
+            intent: null,
+            disclose: null,
+            status: 'llm_error',
+            latency_ms: Math.round(performance.now() - startedAt),
+          })
+          throw err
+        }
+        logChat({
+          message_id: messageId,
+          persona,
+          message,
+          reply: res.reply,
+          intent: res.intent,
+          disclose: res.disclose,
+          status: 'ok',
+          latency_ms: Math.round(performance.now() - startedAt),
+        })
 
         const askedCapability = s.askedCapability || res.disclose.includes('inhouse_capability') || res.disclose.includes('sheet_lead_time')
         const askedBudget =
@@ -289,7 +319,7 @@ export const useSession = create<SessionState & SessionActions>()(
           askedCapability,
           askedBudget,
         }))
-        pushLog(set, get, 'ask', { actor: persona, intent: res.intent })
+        pushLog(set, get, 'ask', { actor: persona, intent: res.intent }, { message_id: messageId, length: message.length })
         return res.reply
       },
 
@@ -383,12 +413,19 @@ export const useSession = create<SessionState & SessionActions>()(
         const s = get()
         const scores = computeScores(s)
         const findings = computeFindings(s)
-        const res = await apiReport({
-          scores,
-          branch: s.branch ?? 'wood_dropped',
-          findings,
-          action_logs: s.actionLogs,
-        })
+        track('submit', { target: 'self_assessment', ...s.selfAssessment, burdenNote: undefined, burden_length: s.selfAssessment.burdenNote.trim().length })
+        let res: Awaited<ReturnType<typeof apiReport>>
+        try {
+          res = await apiReport({
+            scores,
+            branch: s.branch ?? 'wood_dropped',
+            findings,
+            action_logs: s.actionLogs,
+          })
+        } catch (err) {
+          track('report_error')
+          throw err
+        }
         // session1(store/session1.ts)의 finishAssessment와 동일한 패턴: personaHeadline/burdenNote는
         // v4 백엔드 응답에 없는 필드라 여기서 채워 넣는다. ReportRequest에 selfAssessment가 없어
         // client.ts 경계에서는 burdenNote를 알 수 없으므로, selfAssessment에 접근 가능한 이
@@ -399,6 +436,7 @@ export const useSession = create<SessionState & SessionActions>()(
           burdenNote: s.selfAssessment.burdenNote.trim(),
         }
         set({ report, currentStage: 'report' })
+        track('session_complete', { branch: s.branch })
         await apiSessionLog({ session_id: s.sessionId, payload: get() })
       },
 
@@ -438,8 +476,10 @@ function pushLog(
   get: () => SessionState,
   type: ActionLogType,
   extra: Partial<ActionLog>,
+  trackProps: Record<string, unknown> = {},
 ) {
   const s = get()
   const entry: ActionLog = { seq: s.actionLogs.length + 1, t: Date.now(), type, ...extra }
   set((state) => ({ actionLogs: [...state.actionLogs, entry] }))
+  track(type, { ...extra, ...trackProps })
 }

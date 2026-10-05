@@ -9,6 +9,7 @@ import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
 import { WarningIcon } from '../../components/icons'
 import { S1_ROUNDS, S1_PERSONA_LABEL, useSession1, type S1Persona } from '../../store/session1'
+import { useTrackView } from '../../lib/analytics'
 
 const PERSONAS: S1Persona[] = ['engineering', 'purchasing', 'senior']
 // Figma 744:16874 사이드바 실측: apps/work/history(검색 아이콘 없음), work가 active.
@@ -28,6 +29,7 @@ function Messenger() {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const activePersona = useSession1((s) => s.activePersona)
+  useTrackView({ kind: 'tab', name: `messenger:${activePersona}` })
   const setActivePersona = useSession1((s) => s.setActivePersona)
   const chatHistory = useSession1((s) => s.chatHistory)
   const sendMessage = useSession1((s) => s.sendMessage)
@@ -119,6 +121,7 @@ function Messenger() {
 function ReviewAndChoice({ isSubmitting, setIsSubmitting }: { isSubmitting: boolean; setIsSubmitting: (v: boolean) => void }) {
   const currentRoundIndex = useSession1((s) => s.currentRoundIndex)
   const roundAnswers = useSession1((s) => s.roundAnswers)
+  useTrackView({ kind: 'panel', name: `round:${currentRoundIndex + 1}` })
   const selectChoice = useSession1((s) => s.selectChoice)
   const setReasoning = useSession1((s) => s.setReasoning)
   const submitRound = useSession1((s) => s.submitRound)

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { logChat, track } from '../lib/analytics'
 import type { ProfileAxis } from '../types'
 import draftRound1Image from '../assets/illustrations/session1-concept-a.png'
 
@@ -206,6 +207,10 @@ export const useSession1 = create<Session1State & Session1Actions>()(
 
       sendMessage: (persona, message) => {
         const reply = mockReply(persona, message)
+        // 세션1 답변은 백엔드 없이 고정 목업이지만, 사용자가 무엇을 물었는지가 분석 가치라 원문을 남긴다.
+        const messageId = crypto.randomUUID()
+        track('ask', { actor: persona, length: message.length, message_id: messageId })
+        logChat({ message_id: messageId, persona, message, reply, intent: null, disclose: null, status: 'ok', latency_ms: null })
         set((s) => ({
           chatHistory: {
             ...s.chatHistory,
@@ -234,6 +239,8 @@ export const useSession1 = create<Session1State & Session1Actions>()(
 
       submitRound: () => {
         const i = get().currentRoundIndex
+        const answer = get().roundAnswers[i]
+        track('submit', { target: `round_${i + 1}`, choice: answer.selectedChoice, reasoning_length: answer.reasoning.trim().length })
         set((s) => {
           const roundAnswers = [...s.roundAnswers]
           roundAnswers[i] = { ...roundAnswers[i], submitted: true }
@@ -247,6 +254,7 @@ export const useSession1 = create<Session1State & Session1Actions>()(
       },
 
       confirmFinalCheck: () => {
+        track('submit', { target: 'final_check' })
         set({ finalChecked: true, currentStage: 'self_assessment' })
       },
 
@@ -324,10 +332,15 @@ export const useSession1 = create<Session1State & Session1Actions>()(
           personaHeadline,
           burdenNote: s.selfAssessment.burdenNote.trim(),
         }
+        track('submit', { target: 'self_assessment', ...s.selfAssessment, burdenNote: undefined, burden_length: s.selfAssessment.burdenNote.trim().length })
         set({ report, currentStage: 'report' })
+        track('session_complete')
       },
 
-      resetSession: () => set(initialState()),
+      resetSession: () => {
+        track('session_reset')
+        set(initialState())
+      },
     }),
     {
       name: 'coad-hackerton-session1',

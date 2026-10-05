@@ -4,6 +4,7 @@ import { useSession } from './store/session'
 import { Explore } from './pages/explore/Explore'
 import { StageJumper } from './components/StageJumper'
 import { MobileNotice } from './components/MobileNotice'
+import { ScreenTracker } from './components/ScreenTracker'
 import { AsteriskIcon } from './components/icons'
 import type { Stage } from './types'
 
@@ -115,31 +116,40 @@ function App() {
   const navigate = useNavigate()
   const isNarrow = useIsNarrowViewport()
 
-  if (isNarrow) return <MobileNotice />
+  if (isNarrow)
+    return (
+      <>
+        <ScreenTracker narrow />
+        <MobileNotice />
+      </>
+    )
 
   return (
-    <Suspense fallback={<RouteFallback />}>
-      <Routes>
-        <Route path="/" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
-        <Route path="/explore" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
-        <Route
-          path="/explore/job"
-          element={
-            <JobDetail
-              onClose={() => navigate('/')}
-              onSubmit={(stepIndex) => navigate(STEP_INDEX_TO_PATH[stepIndex] ?? '/session2')}
-            />
-          }
-        />
-        <Route path="/design-system" element={<DesignSystem />} />
-        <Route path="/proposal-writing" element={<ProposalWriting />} />
-        <Route path="/session1" element={<Session1App />} />
-        <Route path="/session2" element={<Session2Route />} />
-        <Route path="/journey-map" element={<JourneyMap />} />
-        <Route path="/comprehensive-report" element={<ComprehensiveReport />} />
-        <Route path="*" element={<ErrorPage onConfirm={() => navigate('/')} />} />
-      </Routes>
-    </Suspense>
+    <>
+      <ScreenTracker narrow={false} />
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
+          <Route path="/explore" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
+          <Route
+            path="/explore/job"
+            element={
+              <JobDetail
+                onClose={() => navigate('/')}
+                onSubmit={(stepIndex) => navigate(STEP_INDEX_TO_PATH[stepIndex] ?? '/session2')}
+              />
+            }
+          />
+          <Route path="/design-system" element={<DesignSystem />} />
+          <Route path="/proposal-writing" element={<ProposalWriting />} />
+          <Route path="/session1" element={<Session1App />} />
+          <Route path="/session2" element={<Session2Route />} />
+          <Route path="/journey-map" element={<JourneyMap />} />
+          <Route path="/comprehensive-report" element={<ComprehensiveReport />} />
+          <Route path="*" element={<ErrorPage onConfirm={() => navigate('/')} />} />
+        </Routes>
+      </Suspense>
+    </>
   )
 }
 
