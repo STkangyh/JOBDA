@@ -10,6 +10,7 @@ import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
 import { WarningIcon } from '../../components/icons'
 import { S1_ROUNDS, S1_PERSONA_LABEL, useSession1, type S1Persona } from '../../store/session1'
 import { useTrackView } from '../../lib/analytics'
+import { ChatRetentionNotice } from '../../components/ChatRetentionNotice'
 
 const PERSONAS: S1Persona[] = ['engineering', 'purchasing', 'senior']
 // Figma 744:16874 사이드바 실측: apps/work/history(검색 아이콘 없음), work가 active.
@@ -114,6 +115,7 @@ function Messenger() {
       <Text variant="caption-sm" className="text-center text-neutral-400">
         AI는 관계자의 담당 범위 안에서만 정보를 제공합니다.
       </Text>
+      <ChatRetentionNotice />
     </Card>
   )
 }

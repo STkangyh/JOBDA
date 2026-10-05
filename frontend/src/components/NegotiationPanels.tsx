@@ -5,6 +5,7 @@ import { ArrowUpwardIcon, WarningIcon } from './icons'
 import { useSession } from '../store/session'
 import { PERSONA_LABEL, PERSONA_SENDER_NAME, type Persona } from '../types'
 import { track, useTrackView } from '../lib/analytics'
+import { ChatRetentionNotice } from './ChatRetentionNotice'
 
 function formatTime(t: number): string {
   const d = new Date(t)
@@ -241,6 +242,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
         <Text variant="caption-sm" className="text-center text-neutral-400">
           AI는 관계자의 담당 범위 안에서만 정보를 제공합니다.
         </Text>
+        <ChatRetentionNotice />
       </div>
     </Card>
   )
