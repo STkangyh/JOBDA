@@ -73,9 +73,7 @@ create policy "insert own chat logs" on public.chat_logs
 revoke all on public.chat_logs from anon, authenticated;
 grant insert on public.chat_logs to authenticated;
 
--- 채팅 원문 보관 기간 90일 — pg_cron 확장(Database → Extensions)을 켠 뒤 아래를 실행한다.
--- select cron.schedule('chat-logs-retention', '0 3 * * *',
---   $$delete from public.chat_logs where created_at < now() - interval '90 days'$$);
+-- 채팅 원문 보관 기간(30일)은 20261007010000_chat_logs_retention.sql에서 pg_cron으로 설정한다.
 
 -- ─────────────────────────────────────────────────────────────
 -- 3. 분석 뷰 — API로 노출되지 않는 analytics 스키마에 둔다 (SQL Editor에서만 조회)
