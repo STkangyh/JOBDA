@@ -49,6 +49,7 @@ const Session1App = lazy(() => import('./pages/session1/Session1App').then((m) =
 const JourneyMap = lazy(() => import('./pages/JourneyMap').then((m) => ({ default: m.JourneyMap })))
 const ComprehensiveReport = lazy(() => import('./pages/ComprehensiveReport').then((m) => ({ default: m.ComprehensiveReport })))
 const ProposalWriting = lazy(() => import('./pages/session2/ProposalWriting').then((m) => ({ default: m.ProposalWriting })))
+const AdminPage = lazy(() => import('./pages/admin/AdminPage').then((m) => ({ default: m.AdminPage })))
 
 // Suspense가 청크 다운로드 중에 보여주는 전체 화면 자리표시자. 어느 라우트든 잠깐 걸치는
 // 화면이라 특정 페이지 배경색에 맞추지 않고 앱 셸의 기본 다크 배경(Explore와 동일)만 깐다.
@@ -142,6 +143,7 @@ function App() {
           />
           <Route path="/design-system" element={<DesignSystem />} />
           <Route path="/proposal-writing" element={<ProposalWriting />} />
+        <Route path="/admin" element={<AdminPage />} />
           <Route path="/session1" element={<Session1App />} />
           <Route path="/session2" element={<Session2Route />} />
           <Route path="/journey-map" element={<JourneyMap />} />
