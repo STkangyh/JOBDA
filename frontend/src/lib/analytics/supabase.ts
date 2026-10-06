@@ -1,29 +1,34 @@
-import { createClient } from '@supabase/supabase-js'
 import { startAnalytics, type Transport } from './analytics'
+import { getSupabase } from '../supabaseClient'
 
 // main.tsx에서 환경변수가 있을 때만 동적 import 된다 — supabase-js가 첫 화면 번들에 끼지 않고,
 // 환경변수가 없는 로컬/테스트에서는 분석이 아예 꺼진다(VITE_API_BASE_URL 없으면 목데이터로 도는 것과 같은 방식).
 const url = import.meta.env.VITE_SUPABASE_URL as string
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
-const supabase = createClient(url, anonKey)
-
 // 탭이 닫히는 순간(pagehide)에는 비동기 대기 없이 바로 요청을 출발시켜야 해서, 토큰은 메모리에
 // 들고 있다가 그대로 쓴다. supabase-js가 갱신할 때마다 onAuthStateChange로 따라 바뀐다.
 let accessToken: string | null = null
 
+async function signInAnonymously() {
+  const { data, error } = await getSupabase().auth.signInAnonymously()
+  if (error) throw error
+  accessToken = data.session?.access_token ?? null
+}
+
 async function ensureUser() {
-  supabase.auth.onAuthStateChange((_event, session) => {
+  const supabase = getSupabase()
+  supabase.auth.onAuthStateChange((event, session) => {
     accessToken = session?.access_token ?? null
+    // 관리자 페이지에서 로그아웃하면 세션이 비므로, 다시 익명 사용자로 돌아와야 기록이 이어진다.
+    if (event === 'SIGNED_OUT') void signInAnonymously().catch(() => {})
   })
   const { data } = await supabase.auth.getSession()
   if (data.session) {
     accessToken = data.session.access_token
     return
   }
-  const { data: anon, error } = await supabase.auth.signInAnonymously()
-  if (error) throw error
-  accessToken = anon.session?.access_token ?? null
+  await signInAnonymously()
 }
 
 // supabase-js의 insert는 keepalive를 지원하지 않아서 REST(PostgREST)를 직접 호출한다.
