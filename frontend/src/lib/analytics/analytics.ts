@@ -48,6 +48,11 @@ export const FLUSH_INTERVAL_MS = 5_000
 export const HEARTBEAT_MS = 30_000
 export const MODAL_HEARTBEAT_MS = 10_000
 export const VISIT_IDLE_MS = 30 * 60_000
+// 입력 없이 5분이 지나면 자리를 비운 것으로 보고 하트비트를 멈춘다 — 탭만 켜둔 시간은 체류가 아니고,
+// 그 시간에 쌓이는 하트비트가 저장 용량의 큰 몫을 차지한다. 입력이 다시 들어오면 다음 주기부터 재개.
+export const HEARTBEAT_IDLE_MS = 5 * 60_000
+// 스크롤·휠은 초당 수십 번 발생하므로 활동 시각 갱신(sessionStorage 쓰기)은 1초에 한 번만.
+const INPUT_THROTTLE_MS = 1_000
 const MAX_QUEUE = 1_000
 // keepalive 요청은 브라우저가 본문 합계 64KB로 제한하므로 닫히는 순간엔 작게 나눠 보낸다.
 // 채팅 행은 AI 답변 원문이 들어 있어 이벤트보다 훨씬 커서 더 작게 자른다.
@@ -187,6 +192,9 @@ export function track(name: string, props: Record<string, unknown> = {}) {
   ensureVisit(now)
   enqueue(name, props, now)
   if (!PASSIVE_EVENTS.has(name)) touch(now)
+  // 어떤 이벤트든 "아직 여기 있다"는 증거라 하트비트와 같은 역할을 한다 — 마지막 이벤트로부터
+  // 한 주기 뒤로 다시 잡아서, 이벤트가 이어지는 동안엔 하트비트를 따로 보내지 않는다(오차 범위는 같음).
+  if (name !== 'heartbeat') scheduleHeartbeat()
 }
 
 export function logChat(input: ChatLogInput) {
@@ -223,7 +231,6 @@ export function openView(kind: ViewKind, name: ViewName): (how: CloseHow) => voi
   const view: OpenView = { id: ++s.viewSeq, kind, name, openedAt: Date.now(), closed: false }
   s.views.push(view)
   track('view_open', { kind, view: name })
-  if (kind === 'modal') scheduleHeartbeat()
   return (how: CloseHow) => closeView(view, how)
 }
 
@@ -246,8 +253,7 @@ function scheduleHeartbeat() {
   s.heartbeatTimer = null
   if (!s.transport || s.hidden) return
   s.heartbeatTimer = setTimeout(() => {
-    // 30분 넘게 아무 행동이 없으면 화면만 켜둔 상태로 보고 하트비트를 멈춘다(끝없이 이어지는 방문 방지).
-    if (Date.now() - s.lastActive <= VISIT_IDLE_MS) track('heartbeat')
+    if (Date.now() - s.lastActive <= HEARTBEAT_IDLE_MS) track('heartbeat')
     scheduleHeartbeat()
   }, currentHeartbeatMs())
 }
@@ -304,7 +310,8 @@ function onPageHide() {
 }
 
 function onUserInput() {
-  if (s.visitId) touch(Date.now())
+  const now = Date.now()
+  if (s.visitId && now - s.lastActive >= INPUT_THROTTLE_MS) touch(now)
 }
 
 // main.tsx는 첫 렌더 뒤에 비동기로 분석을 켠다 — 그 사이 앱이 이미 정해둔 화면·흐름·열린 뷰는
@@ -323,11 +330,16 @@ export function startAnalytics(transport: Transport): () => void {
   window.addEventListener('pagehide', onPageHide)
   window.addEventListener('pointerdown', onUserInput, { passive: true })
   window.addEventListener('keydown', onUserInput, { passive: true })
+  // 자료를 읽으며 스크롤만 하는 사용자도 자리에 있는 것으로 본다.
+  window.addEventListener('wheel', onUserInput, { passive: true })
+  window.addEventListener('touchmove', onUserInput, { passive: true })
   s.cleanup = () => {
     document.removeEventListener('visibilitychange', onVisibility)
     window.removeEventListener('pagehide', onPageHide)
     window.removeEventListener('pointerdown', onUserInput)
     window.removeEventListener('keydown', onUserInput)
+    window.removeEventListener('wheel', onUserInput)
+    window.removeEventListener('touchmove', onUserInput)
   }
   return stopTransport
 }

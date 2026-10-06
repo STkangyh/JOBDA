@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   FLUSH_INTERVAL_MS,
+  HEARTBEAT_IDLE_MS,
   HEARTBEAT_MS,
   MODAL_HEARTBEAT_MS,
   VISIT_IDLE_MS,
@@ -191,9 +192,35 @@ describe('analytics core', () => {
     const after = sent.filter((e) => e.visit_id !== firstVisit)
     expect(after.map((e) => e.name)).toEqual(['screen_view', 'click'])
     expect(after[0]).toMatchObject({ screen: 'session2/vendor_compare', props: { resumed: true } })
-    // 유휴 상태에선 하트비트를 멈춰서, 탭만 켜둔 채 끝없이 이어지는 방문이 생기지 않는다.
+    // 자리를 비운 뒤 5분이 지나면 하트비트를 멈춰서, 탭만 켜둔 30분 동안 60개가 아니라 10개만 쌓인다.
     const idleBeats = sent.filter((e) => e.visit_id === firstVisit && e.name === 'heartbeat')
-    expect(idleBeats.length).toBeLessThanOrEqual(VISIT_IDLE_MS / HEARTBEAT_MS)
+    expect(idleBeats).toHaveLength(HEARTBEAT_IDLE_MS / HEARTBEAT_MS)
+  })
+
+  it('skips heartbeats while other events keep arriving — any event already proves the user is there', async () => {
+    startAnalytics(transport)
+    setScreen('session2/workspace')
+    const beats = () => __testing.queue().filter((e) => e.name === 'heartbeat').length
+    for (let i = 0; i < 6; i++) {
+      vi.advanceTimersByTime(HEARTBEAT_MS - 5_000)
+      track('ask')
+    }
+    expect(beats()).toBe(0)
+    vi.advanceTimersByTime(HEARTBEAT_MS)
+    expect(beats()).toBe(1)
+  })
+
+  it('stops beating after 5 minutes without input and resumes on the next pointer, key, or scroll', async () => {
+    startAnalytics(transport)
+    setScreen('session2/materials')
+    const beats = () => __testing.queue().filter((e) => e.name === 'heartbeat').length
+
+    vi.advanceTimersByTime(HEARTBEAT_IDLE_MS + HEARTBEAT_MS * 4)
+    expect(beats()).toBe(HEARTBEAT_IDLE_MS / HEARTBEAT_MS)
+
+    window.dispatchEvent(new Event('wheel'))
+    vi.advanceTimersByTime(HEARTBEAT_MS)
+    expect(beats()).toBe(HEARTBEAT_IDLE_MS / HEARTBEAT_MS + 1)
   })
 
   it('keeps events and retries on the next tick when sending fails', async () => {
