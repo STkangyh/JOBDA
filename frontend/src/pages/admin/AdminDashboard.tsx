@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { DailyColumns, FunnelBars, Meter } from './charts'
+import { UserTestSection } from './UserTestSection'
 import {
   CLOSE_LABELS,
   KIND_LABELS,
@@ -11,6 +12,7 @@ import {
   formatPct,
   screenLabel,
   viewLabel,
+  type ActivityRow,
   type AdminReport,
   type Period,
 } from './report'
@@ -78,9 +80,10 @@ interface Props {
   period: Period
   onPeriod: (p: Period) => void
   loading: boolean
+  loadTimeline: (sessionId: string) => Promise<ActivityRow[]>
 }
 
-export function AdminDashboard({ report, period, onPeriod, loading }: Props) {
+export function AdminDashboard({ report, period, onPeriod, loading, loadTimeline }: Props) {
   const { overview } = report
   const completion = overview.sessions_started ? (overview.sessions_completed / overview.sessions_started) * 100 : null
   const daily = fillDays(report.daily, period)
@@ -113,6 +116,8 @@ export function AdminDashboard({ report, period, onPeriod, loading }: Props) {
           <StatTile label="체험 완료" value={formatCount(overview.sessions_completed)} hint="리포트 생성까지" />
           <StatTile label="완료율" value={formatPct(completion == null ? null : Math.round(completion * 10) / 10)} hint="완료 ÷ 시작" />
         </div>
+
+        <UserTestSection report={report} loadTimeline={loadTimeline} />
 
         <Section title="일별 방문" caption="막대에 마우스를 올리면 그날의 사용자·체험 수를 볼 수 있어요.">
           <DailyColumns rows={daily} />

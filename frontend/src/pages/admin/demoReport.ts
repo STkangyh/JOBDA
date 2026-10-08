@@ -1,4 +1,4 @@
-import { kstDay, type AdminReport } from './report'
+import { kstDay, type ActivityRow, type AdminReport, type UtSession } from './report'
 
 // 개발 서버 /admin?demo 전용 샘플 — 실제 데이터 없이 화면 배치·라벨·차트를 확인하는 용도.
 export function demoReport(now = Date.now()): AdminReport {
@@ -52,5 +52,55 @@ export function demoReport(now = Date.now()): AdminReport {
       { screen: 'session2/workspace', view: 'workspace_mode:draft', last_action: 'chat_error', visits: 9 },
       { screen: 'session1/round', view: 'round:2', last_action: 'submit', visits: 8 },
     ],
+    ut_sessions: demoUtSessions(now),
+    ut_stages: [
+      { flow: 's1', screen: 'session1/brief', sessions: 4, median_s: 95 },
+      { flow: 's1', screen: 'session1/materials', sessions: 4, median_s: 160 },
+      { flow: 's1', screen: 'session1/round', sessions: 4, median_s: 620 },
+      { flow: 's1', screen: 'session1/self_assessment', sessions: 3, median_s: 140 },
+      { flow: 's2', screen: 'session2/brief', sessions: 3, median_s: 110 },
+      { flow: 's2', screen: 'session2/workspace', sessions: 3, median_s: 905 },
+      { flow: 's2', screen: 'session2/vendor_compare', sessions: 2, median_s: 330 },
+    ],
   }
+}
+
+function demoUtSessions(now: number): UtSession[] {
+  const at = (minAgo: number) => new Date(now - minAgo * 60_000).toISOString()
+  const row = (p: string, flow: 's1' | 's2', ago: number, status: UtSession['status'], dur: number, exit: string | null, messages: number, errors: number): UtSession => ({
+    participant: p,
+    session_id: `00000000-0000-0000-0000-${String(ago).padStart(12, '0')}`,
+    flow,
+    started_at: at(ago),
+    completed_at: status === 'completed' ? at(ago - dur / 60) : null,
+    last_at: at(ago - dur / 60),
+    status,
+    time_on_task_s: dur,
+    exit_screen: exit,
+    messages,
+    system_errors: errors,
+    stage_seconds: {},
+  })
+  return [
+    row('P04', 's2', 20, 'in_progress', 840, null, 6, 0),
+    row('P03', 's2', 90, 'exited', 1310, 'session2/workspace', 9, 2),
+    row('P02', 's1', 180, 'completed', 1490, null, 7, 0),
+    row('P01', 's1', 300, 'completed', 1720, null, 11, 1),
+  ]
+}
+
+export function demoTimeline(now = Date.now()): ActivityRow[] {
+  const t = (sec: number) => new Date(now - 3_600_000 + sec * 1000).toISOString()
+  return [
+    { ts: t(0), activity: 'session_start', screen: 'session1/brief', detail: 'session1/brief' },
+    { ts: t(95), activity: 'material_open', screen: 'session1/materials', detail: 'materials_doc:concept_a' },
+    { ts: t(130), activity: 'material_open', screen: 'session1/materials', detail: 'materials_doc:design_guide' },
+    { ts: t(260), activity: 'stakeholder_open', screen: 'session1/round', detail: 'messenger:engineering' },
+    { ts: t(300), activity: 'message_send', screen: 'session1/round', detail: 'engineering' },
+    { ts: t(420), activity: 'decision_select', screen: 'session1/round', detail: 'round_1' },
+    { ts: t(510), activity: 'reason_submit', screen: 'session1/round', detail: 'round_1' },
+    { ts: t(1300), activity: 'self_eval_start', screen: 'session1/self_assessment', detail: null },
+    { ts: t(1440), activity: 'report_view', screen: 'session1/report', detail: null },
+    { ts: t(1490), activity: 'session_complete', screen: 'session1/report', detail: null },
+  ]
 }

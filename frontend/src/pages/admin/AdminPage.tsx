@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from
 import { ANALYTICS_ENABLED } from '../../lib/analytics'
 import { getSupabase } from '../../lib/supabaseClient'
 import { AdminDashboard } from './AdminDashboard'
-import { periodSince, type AdminReport, type Period } from './report'
+import { periodSince, type ActivityRow, type AdminReport, type Period } from './report'
 
 type Status = 'checking' | 'signed_out' | 'forbidden' | 'ready' | 'error'
 
@@ -40,6 +40,12 @@ function Notice({ title, body, action }: { title: string; body: string; action?:
   )
 }
 
+async function loadTimeline(sessionId: string): Promise<ActivityRow[]> {
+  const { data, error } = await getSupabase().rpc('admin_activity_log', { p_session: sessionId })
+  if (error) throw error
+  return (data ?? []) as ActivityRow[]
+}
+
 // 개발 서버에서 /admin?demo 로 열면 샘플 데이터로 화면만 확인한다(운영 빌드에서는 코드째 빠짐).
 function useDemoReport() {
   const [demo, setDemo] = useState<AdminReport | null>(null)
@@ -53,12 +59,13 @@ function useDemoReport() {
 
 export function AdminPage() {
   const demo = useDemoReport()
+  const demoTimeline = async () => (await import('./demoReport')).demoTimeline()
   const [demoPeriod, setDemoPeriod] = useState<Period>('30d')
 
   if (demo) {
     return (
       <Shell>
-        <AdminDashboard report={demo} period={demoPeriod} onPeriod={setDemoPeriod} loading={false} />
+        <AdminDashboard report={demo} period={demoPeriod} onPeriod={setDemoPeriod} loading={false} loadTimeline={demoTimeline} />
       </Shell>
     )
   }
@@ -164,7 +171,7 @@ function ConnectedAdmin() {
 
   return (
     <Shell email={email} onSignOut={signOut}>
-      <AdminDashboard report={report} period={period} onPeriod={changePeriod} loading={loading} />
+      <AdminDashboard report={report} period={period} onPeriod={changePeriod} loading={loading} loadTimeline={loadTimeline} />
     </Shell>
   )
 }

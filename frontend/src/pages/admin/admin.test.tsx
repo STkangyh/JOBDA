@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { fillDays, periodSince, screenLabel, viewLabel, formatDuration } from './report'
 import { AdminDashboard } from './AdminDashboard'
-import { demoReport } from './demoReport'
+import { demoReport, demoTimeline } from './demoReport'
 
 describe('report helpers', () => {
   it('"오늘" starts at midnight Korea time, not UTC midnight', () => {
@@ -32,7 +32,7 @@ describe('report helpers', () => {
 
 describe('AdminDashboard', () => {
   it('shows KPIs, both funnels with the biggest drop called out, and the tables', () => {
-    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} />)
+    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} loadTimeline={async () => []} />)
     expect(screen.getByText('완료율')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '세션2 퍼널' })).toBeInTheDocument()
     expect(screen.getByText(/64명 이탈 · 가장 큰 이탈 구간/)).toBeInTheDocument()
@@ -45,9 +45,39 @@ describe('AdminDashboard', () => {
   it('changes the period from the filter row', async () => {
     const user = userEvent.setup()
     const onPeriod = vi.fn()
-    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={onPeriod} loading={false} />)
+    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={onPeriod} loading={false} loadTimeline={async () => []} />)
     await user.click(screen.getByRole('button', { name: '최근 7일' }))
     expect(onPeriod).toHaveBeenCalledWith('7d')
+  })
+})
+
+describe('UserTestSection', () => {
+  it('shows participant KPIs — completion excludes sessions still in progress', () => {
+    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} loadTimeline={async () => []} />)
+    const ut = screen.getByRole('heading', { name: '유저 테스트' }).closest('section')!
+    // 4개 세션 중 진행 중 1개 제외 → 완료 2 / 끝난 3
+    expect(within(ut).getByText('66.7%')).toBeInTheDocument()
+    expect(within(ut).getByText('세션2 · 관계자 협업에서')).toBeInTheDocument()
+    expect(within(ut).getByText('진행 중')).toBeInTheDocument()
+  })
+
+  it('opens a session\'s activity log in the planned activity names', async () => {
+    const user = userEvent.setup()
+    const loadTimeline = vi.fn(async () => demoTimeline())
+    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} loadTimeline={loadTimeline} />)
+    const ut = screen.getByRole('heading', { name: '유저 테스트' }).closest('section')!
+    await user.click(within(ut).getAllByRole('button', { name: '활동 기록' })[0])
+    const log = await screen.findByRole('list', { name: '활동 기록' })
+    expect(loadTimeline).toHaveBeenCalledWith(demoReport().ut_sessions![0].session_id)
+    expect(within(log).getByText('선택 근거 제출')).toBeInTheDocument()
+    expect(within(log).getAllByText('라운드 1')).toHaveLength(2)
+    expect(within(log).getByText('자료 · 시안 A')).toBeInTheDocument()
+    expect(within(log).getByText('메신저 · 설계팀')).toBeInTheDocument()
+  })
+
+  it('shows how to start when there are no participant sessions yet', () => {
+    render(<AdminDashboard report={{ ...demoReport(), ut_sessions: [], ut_stages: [] }} period="30d" onPeriod={() => {}} loading={false} loadTimeline={async () => []} />)
+    expect(screen.getByText(/테스트 링크에 \?ut=참가자코드/)).toBeInTheDocument()
   })
 })
 

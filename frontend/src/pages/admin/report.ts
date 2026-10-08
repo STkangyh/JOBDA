@@ -34,6 +34,33 @@ export interface AdminReport {
     exits_in_view: number
   }[]
   exits: { screen: string | null; view: string | null; last_action: string; visits: number }[]
+  // 유저 테스트 참가자(?ut=코드) 세션 — 이 필드가 생기기 전 마이그레이션이면 없을 수 있다.
+  ut_sessions?: UtSession[]
+  ut_stages?: { flow: 's1' | 's2'; screen: string; sessions: number; median_s: number }[]
+}
+
+export type UtStatus = 'completed' | 'in_progress' | 'exited'
+
+export interface UtSession {
+  participant: string
+  session_id: string
+  flow: 's1' | 's2'
+  started_at: string
+  completed_at: string | null
+  last_at: string
+  status: UtStatus
+  time_on_task_s: number
+  exit_screen: string | null
+  messages: number
+  system_errors: number
+  stage_seconds: Record<string, number>
+}
+
+export interface ActivityRow {
+  ts: string
+  activity: string
+  screen: string | null
+  detail: string | null
 }
 
 export type Period = 'today' | '7d' | '30d' | 'all'
@@ -97,6 +124,17 @@ const PAGES: Record<string, string> = {
   mobile_notice: '모바일 안내',
 }
 
+// 세션 안 단계 순서 — 단계별 소요 시간 표를 체험 순서대로 놓는 데 쓴다.
+const FLOW_STAGES: Record<'s1' | 's2', string[]> = {
+  s1: ['brief', 'materials', 'round', 'final_check', 'self_assessment', 'report'],
+  s2: ['brief', 'materials', 'workspace', 'senior_feedback', 'final_feedback', 'branch_select', 'vendor_compare', 'self_assessment', 'report'],
+}
+
+export function stageOrder(flow: 's1' | 's2', screen: string) {
+  const i = FLOW_STAGES[flow].indexOf(screen.split('/')[1] ?? '')
+  return (flow === 's1' ? 0 : 100) + (i < 0 ? 99 : i)
+}
+
 export function stageLabel(stage: string) {
   return STAGES[stage] ?? stage
 }
@@ -117,6 +155,12 @@ const VIEW_VALUES: Record<string, string> = {
   limit_sample: '한도 견본 판정표',
   draft: '초안',
   final: '최종본',
+  concept_a: '시안 A',
+  concept_b: '시안 B',
+  concept_c: '시안 C',
+  design_file: '설계 파일',
+  mockup_guide: '목형 제작 가이드',
+  design_guide: '디자인 구체화 가이드',
 }
 const VIEW_GROUPS: Record<string, string> = {
   messenger: '메신저',
@@ -164,6 +208,49 @@ const ACTIONS: Record<string, string> = {
 
 export function actionLabel(name: string) {
   return ACTIONS[name] ?? name
+}
+
+export const UT_STATUS_LABELS: Record<UtStatus, string> = { completed: '완료', in_progress: '진행 중', exited: '중간 이탈' }
+
+// 유저 테스트 기획서의 Activity Log 이름
+const ACTIVITIES: Record<string, string> = {
+  session_start: '세션 시작',
+  material_open: '자료 열람',
+  stakeholder_open: '관계자 선택',
+  message_send: '관계자에게 질문',
+  decision_select: '선택지 선택',
+  reason_submit: '선택 근거 제출',
+  feedback_receive: 'AI 피드백 확인',
+  revision_submit: '수정안 제출',
+  self_eval_start: '자기평가 시작',
+  report_view: '리포트 확인',
+  session_complete: '세션 완료',
+  session_exit: '중간 이탈',
+}
+
+export function activityLabel(name: string) {
+  return ACTIVITIES[name] ?? name
+}
+
+const DETAILS: Record<string, string> = {
+  vendor: '업체',
+  vendor_proposal: '업체 제안',
+  vendor_report: '업체 선정 보고',
+  final_approval: '최종 승인 요청',
+  wood_dropped: '목재 포기',
+  sheet_wrap: '시트 래핑',
+  outsourcing: '외주',
+}
+
+// 활동의 대상(자료·관계자·선택지)을 읽기 쉽게. 화면 경로면 화면 이름, 뷰 이름이면 뷰 이름으로.
+export function activityDetail(row: ActivityRow) {
+  const d = row.detail
+  if (!d) return ''
+  if (d.startsWith('session')) return screenLabel(d)
+  if (d.includes(':')) return viewLabel(d)
+  const round = d.match(/^round_(\d+)$/)
+  if (round) return `라운드 ${round[1]}`
+  return PERSONAS[d] ?? VIEW_VALUES[d] ?? DETAILS[d] ?? d
 }
 
 export function formatCount(n: number) {
