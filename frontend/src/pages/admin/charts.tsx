@@ -129,7 +129,8 @@ export function FunnelBars({ steps }: { steps: FunnelStep[] }) {
   return (
     <ol className="flex flex-col gap-2.5">
       {steps.map((s, i) => {
-        const w = (s.sessions / base) * 100
+        // 분모보다 큰 단계가 와도(예전 집계 기준 데이터) 카드 밖으로 넘치지 않게 100%에서 자른다.
+        const w = Math.min(100, (s.sessions / base) * 100)
         return (
           <li key={s.stage} className="grid grid-cols-[88px_minmax(0,1fr)_96px] items-center gap-3">
             <span className="truncate text-body-sm text-neutral-700">{stageLabel(s.stage)}</span>
