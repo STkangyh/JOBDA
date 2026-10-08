@@ -122,6 +122,7 @@ const PAGES: Record<string, string> = {
   '/proposal-writing': '제안서 작성(미리보기)',
   '/design-system': '디자인 시스템',
   mobile_notice: '모바일 안내',
+  not_found: '없는 페이지',
 }
 
 // 세션 안 단계 순서 — 단계별 소요 시간 표를 체험 순서대로 놓는 데 쓴다.

@@ -111,6 +111,19 @@ describe('screen tracking in the real app', () => {
   })
 })
 
+describe('screen tracking for unknown addresses', () => {
+  it('records an unregistered path as not_found, never the typed path itself', async () => {
+    render(
+      <MemoryRouter initialEntries={['/someone@example.com']}>
+        <App />
+      </MemoryRouter>,
+    )
+    await drain()
+    expect(byName('screen_view').map((e) => e.screen)).toEqual(['not_found'])
+    expect(JSON.stringify(sent)).not.toContain('example.com')
+  })
+})
+
 describe('store events', () => {
   it('sends each chat as an "ask" with a message_id and length — never the message text', async () => {
     mockedChat.mockResolvedValueOnce({ reply: '네', intent: 'other', disclose: [] })

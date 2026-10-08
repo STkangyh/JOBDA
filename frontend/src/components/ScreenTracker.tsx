@@ -4,6 +4,10 @@ import { useSession } from '../store/session'
 import { useSession1 } from '../store/session1'
 import { setContext, setScreen, type Flow } from '../lib/analytics'
 
+// App.tsx의 탐색 화면 라우트. 여기 없는 주소(오타, 주소창에 입력한 아무 문자열)는 경로를 그대로
+// 남기지 않고 not_found로 묶는다 — 주소창에 이메일 등을 입력하면 그대로 화면 이름에 기록되던 문제.
+const EXPLORE_PATHS = new Set(['/', '/explore', '/explore/job', '/design-system', '/proposal-writing', '/admin', '/journey-map', '/comprehensive-report'])
+
 // 화면(screen) = 주소, 단 세션은 주소가 하나(/session1, /session2)뿐이라 단계까지 붙인다
 // (예: session2/vendor_compare). 이탈률·퍼널이 이 단위로 계산된다.
 export function ScreenTracker({ narrow }: { narrow: boolean }) {
@@ -19,7 +23,7 @@ export function ScreenTracker({ narrow }: { narrow: boolean }) {
     if (narrow) setScreen('mobile_notice')
     else if (flow === 's2') setScreen(`session2/${s2Stage}`)
     else if (flow === 's1') setScreen(`session1/${s1Stage}`)
-    else setScreen(pathname)
+    else setScreen(EXPLORE_PATHS.has(pathname) ? pathname : 'not_found')
   }, [pathname, narrow, s2Stage, s2Id, s1Stage, s1Id])
 
   return null
