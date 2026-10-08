@@ -146,6 +146,18 @@ describe('AdminPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('이메일 또는 비밀번호가 맞지 않아요.')
   })
 
+  it('says what to fix when the account exists but was never confirmed', async () => {
+    const user = userEvent.setup()
+    fake.auth.getSession.mockResolvedValue({ data: { session: null } })
+    fake.auth.signInWithPassword.mockResolvedValue({ data: { user: null }, error: { code: 'email_not_confirmed', message: 'Email not confirmed', status: 400 } })
+    await renderPage()
+
+    await user.type(await screen.findByLabelText('이메일'), 'new@jobda.dev')
+    await user.type(screen.getByLabelText('비밀번호'), 'pw')
+    await user.click(screen.getByRole('button', { name: '로그인' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('아직 확인되지 않은 계정이에요')
+  })
+
   it('tells a signed-in non-admin they lack permission (42501 from admin_report)', async () => {
     fake.auth.getSession.mockResolvedValue({ data: { session: { user: { email: 'guest@x.com', is_anonymous: false } } } })
     fake.rpc.mockResolvedValue({ data: null, error: { code: '42501', message: 'admin only' } })

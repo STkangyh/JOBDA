@@ -176,6 +176,24 @@ function ConnectedAdmin() {
   )
 }
 
+// 원인마다 고칠 곳이 달라서(비밀번호 / 대시보드의 계정 확인 / 잠시 대기) 한 문구로 뭉치지 않는다.
+const LOGIN_ERRORS: Record<string, string> = {
+  invalid_credentials: '이메일 또는 비밀번호가 맞지 않아요.',
+  email_not_confirmed: '아직 확인되지 않은 계정이에요. Supabase 대시보드 → Authentication → Users에서 이 계정을 확인(Confirm) 처리해주세요.',
+  over_request_rate_limit: '로그인 시도가 너무 많아요. 몇 분 뒤 다시 시도해주세요.',
+  user_banned: '사용이 중지된 계정이에요. 팀원에게 확인을 요청해주세요.',
+  email_provider_disabled: '이메일 로그인이 꺼져 있어요. Supabase 대시보드 → Authentication → Sign In / Providers에서 Email을 켜주세요.',
+  provider_disabled: '이메일 로그인이 꺼져 있어요. Supabase 대시보드 → Authentication → Sign In / Providers에서 Email을 켜주세요.',
+}
+
+function loginErrorMessage(error: { code?: string; message?: string; status?: number }) {
+  if (error.code && LOGIN_ERRORS[error.code]) return LOGIN_ERRORS[error.code]
+  if (/invalid login credentials/i.test(error.message ?? '')) return LOGIN_ERRORS.invalid_credentials
+  if (/email not confirmed/i.test(error.message ?? '')) return LOGIN_ERRORS.email_not_confirmed
+  if (!error.status) return '서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 시도해주세요.'
+  return `로그인하지 못했어요. (${error.message ?? '알 수 없는 오류'})`
+}
+
 function LoginForm({ onSignedIn }: { onSignedIn: (email: string) => Promise<void> }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -189,7 +207,7 @@ function LoginForm({ onSignedIn }: { onSignedIn: (email: string) => Promise<void
     const { data, error: authError } = await getSupabase().auth.signInWithPassword({ email: email.trim(), password })
     if (authError || !data.user) {
       setBusy(false)
-      setError('이메일 또는 비밀번호가 맞지 않아요.')
+      setError(authError ? loginErrorMessage(authError) : LOGIN_ERRORS.invalid_credentials)
       return
     }
     await onSignedIn(data.user.email ?? email.trim())
