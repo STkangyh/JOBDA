@@ -1,4 +1,5 @@
 import type { CloseHow, ViewKind, ViewName } from './views'
+import { currentParticipant } from './participant'
 
 export type Flow = 'explore' | 's1' | 's2'
 
@@ -85,6 +86,7 @@ interface State {
   views: OpenView[]
   viewSeq: number
   visitId: string | null
+  participant: string | null
   lastActive: number
   hidden: boolean
   flushing: boolean
@@ -105,6 +107,7 @@ const fresh = (): State => ({
   views: [],
   viewSeq: 0,
   visitId: null,
+  participant: null,
   lastActive: 0,
   hidden: false,
   flushing: false,
@@ -178,7 +181,7 @@ function enqueue(name: string, props: Record<string, unknown>, now: number) {
     view: orderedViews().at(-1)?.name ?? null, // 가장 세밀한 뷰(모달 > 드로어 > 탭 > 패널)
     view_path: viewPath(),
     name,
-    props,
+    props: s.participant ? { ...props, ut: s.participant } : props,
     seq: s.seq,
     client_ts: new Date(now).toISOString(),
     env,
@@ -319,6 +322,7 @@ function onUserInput() {
 export function startAnalytics(transport: Transport): () => void {
   stopTransport()
   s.transport = transport
+  s.participant = currentParticipant()
   s.hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
   const now = Date.now()
   ensureVisit(now)

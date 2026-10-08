@@ -19,6 +19,7 @@ import {
   type Table,
 } from './analytics'
 import type { ViewName } from './views'
+import { captureParticipant, currentParticipant } from './participant'
 
 let sent: AnalyticsEvent[]
 let chats: ChatLogRow[]
@@ -64,6 +65,25 @@ afterEach(() => {
 })
 
 describe('analytics core', () => {
+  it('tags every event with the user-test participant code from the ?ut= link, and ?ut=off clears it', async () => {
+    captureParticipant('?ut=P07')
+    startAnalytics(transport)
+    setScreen('session1/brief')
+    track('ask')
+    expect(__testing.queue().map((e) => e.props.ut)).toEqual(['P07', 'P07'])
+    stopAnalytics()
+
+    captureParticipant('?ut=off')
+    startAnalytics(transport)
+    setScreen('session1/brief')
+    expect(__testing.queue()[0].props).not.toHaveProperty('ut')
+    stopAnalytics()
+
+    // 코드 형식이 아니면 받지 않는다(주소에 섞인 다른 값이 기록에 들어가지 않게)
+    captureParticipant('?ut=<script>')
+    expect(currentParticipant()).toBeNull()
+  })
+
   it('does nothing until started (no env → analytics off)', async () => {
     track('click')
     const close = openView('tab', 'messenger:senior')
