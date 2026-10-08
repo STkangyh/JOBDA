@@ -8,6 +8,7 @@ import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { useSession1 } from '../../store/session1'
 import { S1_DOCS, S1_DOC_CATEGORIES } from '../../data/session1Docs'
+import { useTrackView, type S1DocKey } from '../../lib/analytics'
 
 const HIGHLIGHTED_CATEGORY = '제품 디자인, 설계 자료'
 // Figma 744:17197 사이드바 실측: apps/work/history(검색 아이콘 없음), work가 active.
@@ -19,6 +20,7 @@ export function Session1Materials() {
   const goTo = useSession1((s) => s.goTo)
   const [selectedKey, setSelectedKey] = useState(S1_DOCS[0].key)
   const doc = S1_DOCS.find((d) => d.key === selectedKey) ?? S1_DOCS[0]
+  useTrackView({ kind: 'panel', name: `materials_doc:${doc.key as S1DocKey}` })
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">

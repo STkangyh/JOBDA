@@ -221,6 +221,8 @@ export const useSession1 = create<Session1State & Session1Actions>()(
 
       selectChoice: (choice) => {
         const i = get().currentRoundIndex
+        // 제출 전 고민 과정(선택을 몇 번 바꿨는지)도 보이도록 고를 때마다 남긴다. 같은 선택 재클릭은 제외.
+        if (get().roundAnswers[i]?.selectedChoice !== choice) track('decision_select', { target: `round_${i + 1}`, choice })
         set((s) => {
           const roundAnswers = [...s.roundAnswers]
           roundAnswers[i] = { ...roundAnswers[i], selectedChoice: choice }

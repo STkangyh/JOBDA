@@ -3,11 +3,13 @@
 export type ViewKind = 'tab' | 'modal' | 'panel' | 'drawer'
 
 type PersonaKey = 'senior' | 'engineering' | 'purchasing'
+// 세션1 자료함 문서(data/session1Docs.ts의 key)
+export type S1DocKey = 'concept_a' | 'concept_b' | 'concept_c' | 'design_file' | 'mockup_guide' | 'design_guide'
 
 export type ViewName =
   | `messenger:${PersonaKey}`
   | `vendor_phase:${'research' | 'select' | 'feedback'}`
-  | `materials_doc:${'spec_form' | 'limit_sample'}`
+  | `materials_doc:${'spec_form' | 'limit_sample' | S1DocKey}`
   | `workspace_mode:${'draft' | 'final'}`
   | `round:${number}`
 

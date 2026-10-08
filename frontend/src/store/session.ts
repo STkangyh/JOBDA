@@ -382,7 +382,10 @@ export const useSession = create<SessionState & SessionActions>()(
         set((s) => ({
           vendors: s.vendors.map((v, i) => (i === index ? { ...v, ...fields } : v)),
         })),
-      selectVendor: (index) => set({ selectedVendorIndex: index }),
+      selectVendor: (index) => {
+        if (get().selectedVendorIndex !== index) track('decision_select', { target: 'vendor', index })
+        set({ selectedVendorIndex: index })
+      },
       // "제안서 전달"(139 CTA) — 아직 최종 제출이 아니라 구매팀에게 제안하고 검토 응답을
       // 받는 단계. approveFinal과 같은 패턴: currentStage는 그대로 'vendor_compare'에 두고
       // 구매팀 메신저에 제안 메시지 + 응답을 꽂아 넣는다. 실제 인계(currentStage 전환)는
