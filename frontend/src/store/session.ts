@@ -325,6 +325,7 @@ export const useSession = create<SessionState & SessionActions>()(
 
       updateDraft: (fields) => set((s) => ({ draft: { ...s.draft, ...fields } })),
       submitDraft: () => {
+        track('step_complete', { step: 'workspace', pass: 'draft' })
         set({ draftSubmitted: true, currentStage: 'senior_feedback', final: { ...get().draft } })
         pushLog(set, get, 'submit', { target: 'draft' })
       },
@@ -348,12 +349,14 @@ export const useSession = create<SessionState & SessionActions>()(
         pushLog(set, get, 'submit', { target: 'final_approval' })
       },
       submitFinal: () => {
+        track('step_complete', { step: 'workspace', pass: 'final' })
         set({ finalSubmitted: true, currentStage: 'final_feedback' })
         pushLog(set, get, 'submit', { target: 'final' })
       },
 
       chooseBranch: (branch) => {
         const s = get()
+        track('step_complete', { step: s.currentStage })
         pushLog(set, get, 'branch', { target: branch })
 
         if (branch === 'wood_dropped' && s.revisitCount < 1) {
@@ -406,6 +409,7 @@ export const useSession = create<SessionState & SessionActions>()(
         pushLog(set, get, 'submit', { target: 'vendor_proposal' })
       },
       submitVendors: () => {
+        track('step_complete', { step: 'vendor_compare' })
         set({ vendorSubmitted: true, currentStage: 'self_assessment' })
         pushLog(set, get, 'submit', { target: 'vendor_report' })
       },
@@ -417,6 +421,7 @@ export const useSession = create<SessionState & SessionActions>()(
         const scores = computeScores(s)
         const findings = computeFindings(s)
         track('submit', { target: 'self_assessment', ...s.selfAssessment, burdenNote: undefined, burden_length: s.selfAssessment.burdenNote.trim().length })
+        track('step_complete', { step: 'self_assessment' })
         let res: Awaited<ReturnType<typeof apiReport>>
         try {
           res = await apiReport({

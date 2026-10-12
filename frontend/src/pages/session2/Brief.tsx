@@ -12,6 +12,7 @@ import { CheckItem } from '../../components/CheckItem'
 import { Tag } from '../../components/Tag'
 import { CollaboratorsCard } from '../../components/CollaboratorsCard'
 import { useSession } from '../../store/session'
+import { track } from '../../lib/analytics'
 
 const GOALS = ['설계팀과의 소통 오류가 없도록 시방서를 정확히 작성', '예산 범위 안에서 목재 파트 생산 방법 결정', '발주 일정 안에 외주업체 선정 완료']
 
@@ -156,7 +157,10 @@ export function Brief() {
             <Button
               variant="primary"
               className="h-[72px] w-full !rounded-xl !text-2xl"
-              onClick={() => goTo('materials')}
+              onClick={() => {
+                track('step_complete', { step: 'brief' })
+                goTo('materials')
+              }}
             >
               시작하기
             </Button>

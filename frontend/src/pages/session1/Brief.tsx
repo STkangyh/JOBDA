@@ -12,6 +12,7 @@ import { CheckItem } from '../../components/CheckItem'
 import { Tag } from '../../components/Tag'
 import { CollaboratorsCard } from '../../components/CollaboratorsCard'
 import { useSession1 } from '../../store/session1'
+import { track } from '../../lib/analytics'
 
 const GOALS = [
   '핵심 디자인 의도 유지(벨트라인)',
@@ -166,7 +167,10 @@ export function Session1Brief() {
               <Button
                 variant="primary"
                 className="h-[72px] w-full !rounded-xl !text-2xl"
-                onClick={() => goTo('materials')}
+                onClick={() => {
+                  track('step_complete', { step: 'brief' })
+                  goTo('materials')
+                }}
               >
                 시작하기
               </Button>

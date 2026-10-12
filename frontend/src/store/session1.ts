@@ -243,6 +243,7 @@ export const useSession1 = create<Session1State & Session1Actions>()(
         const i = get().currentRoundIndex
         const answer = get().roundAnswers[i]
         track('submit', { target: `round_${i + 1}`, choice: answer.selectedChoice, reasoning_length: answer.reasoning.trim().length })
+        track('step_complete', { step: 'round', round: i + 1 })
         set((s) => {
           const roundAnswers = [...s.roundAnswers]
           roundAnswers[i] = { ...roundAnswers[i], submitted: true }
@@ -257,6 +258,7 @@ export const useSession1 = create<Session1State & Session1Actions>()(
 
       confirmFinalCheck: () => {
         track('submit', { target: 'final_check' })
+        track('step_complete', { step: 'final_check' })
         set({ finalChecked: true, currentStage: 'self_assessment' })
       },
 
@@ -335,6 +337,7 @@ export const useSession1 = create<Session1State & Session1Actions>()(
           burdenNote: s.selfAssessment.burdenNote.trim(),
         }
         track('submit', { target: 'self_assessment', ...s.selfAssessment, burdenNote: undefined, burden_length: s.selfAssessment.burdenNote.trim().length })
+        track('step_complete', { step: 'self_assessment' })
         set({ report, currentStage: 'report' })
         track('session_complete')
       },

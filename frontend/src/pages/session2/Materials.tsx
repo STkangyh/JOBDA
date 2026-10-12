@@ -164,7 +164,14 @@ export function Materials() {
           </Card>
         </div>
 
-        <PrimaryCTAButton onClick={() => goTo('workspace')}>업무 시작하기</PrimaryCTAButton>
+        <PrimaryCTAButton
+          onClick={() => {
+            track('step_complete', { step: 'materials' })
+            goTo('workspace')
+          }}
+        >
+          업무 시작하기
+        </PrimaryCTAButton>
       </div>
     </div>
   )

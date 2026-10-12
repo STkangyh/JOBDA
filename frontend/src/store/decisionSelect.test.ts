@@ -32,4 +32,12 @@ describe('decision_select activity', () => {
     useSession.getState().selectVendor(2)
     expect(decisions()).toEqual([{ target: 'vendor', index: 2 }])
   })
+
+  it('records step completion when a round is submitted', () => {
+    const s1 = useSession1.getState()
+    s1.selectChoice(0)
+    s1.submitRound()
+    const steps = track.mock.calls.filter(([name]) => name === 'step_complete').map(([, props]) => props)
+    expect(steps).toEqual([{ step: 'round', round: 1 }])
+  })
 })

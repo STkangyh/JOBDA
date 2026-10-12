@@ -8,6 +8,7 @@ import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
 import { DRAFT_DESCRIPTION, SENIOR_INTRO, FEEDBACK_PASS, FEEDBACK_FAIL, SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
 import productImage from '../../assets/illustrations/product-angle-1.png'
+import { track } from '../../lib/analytics'
 
 // Figma "관계자 협업" 라운드의 1차 피드백 상태 — 823:55090("Desktop - 130")/823:55255
 // ("Desktop - 131") 실측. Figma는 이 화면에서 바로 "시방서 수정" 입력 필드까지 함께 보여주지만,
@@ -95,7 +96,14 @@ export function SeniorFeedback() {
                   { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
                 ]}
               />
-              <PrimaryCTAButton onClick={() => goTo('workspace')}>시방서 수정하러 가기</PrimaryCTAButton>
+              <PrimaryCTAButton
+                onClick={() => {
+                  track('step_complete', { step: 'senior_feedback' })
+                  goTo('workspace')
+                }}
+              >
+                시방서 수정하러 가기
+              </PrimaryCTAButton>
             </div>
           </div>
         </div>

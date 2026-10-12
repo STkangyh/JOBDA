@@ -8,7 +8,7 @@ import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { CloudSavedIcon, ProfileIcon } from '../../components/icons'
 import { useSession1 } from '../../store/session1'
 import { S1_DOCS, S1_DOC_CATEGORIES } from '../../data/session1Docs'
-import { useTrackView, type S1DocKey } from '../../lib/analytics'
+import { track, useTrackView, type S1DocKey } from '../../lib/analytics'
 
 const HIGHLIGHTED_CATEGORY = '제품 디자인, 설계 자료'
 // Figma 744:17197 사이드바 실측: apps/work/history(검색 아이콘 없음), work가 active.
@@ -109,7 +109,14 @@ export function Session1Materials() {
           </Card>
         </div>
 
-        <PrimaryCTAButton onClick={() => goTo('round')}>업무 시작하기</PrimaryCTAButton>
+        <PrimaryCTAButton
+          onClick={() => {
+            track('step_complete', { step: 'materials' })
+            goTo('round')
+          }}
+        >
+          업무 시작하기
+        </PrimaryCTAButton>
       </div>
     </div>
   )

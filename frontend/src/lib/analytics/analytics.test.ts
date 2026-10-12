@@ -79,6 +79,13 @@ describe('analytics core', () => {
     expect(__testing.queue()[0].props).not.toHaveProperty('ut')
     stopAnalytics()
 
+    // UT 회차(&round=V1)도 함께 붙는다
+    captureParticipant('?ut=UT_001&round=V1')
+    startAnalytics(transport)
+    setScreen('session2/brief')
+    expect(__testing.queue()[0].props).toMatchObject({ ut: 'UT_001', ut_round: 'V1' })
+    stopAnalytics()
+
     // 코드 형식이 아니면 받지 않는다(주소에 섞인 다른 값이 기록에 들어가지 않게)
     captureParticipant('?ut=<script>')
     expect(currentParticipant()).toBeNull()
