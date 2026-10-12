@@ -2,6 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import arrowBack from '../assets/illustrations/story-arrow-back.svg'
 
 // Figma "02_기러기 가족" 세션2 브리프(Desktop-230~240)의 스토리형 화면 부품.
+// 글자 굵기·효과는 디자인 시스템 토큰을 따른다(2026-10-13: Emphasis/Headline/Small·Title/Large가 SemiBold → Medium).
 // 대사 상자 위 챕터 진행 막대, 좌우 화살표, 우상단 Exit/Skip/Next 칩 버튼.
 
 type ChipTone = 'default' | 'next' | 'exit'
@@ -9,11 +10,11 @@ type ChipTone = 'default' | 'next' | 'exit'
 // 상태 정의: Desktop-238(Next 활성), 237(Next Pressed), 239(Exit Hover = "Active 2"), 240(Exit Pressed).
 // Skip·기본 칩은 디자인에 호버 상태가 없어서 키보드 포커스 표시만 둔다.
 const CHIP_TONE: Record<ChipTone, string> = {
-  default: 'border-[rgba(225,225,225,0.5)] bg-[rgba(245,245,245,0.5)] text-neutral-500 backdrop-blur-[14px]',
+  default: 'border-[rgba(225,225,225,0.5)] bg-[rgba(245,245,245,0.5)] text-neutral-500 backdrop-blur-gnb',
   next:
-    'border-green-100 bg-green-300 text-green-800 shadow-[inset_0_0_12px_6px_var(--color-green-100),0_0_16px_rgba(0,0,0,0.04)] active:bg-[#c7dab5]',
+    'border-green-100 bg-green-300 text-green-800 shadow-[inset_0_0_12px_6px_var(--color-green-100),var(--shadow-gnb)] active:bg-[#c7dab5]',
   exit:
-    'border-[rgba(225,225,225,0.5)] bg-[rgba(245,245,245,0.5)] text-neutral-500 backdrop-blur-[14px] hover:border-error-100 hover:bg-error-200 hover:text-neutral-75 hover:shadow-[inset_0_0_12px_6px_var(--color-error-100),0_0_16px_rgba(0,0,0,0.04)] active:border-error-100 active:bg-[#d47168] active:text-neutral-75',
+    'border-[rgba(225,225,225,0.5)] bg-[rgba(245,245,245,0.5)] text-neutral-500 backdrop-blur-gnb hover:border-error-100 hover:bg-error-200 hover:text-neutral-75 hover:shadow-[inset_0_0_12px_6px_var(--color-error-100),var(--shadow-gnb)] active:border-error-100 active:bg-[#d47168] active:text-neutral-75',
 }
 
 export function GlassChipButton({
@@ -25,7 +26,7 @@ export function GlassChipButton({
   return (
     <button
       type="button"
-      className={`flex h-14 min-w-[106px] items-center justify-center overflow-clip rounded-[32px] border-2 px-6 text-headline-md font-semibold shadow-[0_0_16px_rgba(0,0,0,0.04)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${CHIP_TONE[tone]} ${className}`}
+      className={`flex h-14 min-w-[106px] items-center justify-center overflow-clip rounded-[32px] border-2 px-6 text-headline-md font-medium shadow-gnb transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${CHIP_TONE[tone]} ${className}`}
       {...props}
     >
       {children}
@@ -69,15 +70,15 @@ export function ChapterProgress({ chapters, current }: { chapters: readonly stri
             <li
               key={label}
               aria-current="step"
-              className="relative flex h-12 min-w-px flex-1 overflow-clip rounded-lg bg-[rgba(245,245,245,0.85)] shadow-[0_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[14px]"
+              className="relative flex h-12 min-w-px flex-1 overflow-clip rounded-lg bg-[rgba(245,245,245,0.85)] shadow-gnb backdrop-blur-gnb"
             >
               <span className="h-full w-4 shrink-0 rounded-lg bg-green-300" aria-hidden />
-              <span className="absolute inset-0 flex items-center justify-center text-title-lg font-semibold text-neutral-900">{label}</span>
+              <span className="absolute inset-0 flex items-center justify-center text-title-lg font-medium text-neutral-900">{label}</span>
             </li>
           )
         }
         return (
-          <li key={label} className="h-3 min-w-px flex-1 rounded-lg bg-[rgba(245,245,245,0.85)] shadow-[0_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[14px]">
+          <li key={label} className="h-3 min-w-px flex-1 rounded-lg bg-[rgba(245,245,245,0.85)] shadow-gnb backdrop-blur-gnb">
             <span className="sr-only">{label}</span>
           </li>
         )
@@ -92,7 +93,7 @@ export function DialogueBox({ children }: { children: ReactNode }) {
   return (
     <div
       aria-live="polite"
-      className="flex min-h-[213px] w-full items-center justify-center overflow-clip rounded-lg border-2 border-[rgba(110,110,110,0.75)] bg-[rgba(1,1,1,0.85)] p-8 shadow-[0_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[14px]"
+      className="flex min-h-[213px] w-full items-center justify-center overflow-clip rounded-lg border-2 border-[rgba(110,110,110,0.75)] bg-[rgba(1,1,1,0.85)] p-8 shadow-gnb backdrop-blur-gnb"
     >
       <div className="text-center text-[clamp(20px,1.852vw,32px)] leading-[1.2] font-medium text-neutral-100 [text-wrap:balance]">{children}</div>
     </div>
