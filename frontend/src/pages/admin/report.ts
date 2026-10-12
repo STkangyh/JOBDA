@@ -191,6 +191,7 @@ const VIEW_GROUPS: Record<string, string> = {
   messenger: '메신저',
   vendor_phase: '업체 비교',
   materials_doc: '자료',
+  brief_scene: '브리프 장면',
   workspace_mode: '시방서',
   round: '라운드',
 }
