@@ -47,7 +47,7 @@ function renderAt(path: string) {
 describe('App routing', () => {
   it('renders Explore at "/"', async () => {
     renderAt('/')
-    expect(await screen.findByText('New Arrival')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: '생활 가전 제품 디자이너' })).toBeInTheDocument()
   })
 
   it('sends a first-time visitor at "/" to the welcome splash, once per browser', async () => {
@@ -57,7 +57,7 @@ describe('App routing', () => {
     expect(await screen.findByText(/직접 경험해 보세요/)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '직무 알아보기' }))
-    expect(await screen.findByText('New Arrival')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: '생활 가전 제품 디자이너' })).toBeInTheDocument()
     expect(localStorage.getItem('jobda-welcome-seen')).toBe('1')
   })
 
@@ -86,9 +86,16 @@ describe('App routing', () => {
     expect(await screen.findByText(/김기럭 사원님 반가워요/)).toBeInTheDocument()
   })
 
+  it('opens the task screen from any task card on the explore home', async () => {
+    const user = userEvent.setup()
+    renderAt('/explore')
+    await user.click(await screen.findByRole('button', { name: '현장 감리' }))
+    expect(await screen.findByText('생활 가전 제품디자이너')).toBeInTheDocument()
+  })
+
   it('renders Explore at the "/explore" alias too', async () => {
     renderAt('/explore')
-    expect(await screen.findByText('New Arrival')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: '생활 가전 제품 디자이너' })).toBeInTheDocument()
   })
 
   it('renders JobDetail at "/explore/job"', async () => {
@@ -107,7 +114,7 @@ describe('App routing', () => {
 
     await user.click(await screen.findByRole('button', { name: '확인' }))
 
-    expect(await screen.findByText('New Arrival')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: '생활 가전 제품 디자이너' })).toBeInTheDocument()
   })
 
   it('shows MobileNotice instead of any route on a narrow viewport', async () => {
@@ -115,6 +122,6 @@ describe('App routing', () => {
     renderAt('/')
 
     expect(await screen.findByText('PC 화면에서 이용해주세요')).toBeInTheDocument()
-    expect(screen.queryByText('New Arrival')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 1, name: '생활 가전 제품 디자이너' })).not.toBeInTheDocument()
   })
 })

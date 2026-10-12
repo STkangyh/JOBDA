@@ -1,9 +1,5 @@
 import { useState } from 'react'
-import brandLogo from '../../assets/brand-logo.png'
 import illustration from '../../assets/illustrations/job-detail-banner.png'
-import { Text } from '../../components/Text'
-import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
-import { CancelIcon } from '../../components/icons'
 import { PROCESS_STEPS, SESSION2_STEP_INDEX } from '../../data/processSteps'
 import { track } from '../../lib/analytics'
 
@@ -13,70 +9,37 @@ import { track } from '../../lib/analytics'
 // 배포 플로우에서 제외된다.
 const AVAILABLE_STEP_INDICES = [SESSION2_STEP_INDEX]
 
-// Figma "Desktop - 64" (652:16286) — 직무 상세 페이지. 브랜드/GNB 없이 전체화면 다크 레이아웃.
-export function JobDetail({
-  onClose,
-  onSubmit,
-}: {
-  onClose: () => void
-  onSubmit: (stepIndex: number) => void
-}) {
-  // Figma Desktop-40(744:13936, 미선택 기본 상태)/Desktop-64(744:14012, 선택 상태) 재확인:
-  // 처음엔 아무 것도 선택 안 된 상태(CTA 비활성)로 시작해야 함 — 이전엔 세션2가 기본
-  // 선택돼 있어서 CTA가 항상 활성 상태였음.
+// Figma "Desktop - 271"(2217:13319, 2026-10-13) — 업무 화면. 탐색 홈의 업무 카드를 누르면 나온다.
+// 디자인대로 GNB·로고·닫기 버튼 없이 전체 화면(2026-10-13 결정 — 나갈 때는 브라우저 뒤로가기).
+// 이전 디자인(Desktop - 64, 652:16286)에서 바뀐 점: 로고·닫기 버튼과 "업무 프로세스" 안내 카드가 빠지고, 목록 칸 안쪽 여백이 넓어졌다.
+export function JobDetail({ onSubmit }: { onSubmit: (stepIndex: number) => void }) {
+  // 처음엔 아무 것도 선택 안 된 상태(CTA 비활성)로 시작한다.
   const [selected, setSelected] = useState<number | null>(null)
 
   return (
-    <div className="flex min-h-svh flex-col gap-[18px] bg-neutral-950 p-7">
-      <div className="flex items-start justify-between">
-        <img src={brandLogo} alt="JOB:SIM" className="size-[75px] rounded-xl bg-neutral-800 object-cover" />
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex size-[50px] items-center justify-center rounded-full bg-error-200 text-white"
-        >
-          <CancelIcon className="size-5" />
-        </button>
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col gap-[18px] lg:flex-row">
-        {/* Figma 744:14042 실측: 배너는 위쪽 정렬(제목이 카드 상단)이고 상단 패딩만 48px로
-            더 넓다(pt-[48px] px-[24px] pb-[24px]) — 우리가 justify-end로 하단 정렬해뒀던 게
-            어긋나 있었음. 일러스트 원본 PNG도 위쪽은 배경색과 거의 같은 무지 어두운 영역이라
-            Figma에 없던 그라데이션 스크림/opacity 감쇠 없이 그대로 깔아도 텍스트가 잘 읽힌다. */}
-        <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-neutral-800 pb-6 pl-6 pr-6 pt-12">
-          <img src={illustration} alt="" className="pointer-events-none absolute inset-0 size-full object-cover" />
-          <div className="relative flex flex-col gap-3">
-            <Text variant="display-md" emphasis className="text-green-400">
-              생활 가전 제품디자이너
-            </Text>
-            <Text variant="title-lg" className="text-neutral-300">
-              C 가전회사에서 초임 디자이너로 근무하고 있는 심재현씨가 되어 인하우스 디자인 업무를
-              체험해보세요.
-            </Text>
-          </div>
+    <div className="grid min-h-svh grid-cols-[minmax(0,1fr)_401px] gap-x-[clamp(24px,2.5vw,44px)] bg-neutral-950 pt-[clamp(48px,16svh,181px)] pr-8 pb-8 pl-[clamp(32px,2.4vw,41px)]">
+      {/* 일러스트는 Figma처럼 카드보다 넓게 깔고(114%) 왼쪽으로 옮겨 인물이 가운데 오게 한다 */}
+      <section className="relative flex max-h-[777px] min-h-[560px] flex-col overflow-hidden rounded-lg bg-neutral-800 px-6 pt-12 pb-6">
+        <img src={illustration} alt="" className="pointer-events-none absolute top-0 left-[-9.53%] h-full w-[114.16%] max-w-none object-cover" />
+        <div className="relative flex flex-col gap-3">
+          <h1 className="text-display-md font-medium tracking-[-0.09px] text-green-400">생활 가전 제품디자이너</h1>
+          <p className="text-title-lg text-neutral-300">C 가전회사에서 초임 디자이너로 근무하고 있는 심재현씨가 되어 인하우스 디자인 업무를 체험해보세요.</p>
         </div>
+      </section>
 
-        <div className="flex w-full flex-col gap-6 rounded-lg bg-neutral-900 p-6 lg:w-[340px]">
-          <div className="flex flex-col gap-3">
-            <Text variant="title-lg" emphasis className="text-primary-400">
-              업무 프로세스
-            </Text>
-            <Text variant="body-lg" className="text-neutral-200">
-              희망하는 대표 세션을 선택하세요
-            </Text>
-          </div>
-          <div className="flex flex-col gap-4">
-            {PROCESS_STEPS.map((step, i) => {
-              const isAvailable = AVAILABLE_STEP_INDICES.includes(i)
-              const isSelected = selected === i
-              return (
+      <div className="flex flex-col justify-between gap-8">
+        <ul className="flex flex-col gap-4" aria-label="업무 프로세스">
+          {PROCESS_STEPS.map((step, i) => {
+            const isAvailable = AVAILABLE_STEP_INDICES.includes(i)
+            const isSelected = selected === i
+            return (
+              <li key={step}>
                 <button
-                  key={step}
                   type="button"
                   disabled={!isAvailable}
+                  aria-pressed={isSelected}
                   onClick={() => setSelected(i)}
-                  className={`flex h-12 items-center gap-0.5 rounded-xl border px-6 text-xl transition-colors ${
+                  className={`flex h-12 w-full items-center gap-0.5 rounded-xl border px-12 text-title-lg whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
                     isSelected
                       ? 'border-green-400 bg-neutral-800 font-semibold text-neutral-100'
                       : `border-neutral-800 bg-neutral-900 text-neutral-300 ${isAvailable ? 'hover:border-neutral-600 hover:text-neutral-100' : ''}`
@@ -85,19 +48,24 @@ export function JobDetail({
                   <span>{i + 1}.</span>
                   <span>{step}</span>
                 </button>
-              )
-            })}
-          </div>
-        </div>
-      </div>
+              </li>
+            )
+          })}
+        </ul>
 
-      <PrimaryCTAButton disabled={selected === null} onClick={() => {
-          if (selected === null) return
-          track('job_start', { step: selected })
-          onSubmit(selected)
-        }}>
-        업무 시작하기
-      </PrimaryCTAButton>
+        <button
+          type="button"
+          disabled={selected === null}
+          onClick={() => {
+            if (selected === null) return
+            track('job_start', { step: selected })
+            onSubmit(selected)
+          }}
+          className="h-[72px] w-full rounded-lg bg-green-500 text-headline-md font-semibold text-neutral-900 transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+        >
+          업무 시작하기
+        </button>
+      </div>
     </div>
   )
 }

@@ -232,6 +232,7 @@ const ACTIONS: Record<string, string> = {
   chat_error: '채팅 실패',
   chat_retry: '채팅 재시도',
   job_select: '직무 선택',
+  task_select: '업무 카드 선택',
   job_start: '직무 시작',
   cta: '버튼 클릭',
   report_error: '리포트 생성 실패',

@@ -173,7 +173,6 @@ function App() {
             path="/explore/job"
             element={
               <JobDetail
-                onClose={() => navigate('/')}
                 onSubmit={(stepIndex) => navigate(STEP_INDEX_TO_PATH[stepIndex] ?? '/session2')}
               />
             }
