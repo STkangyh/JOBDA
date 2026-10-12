@@ -12,6 +12,7 @@ export type ViewName =
   | `materials_doc:${'spec_form' | 'limit_sample' | S1DocKey}`
   | `workspace_mode:${'draft' | 'final'}`
   | `round:${number}`
+  | `brief_scene:${number}`
 
 // navigate = 화면(screen)이 바뀌어서 이전 화면의 뷰를 자동으로 닫음
 export type CloseHow = 'button' | 'esc' | 'backdrop' | 'switch' | 'unmount' | 'navigate'
