@@ -9,8 +9,8 @@ import { track } from './analytics'
 // 환경변수가 없는 로컬·테스트에서는 서버 기능이 꺼져 있다(활동 로그와 같은 규칙).
 export const authConfigured = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
 
-// 로그인·가입 인증 뒤 이동할 곳. 온보딩 디자인이 오기 전까지는 체험 진입점인 직무 상세로 임시 연결한다.
-export const AFTER_AUTH_PATH = '/explore/job'
+// 로그인·가입 인증 뒤 이동할 곳 — 온보딩(Figma 2217:9726)
+export const AFTER_AUTH_PATH = '/onboarding'
 
 // supabase-js가 인증 화면 청크에만 들어가도록 동적 import 한다.
 async function supabase() {

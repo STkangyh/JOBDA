@@ -51,6 +51,7 @@ const Session1App = lazy(() => import('./pages/session1/Session1App').then((m) =
 const JourneyMap = lazy(() => import('./pages/JourneyMap').then((m) => ({ default: m.JourneyMap })))
 const Welcome = lazy(() => import('./pages/Welcome').then((m) => ({ default: m.Welcome })))
 const Loading = lazy(() => import('./pages/Loading').then((m) => ({ default: m.Loading })))
+const Onboarding = lazy(() => import('./pages/Onboarding').then((m) => ({ default: m.Onboarding })))
 const Login = lazy(() => import('./pages/auth/Login').then((m) => ({ default: m.Login })))
 const Signup = lazy(() => import('./pages/auth/Signup').then((m) => ({ default: m.Signup })))
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword').then((m) => ({ default: m.ForgotPassword })))
@@ -166,6 +167,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/auth/confirm" element={<AuthConfirm />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/explore" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
           <Route
             path="/explore/job"

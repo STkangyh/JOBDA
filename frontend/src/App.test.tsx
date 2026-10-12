@@ -78,6 +78,14 @@ describe('App routing', () => {
     localStorage.removeItem('jobda-has-account')
   })
 
+  it('renders the onboarding at "/onboarding" and its "체험 시작하기" starts session 2', async () => {
+    const user = userEvent.setup()
+    renderAt('/onboarding')
+    expect(await screen.findByRole('heading', { name: '처음 오셨나요?' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '체험 시작하기' }))
+    expect(await screen.findByText(/김기럭 사원님 반가워요/)).toBeInTheDocument()
+  })
+
   it('renders Explore at the "/explore" alias too', async () => {
     renderAt('/explore')
     expect(await screen.findByText('New Arrival')).toBeInTheDocument()

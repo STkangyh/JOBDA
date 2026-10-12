@@ -146,6 +146,7 @@ const PAGES: Record<string, string> = {
   '/forgot-password': '비밀번호 찾기',
   '/reset-password': '비밀번호 재설정',
   '/auth/confirm': '메일 링크 인증',
+  '/onboarding': '온보딩',
   '/explore': '홈',
   '/explore/job': '직무 상세',
   '/journey-map': '체험맵',

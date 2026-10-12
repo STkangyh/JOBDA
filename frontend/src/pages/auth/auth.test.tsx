@@ -42,7 +42,7 @@ function renderAt(path: string) {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/auth/confirm" element={<AuthConfirm />} />
-        <Route path="/explore/job" element={<p>직무 상세</p>} />
+        <Route path="/onboarding" element={<p>온보딩</p>} />
       </Routes>
       <Where />
     </MemoryRouter>,
@@ -91,7 +91,7 @@ describe('login', () => {
     expect(screen.getByRole('checkbox', { name: '로그인 상태 유지' })).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: '제출하기' }))
 
-    expect(await screen.findByText('직무 상세')).toBeInTheDocument()
+    expect(await screen.findByText('온보딩')).toBeInTheDocument()
     expect(auth.signInWithPassword).toHaveBeenCalledWith({ email: EMAIL, password: 'right-pass1!' })
     expect(consumeExpiredSessionFlag()).toBe(false) // 같은 브라우저 세션에서는 유지
     sessionStorage.clear() // 브라우저를 닫았다 다시 연 상태
@@ -103,7 +103,7 @@ describe('login', () => {
     const user = await fillLogin('right-pass1!')
     await user.click(screen.getByRole('checkbox', { name: '로그인 상태 유지' }))
     await user.click(screen.getByRole('button', { name: '제출하기' }))
-    await screen.findByText('직무 상세')
+    await screen.findByText('온보딩')
     sessionStorage.clear()
     expect(consumeExpiredSessionFlag()).toBe(false)
   })
@@ -121,7 +121,7 @@ describe('login', () => {
   it('skips the form when an email account is already signed in', async () => {
     auth.getSession.mockResolvedValue(accountSession)
     renderAt('/login')
-    expect(await screen.findByText('직무 상세')).toBeInTheDocument()
+    expect(await screen.findByText('온보딩')).toBeInTheDocument()
   })
 })
 
@@ -239,7 +239,7 @@ describe('entry at "/"', () => {
     await user.type(screen.getByLabelText('비밀번호'), 'right-pass1!')
     if (remember) await user.click(screen.getByRole('checkbox', { name: '로그인 상태 유지' }))
     await user.click(screen.getByRole('button', { name: '제출하기' }))
-    await screen.findByText('직무 상세')
+    await screen.findByText('온보딩')
     auth.getSession.mockResolvedValue(accountSession) // 로그인 세션이 저장된 상태
   }
 
