@@ -23,7 +23,7 @@ describe('Messenger', () => {
     const user = userEvent.setup()
     render(<Messenger defaultActive="senior" />)
 
-    await user.type(screen.getByPlaceholderText('Message'), '테스트 메시지')
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '테스트 메시지')
     await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
 
     expect(screen.getByText('테스트 메시지')).toBeInTheDocument()
@@ -35,7 +35,7 @@ describe('Messenger', () => {
     const user = userEvent.setup()
     render(<Messenger defaultActive="senior" />)
 
-    const input = screen.getByPlaceholderText('Message')
+    const input = screen.getByPlaceholderText('메시지를 입력하세요')
     await user.type(input, '전송 중 입력창')
     await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
 
@@ -53,7 +53,7 @@ describe('Messenger', () => {
     const user = userEvent.setup()
     const { container } = render(<Messenger defaultActive="senior" />)
 
-    await user.type(screen.getByPlaceholderText('Message'), '대기 확인')
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '대기 확인')
     await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
 
     expect(container.querySelectorAll('.animate-bounce')).toHaveLength(3)
@@ -69,7 +69,7 @@ describe('Messenger', () => {
     const user = userEvent.setup()
     render(<Messenger defaultActive="senior" />)
 
-    await user.type(screen.getByPlaceholderText('Message'), '실패할 메시지')
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '실패할 메시지')
     await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
 
     expect(await screen.findByText('메시지 전송에 실패했어요.')).toBeInTheDocument()
@@ -87,7 +87,7 @@ describe('Messenger', () => {
     const user = userEvent.setup()
     render(<Messenger defaultActive="senior" />)
 
-    await user.type(screen.getByPlaceholderText('Message'), '   ')
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '   ')
     await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
 
     expect(mockedChat).not.toHaveBeenCalled()

@@ -7,7 +7,7 @@ export function FeedbackRemainingBadge({ remaining }: { remaining: number }) {
   return (
     <div className="flex items-end gap-1">
       <WarningIcon className="size-5 shrink-0 text-error-200" />
-      <Text variant="body-sm" className="text-neutral-400">
+      <Text variant="body-md" className="text-neutral-500">
         가능 피드백 세션 {remaining}회 남음
       </Text>
     </div>

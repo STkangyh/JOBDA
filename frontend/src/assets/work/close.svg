@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+<foreignObject x="-16" y="-16" width="88" height="88"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(8px);clip-path:url(#bgblur_0_0_468_clip_path);height:100%;width:100%"></div></foreignObject><g id="Button" data-figma-bg-blur-radius="16">
+<rect width="56" height="56" rx="28" fill="#F5F5F5" fill-opacity="0.5"/>
+<path id="Union" d="M39.195 14.1175C39.3512 13.9613 39.6052 13.9613 39.7614 14.1175L42.0446 16.4017C42.2005 16.5579 42.2007 16.811 42.0446 16.9671L30.9294 28.0823L42.0446 39.1976C42.2005 39.3538 42.2007 39.6069 42.0446 39.763L39.7614 42.0472C39.6053 42.2033 39.3512 42.2031 39.195 42.0472L28.0807 30.932L16.9665 42.0472C16.8103 42.2033 16.5563 42.2031 16.4001 42.0472L14.1169 39.763C13.9607 39.6068 13.9607 39.3538 14.1169 39.1976L25.2311 28.0823L14.1169 16.9671C13.9607 16.8109 13.9608 16.5579 14.1169 16.4017L16.4001 14.1175C16.5563 13.9613 16.8103 13.9613 16.9665 14.1175L28.0807 25.2318L39.195 14.1175Z" fill="#B3B3B3"/>
+</g>
+<defs>
+<clipPath id="bgblur_0_0_468_clip_path" transform="translate(16 16)"><rect width="56" height="56" rx="28"/>
+</clipPath></defs>
+</svg>

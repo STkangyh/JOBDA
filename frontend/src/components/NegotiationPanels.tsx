@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { Card } from './Card'
 import { Text } from './Text'
 import { ArrowUpwardIcon, WarningIcon } from './icons'
 import { useSession } from '../store/session'
@@ -89,23 +88,19 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   }, [history.length, sending, showIntro, failed])
 
   return (
-    <Card className="flex h-full max-h-[1400px] flex-col gap-6 p-6">
-      <Text variant="title-lg" emphasis className="text-green-900">
-        메신저
-      </Text>
-      <div className="flex gap-2">
+    // 업무 페이지 새 디자인(2217:10088 등): 화면 오른쪽 끝에 붙은 회색 반투명 패널. 관계자 탭 3개는 디자인에
+    // 없지만 대화 상대를 바꾸는 기능이 필요해 제목 아래 칩으로 남겼다.
+    <section className="flex h-full min-h-0 flex-col gap-2.5 rounded-l-lg bg-[rgba(234,234,234,0.75)] p-8 shadow-[-4px_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[6px]">
+      <h2 className="text-title-lg font-semibold text-neutral-700">메신저</h2>
+      <div className="flex flex-wrap gap-2">
         {PERSONAS.map((p) => {
           const isUnread = unreadPersonas.has(p)
           return (
             <button
               key={p}
               onClick={() => selectTab(p)}
-              className={`flex shrink-0 items-center gap-2 rounded-[20px] border px-3 py-2 text-body-md font-medium transition-colors ${
-                isUnread
-                  ? 'border-neutral-200 bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
-                  : active === p
-                    ? 'border-green-200 bg-green-50 text-green-900'
-                    : 'border-neutral-200 bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
+              className={`flex shrink-0 items-center gap-2 rounded-[80px] border-2 px-3 py-1.5 text-body-md transition-colors ${
+                active === p && !isUnread ? 'border-green-200 bg-green-300 text-green-900' : 'border-neutral-100 bg-green-50 text-neutral-700 hover:bg-green-100'
               }`}
             >
               {isUnread && <span className="size-2 shrink-0 rounded-full bg-success-200" />}
@@ -123,19 +118,19 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
         <div className="flex min-h-full flex-col justify-end gap-3">
           {showIntro && (
             <div className="flex items-end gap-2 self-start">
-              <div className="flex max-w-[85%] flex-col gap-2 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3">
+              <div className="flex max-w-[229px] flex-col gap-2 rounded-tl-xl rounded-tr-xl rounded-br-xl bg-neutral-100 px-[18px] py-3">
                 <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
                   {intro!.text}
                 </Text>
                 <div className="flex gap-2">
-                  <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500">
+                  <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700">
                     {PERSONA_SENDER_NAME[intro!.persona]}
                   </span>
                   <button
                     type="button"
                     onClick={() => saveNote(intro!.text)}
                     disabled={savedNotes.includes(intro!.text)}
-                    className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
+                    className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
                   >
                     {savedNotes.includes(intro!.text) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
                   </button>
@@ -151,23 +146,23 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           {history.map((m, i) => (
             <div key={i} className={`flex items-end gap-2 ${m.role === 'user' ? 'flex-row-reverse self-end' : 'self-start'}`}>
               <div
-                className={`flex max-w-[85%] flex-col gap-2 px-4 py-3 ${
+                className={`flex max-w-[229px] flex-col gap-2 px-[18px] py-3 ${
                   m.role === 'user'
-                    ? 'rounded-bl-xl rounded-tl-xl rounded-tr-xl bg-green-100 text-green-900'
-                    : 'rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 text-neutral-900'
+                    ? 'rounded-tl-xl rounded-tr-xl rounded-bl-xl bg-green-300 text-green-900'
+                    : 'rounded-tl-xl rounded-tr-xl rounded-br-xl bg-neutral-100 text-neutral-700'
                 }`}
               >
                 <Text variant="body-md">{m.content}</Text>
                 {m.role === 'assistant' && (
                   <div className="flex gap-2">
-                    <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500">
+                    <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700">
                       {PERSONA_SENDER_NAME[active]}
                     </span>
                     <button
                       type="button"
                       onClick={() => saveNote(m.content)}
                       disabled={savedNotes.includes(m.content)}
-                      className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-500 transition-colors hover:bg-white hover:text-neutral-700 disabled:cursor-not-allowed disabled:text-neutral-300"
+                      className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
                     >
                       {savedNotes.includes(m.content) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
                     </button>
@@ -175,7 +170,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
                 )}
               </div>
               {m.t && (
-                <Text variant="caption-sm" className="shrink-0 text-neutral-400">
+                <Text variant="caption-sm" className="shrink-0 text-[12px] text-neutral-700">
                   {formatTime(m.t)}
                 </Text>
               )}
@@ -217,7 +212,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           24px 간격은 바깥 Card의 gap-6가 담당). */}
       <div className="flex flex-col gap-1">
         <form
-          className="flex h-[50px] items-center justify-between gap-2 rounded-[4px] bg-neutral-100 py-[9px] pl-3 pr-[9px]"
+          className="flex items-center justify-between gap-3 rounded-2xl bg-neutral-50 p-3"
           onSubmit={(e) => {
             e.preventDefault()
             send(input)
@@ -227,14 +222,14 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
             value={input}
             maxLength={300}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Message"
-            className="h-full flex-1 bg-transparent text-body-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+            placeholder="메시지를 입력하세요"
+            className="h-8 min-w-0 flex-1 bg-transparent text-title-lg text-neutral-700 placeholder:text-neutral-500 focus:outline-none"
           />
           <button
             type="submit"
             aria-label="메시지 보내기"
             disabled={sending || !input.trim()}
-            className="flex h-8 w-11 shrink-0 items-center justify-center rounded-[4px] bg-neutral-400 text-white transition-colors disabled:bg-neutral-200 disabled:text-neutral-400"
+            className="flex h-8 w-11 shrink-0 items-center justify-center rounded-[4px] bg-green-500 text-neutral-900 transition-colors disabled:bg-neutral-200 disabled:text-neutral-400"
           >
             <ArrowUpwardIcon className="size-6" />
           </button>
@@ -244,7 +239,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
         </Text>
         <ChatRetentionNotice />
       </div>
-    </Card>
+    </section>
   )
 }
 
@@ -257,46 +252,54 @@ interface WorkNotesCardProps {
 // 화면마다 그룹 내용이 달라진다(특히 CMF 결정 사항은 1차 피드백 전후로 태그가 하나 늘어남).
 export function WorkNotesCard({ groups }: WorkNotesCardProps) {
   const savedNotes = useSession((s) => s.savedNotes)
+  // 업무 페이지 새 디자인에서는 "업무 노트"가 제목 막대로만 보인다 — 누르면 펼쳐서 기존 내용(태그·저장한 답변)을 보여준다.
+  const [open, setOpen] = useState(false)
 
-  // h-full: Messenger와 나란한 그리드 칸에 자기 혼자 들어가서 행 높이만큼 늘어나게 함(항상
-  // 이래야 메신저와 높이가 정확히 일치한다 — 제출 버튼 등 다른 요소와 이 칸을 나눠 쓰면 안 됨,
-  // Workspace.tsx 참고).
   return (
-    <Card className="flex h-full flex-1 flex-col gap-6 p-6">
-      <Text variant="title-lg" emphasis className="text-green-900">
+    <section className="flex shrink-0 flex-col rounded-l-lg bg-[rgba(234,234,234,0.75)] shadow-[-4px_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[6px]">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex h-16 items-center justify-between px-8 text-left text-title-lg font-semibold text-neutral-700 focus-visible:outline-2 focus-visible:outline-green-700"
+      >
         업무 노트
-      </Text>
-      {groups.map((g) => (
-        <div key={g.label} className="flex flex-col gap-3">
-          <Text variant="body-lg" className="text-neutral-600">
-            {g.label}
-          </Text>
-          <div className="flex flex-wrap gap-2.5">
-            {g.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border-2 border-neutral-200 bg-neutral-100 px-3 py-2 text-body-lg text-neutral-500"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      ))}
-      {savedNotes.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <Text variant="body-lg" className="text-neutral-600">
-            저장한 답변
-          </Text>
-          <ul className="flex flex-col gap-2">
-            {savedNotes.map((note, i) => (
-              <li key={i} className="rounded-md bg-neutral-100 px-3 py-2 text-body-md text-neutral-700">
-                {note}
-              </li>
-            ))}
-          </ul>
+        <span aria-hidden className={`text-body-md text-neutral-500 transition-transform ${open ? 'rotate-180' : ''}`}>
+          ▾
+        </span>
+      </button>
+      {open && (
+        <div className="flex max-h-[360px] flex-col gap-5 overflow-y-auto px-8 pb-6">
+          {groups.map((g) => (
+            <div key={g.label} className="flex flex-col gap-2">
+              <Text variant="body-lg" className="text-neutral-600">
+                {g.label}
+              </Text>
+              <div className="flex flex-wrap gap-2">
+                {g.tags.map((tag) => (
+                  <span key={tag} className="rounded-full border-2 border-neutral-100 bg-green-50 px-3 py-1.5 text-body-md text-neutral-700">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+          {savedNotes.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <Text variant="body-lg" className="text-neutral-600">
+                저장한 답변
+              </Text>
+              <ul className="flex flex-col gap-2">
+                {savedNotes.map((note, i) => (
+                  <li key={i} className="rounded-md bg-neutral-50 px-3 py-2 text-body-md text-neutral-700">
+                    {note}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
-    </Card>
+    </section>
   )
 }
