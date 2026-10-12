@@ -39,7 +39,7 @@ export interface AdminReport {
   ut_stages?: { flow: 's1' | 's2'; screen: string; sessions: number; median_s: number }[]
 }
 
-export type UtStatus = 'completed' | 'in_progress' | 'exited'
+export type UtStatus = 'completed' | 'exited' | 'in_progress' | 'incomplete'
 
 export interface UtSession {
   participant: string
@@ -54,6 +54,29 @@ export interface UtSession {
   messages: number
   system_errors: number
   stage_seconds: Record<string, number>
+  ut_round: string | null
+  last_screen: string | null
+  last_activity: string | null
+  last_detail: string | null
+  last_activity_at: string | null
+  m_first_judgment: boolean
+  m_feedback: boolean
+  m_revision: boolean
+  m_self_eval: boolean
+  m_report: boolean
+  repeat_opens: number
+  review: UtReview | null
+}
+
+export type IssueType = 'dropoff' | 'friction' | 'tech_error' | 'none'
+export type Evidence = 'log' | 'survey' | 'recording' | 'multiple'
+
+export interface UtReview {
+  issue_type: IssueType
+  reason: string
+  evidence: Evidence
+  note: string
+  updated_at?: string
 }
 
 export interface ActivityRow {
@@ -61,6 +84,7 @@ export interface ActivityRow {
   activity: string
   screen: string | null
   detail: string | null
+  nth?: number
 }
 
 export type Period = 'today' | '7d' | '30d' | 'all'
@@ -211,11 +235,15 @@ export function actionLabel(name: string) {
   return ACTIONS[name] ?? name
 }
 
-export const UT_STATUS_LABELS: Record<UtStatus, string> = { completed: '완료', in_progress: '진행 중', exited: '중간 이탈' }
+export const UT_STATUS_LABELS: Record<UtStatus, string> = { completed: '완료', exited: '명시적 종료', in_progress: '진행 중', incomplete: '미완료' }
 
 // 유저 테스트 기획서의 Activity Log 이름
 const ACTIVITIES: Record<string, string> = {
   session_start: '세션 시작',
+  step_enter: '단계 진입',
+  step_complete: '단계 완료',
+  self_eval_submit: '자기평가 완료',
+  error_occurred: '오류 발생',
   material_open: '자료 열람',
   stakeholder_open: '관계자 선택',
   message_send: '관계자에게 질문',
@@ -226,7 +254,7 @@ const ACTIVITIES: Record<string, string> = {
   self_eval_start: '자기평가 시작',
   report_view: '리포트 확인',
   session_complete: '세션 완료',
-  session_exit: '중간 이탈',
+  session_exit: '종료 버튼으로 종료',
 }
 
 export function activityLabel(name: string) {
@@ -248,6 +276,10 @@ export function activityDetail(row: ActivityRow) {
   const d = row.detail
   if (!d) return ''
   if (d.startsWith('session')) return screenLabel(d)
+  if (row.activity === 'self_eval_submit') return ''
+  if (row.activity === 'step_enter' || row.activity === 'step_complete' || row.activity === 'feedback_receive') return stageLabel(d)
+  if (d === 'chat') return 'AI 채팅 응답 실패'
+  if (d === 'report') return '리포트 생성 실패'
   if (d.includes(':')) return viewLabel(d)
   const round = d.match(/^round_(\d+)$/)
   if (round) return `라운드 ${round[1]}`

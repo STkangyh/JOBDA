@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { fillDays, periodSince, screenLabel, viewLabel, formatDuration } from './report'
 import { AdminDashboard } from './AdminDashboard'
+import type { UtApi } from './UserTestSection'
 import { demoReport, demoTimeline } from './demoReport'
 
 describe('report helpers', () => {
@@ -32,7 +33,7 @@ describe('report helpers', () => {
 
 describe('AdminDashboard', () => {
   it('shows KPIs, both funnels with the biggest drop called out, and the tables', () => {
-    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} loadTimeline={async () => []} />)
+    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} ut={noopUt} />)
     expect(screen.getByText('완료율')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '세션2 퍼널' })).toBeInTheDocument()
     expect(screen.getByText(/64명 이탈 · 가장 큰 이탈 구간/)).toBeInTheDocument()
@@ -45,38 +46,70 @@ describe('AdminDashboard', () => {
   it('changes the period from the filter row', async () => {
     const user = userEvent.setup()
     const onPeriod = vi.fn()
-    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={onPeriod} loading={false} loadTimeline={async () => []} />)
+    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={onPeriod} loading={false} ut={noopUt} />)
     await user.click(screen.getByRole('button', { name: '최근 7일' }))
     expect(onPeriod).toHaveBeenCalledWith('7d')
   })
 })
 
+const noopUt: UtApi = { loadTimeline: async () => [], saveReview: async () => {} }
+
 describe('UserTestSection', () => {
-  it('shows participant KPIs — completion excludes sessions still in progress', () => {
-    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} loadTimeline={async () => []} />)
-    const ut = screen.getByRole('heading', { name: '유저 테스트' }).closest('section')!
-    // 4개 세션 중 진행 중 1개 제외 → 완료 2 / 끝난 3
-    expect(within(ut).getByText('66.7%')).toBeInTheDocument()
-    expect(within(ut).getByText('세션2 · 관계자 협업에서')).toBeInTheDocument()
-    expect(within(ut).getByText('진행 중')).toBeInTheDocument()
+  const renderUt = (ut = noopUt) =>
+    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} ut={ut} />)
+  const utSection = () => screen.getByRole('heading', { name: '유저 테스트' }).closest('section')!
+
+  it('shows the UT KPIs from the plan — completion counts every started session', () => {
+    renderUt()
+    const ut = utSection()
+    // 4개 세션 중 완료 2 → 50%, 30일 넘게 멈춘 세션 1개가 미완료
+    expect(within(within(ut).getByText('전체 완주율').parentElement!).getByText('50%')).toBeInTheDocument()
+    expect(within(within(ut).getByText('미완료 세션').parentElement!).getByText('1')).toBeInTheDocument()
+    expect(within(ut).getByRole('heading', { name: '세션2 업무 마일스톤' })).toBeInTheDocument()
+    expect(within(ut).getByText('미완료')).toBeInTheDocument()
+    // 저장된 검토는 표에 유형으로 보인다
+    expect(within(ut).getByText('Drop-off')).toBeInTheDocument()
   })
 
-  it('opens a session\'s activity log in the planned activity names', async () => {
+  it('timeline marks steps, re-opened materials, errors and the last action', async () => {
     const user = userEvent.setup()
     const loadTimeline = vi.fn(async () => demoTimeline())
-    render(<AdminDashboard report={demoReport()} period="30d" onPeriod={() => {}} loading={false} loadTimeline={loadTimeline} />)
-    const ut = screen.getByRole('heading', { name: '유저 테스트' }).closest('section')!
-    await user.click(within(ut).getAllByRole('button', { name: '활동 기록' })[0])
+    renderUt({ ...noopUt, loadTimeline })
+    await user.click(within(utSection()).getAllByRole('button', { name: '기록·검토' })[0])
     const log = await screen.findByRole('list', { name: '활동 기록' })
     expect(loadTimeline).toHaveBeenCalledWith(demoReport().ut_sessions![0].session_id)
-    expect(within(log).getByText('선택 근거 제출')).toBeInTheDocument()
-    expect(within(log).getAllByText('라운드 1')).toHaveLength(2)
-    expect(within(log).getByText('자료 · 시안 A')).toBeInTheDocument()
-    expect(within(log).getByText('메신저 · 설계팀')).toBeInTheDocument()
+    expect(within(log).getByText('자료탐색 단계')).toBeInTheDocument()
+    expect(within(log).getByText('재열람')).toBeInTheDocument()
+    expect(within(log).getByText('AI 채팅 응답 실패')).toBeInTheDocument()
+    expect(within(log).getByText('마지막 행동').closest('li')).toHaveTextContent('세션 완료')
+  })
+
+  it('starts the review from a log-based suggestion, marks a log-only cause as presumed, and saves', async () => {
+    const user = userEvent.setup()
+    const saveReview = vi.fn(async () => {})
+    renderUt({ ...noopUt, saveReview })
+    await user.click(within(utSection()).getAllByRole('button', { name: '기록·검토' })[0])
+    expect(screen.getByText('자동 제안 — 확인 후 저장하세요')).toBeInTheDocument()
+    expect(screen.getByLabelText('문제 확인되지 않음')).toBeChecked()
+
+    await user.click(screen.getByLabelText('Friction — 혼란·막힘 의심'))
+    await user.selectOptions(screen.getByLabelText('원인 분류'), 'other')
+    expect(screen.getByText(/이 원인은 "추정"으로 표시돼요/)).toBeInTheDocument()
+    await user.type(screen.getByLabelText('관리자 메모'), '메신저 재진입 반복')
+    await user.click(screen.getByRole('button', { name: '검토 저장' }))
+
+    expect(saveReview).toHaveBeenCalledWith(demoReport().ut_sessions![0].session_id, {
+      issue_type: 'friction',
+      reason: 'other',
+      evidence: 'log',
+      note: '메신저 재진입 반복',
+    })
+    expect(await screen.findByText('저장했어요')).toBeInTheDocument()
+    expect(within(utSection()).getByText('Friction')).toBeInTheDocument()
   })
 
   it('shows how to start when there are no participant sessions yet', () => {
-    render(<AdminDashboard report={{ ...demoReport(), ut_sessions: [], ut_stages: [] }} period="30d" onPeriod={() => {}} loading={false} loadTimeline={async () => []} />)
+    render(<AdminDashboard report={{ ...demoReport(), ut_sessions: [], ut_stages: [] }} period="30d" onPeriod={() => {}} loading={false} ut={noopUt} />)
     expect(screen.getByText(/테스트 링크에 \?ut=참가자코드/)).toBeInTheDocument()
   })
 })

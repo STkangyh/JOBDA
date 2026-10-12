@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from
 import { ANALYTICS_ENABLED } from '../../lib/analytics'
 import { getSupabase } from '../../lib/supabaseClient'
 import { AdminDashboard } from './AdminDashboard'
-import { periodSince, type ActivityRow, type AdminReport, type Period } from './report'
+import { periodSince, type ActivityRow, type AdminReport, type Period, type UtReview } from './report'
+import type { UtApi } from './UserTestSection'
 
 type Status = 'checking' | 'signed_out' | 'forbidden' | 'ready' | 'error'
 
@@ -40,10 +41,18 @@ function Notice({ title, body, action }: { title: string; body: string; action?:
   )
 }
 
-async function loadTimeline(sessionId: string): Promise<ActivityRow[]> {
-  const { data, error } = await getSupabase().rpc('admin_activity_log', { p_session: sessionId })
-  if (error) throw error
-  return (data ?? []) as ActivityRow[]
+// 검토 기록(ut_reviews)은 RLS가 관리자만 쓰게 막는다. 검토자·수정 시각은 DB 트리거가 채운다.
+const utApi: UtApi = {
+  async loadTimeline(sessionId) {
+    const { data, error } = await getSupabase().rpc('admin_activity_log', { p_session: sessionId })
+    if (error) throw error
+    return (data ?? []) as ActivityRow[]
+  },
+  async saveReview(sessionId, review: UtReview) {
+    const { issue_type, reason, evidence, note } = review
+    const { error } = await getSupabase().from('ut_reviews').upsert({ session_id: sessionId, issue_type, reason, evidence, note }, { onConflict: 'session_id' })
+    if (error) throw error
+  },
 }
 
 // 개발 서버에서 /admin?demo 로 열면 샘플 데이터로 화면만 확인한다(운영 빌드에서는 코드째 빠짐).
@@ -59,13 +68,16 @@ function useDemoReport() {
 
 export function AdminPage() {
   const demo = useDemoReport()
-  const demoTimeline = async () => (await import('./demoReport')).demoTimeline()
+  const demoUt: UtApi = {
+    loadTimeline: async () => (await import('./demoReport')).demoTimeline(),
+    saveReview: async () => {},
+  }
   const [demoPeriod, setDemoPeriod] = useState<Period>('30d')
 
   if (demo) {
     return (
       <Shell>
-        <AdminDashboard report={demo} period={demoPeriod} onPeriod={setDemoPeriod} loading={false} loadTimeline={demoTimeline} />
+        <AdminDashboard report={demo} period={demoPeriod} onPeriod={setDemoPeriod} loading={false} ut={demoUt} />
       </Shell>
     )
   }
@@ -171,7 +183,7 @@ function ConnectedAdmin() {
 
   return (
     <Shell email={email} onSignOut={signOut}>
-      <AdminDashboard report={report} period={period} onPeriod={changePeriod} loading={loading} loadTimeline={loadTimeline} />
+      <AdminDashboard report={report} period={period} onPeriod={changePeriod} loading={loading} ut={utApi} />
     </Shell>
   )
 }
