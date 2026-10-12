@@ -1,5 +1,6 @@
 import { startAnalytics, type Transport } from './analytics'
 import { getSupabase } from '../supabaseClient'
+import { consumeExpiredSessionFlag } from '../auth'
 
 // main.tsx에서 환경변수가 있을 때만 동적 import 된다 — supabase-js가 첫 화면 번들에 끼지 않고,
 // 환경변수가 없는 로컬/테스트에서는 분석이 아예 꺼진다(VITE_API_BASE_URL 없으면 목데이터로 도는 것과 같은 방식).
@@ -18,6 +19,9 @@ async function signInAnonymously() {
 
 async function ensureUser() {
   const supabase = getSupabase()
+  // "로그인 상태 유지"를 끄고 로그인한 뒤 브라우저를 다시 열었으면 계정 세션을 지우고 익명으로 시작한다.
+  // 리스너를 걸기 전에 처리해야 SIGNED_OUT 재로그인과 아래 익명 로그인이 겹치지 않는다.
+  if (consumeExpiredSessionFlag()) await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
   supabase.auth.onAuthStateChange((event, session) => {
     accessToken = session?.access_token ?? null
     // 관리자 페이지에서 로그아웃하면 세션이 비므로, 다시 익명 사용자로 돌아와야 기록이 이어진다.

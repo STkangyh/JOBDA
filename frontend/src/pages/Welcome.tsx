@@ -14,7 +14,7 @@ const JOURNEY = [
   { title: '하나의 제품을 완성해요', body: '소재 선정과 양산까지, 전체 과정을 경험해요.' },
 ]
 
-// 체험 시작하기 → 로딩 → (예정) 로그인(로그인 상태 유지 체크) → 온보딩. 로딩 뒤 연결은 pages/Loading.tsx.
+// 체험 시작하기 → 로딩 → 로그인(로그인 상태 유지 체크) → (예정) 온보딩.
 const START_PATH = '/loading'
 
 export function Welcome() {

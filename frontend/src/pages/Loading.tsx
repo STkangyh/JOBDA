@@ -6,8 +6,8 @@ import spinner from '../assets/loading/spinner.svg'
 // Figma "체험 준비 · Loading splash"(2217:9710, 2026-10-13). 시작 화면의 "체험 시작하기" 다음 화면.
 // 진행 막대가 차는 만큼 오른쪽 아래 숫자가 같이 오르고, 다 찰 때까지 가운데 스피너가 계속 돈다.
 
-// 다음 목적지: (예정) 로그인 → 온보딩. 두 화면 디자인이 오기 전까지는 체험 진입점인 직무 상세로 임시 연결한다.
-const NEXT_PATH = '/explore/job'
+// 다음은 로그인 화면(이미 로그인되어 있으면 로그인 화면이 알아서 건너뛴다).
+const NEXT_PATH = '/login'
 
 // 실제로 기다릴 서버 작업이 아직 없어 정해진 시간 동안 채운다. 그 사이 다음 화면 코드를 미리 받아둔다.
 export const LOADING_DURATION_MS = 2400
@@ -23,7 +23,7 @@ export function Loading() {
   const [percent, setPercent] = useState(0)
 
   useEffect(() => {
-    void import('./explore/JobDetail')
+    void import('./auth/Login')
     let elapsed = 0
     const id = window.setInterval(() => {
       elapsed = Math.min(LOADING_DURATION_MS, elapsed + TICK_MS)

@@ -8,6 +8,7 @@ import { ScreenTracker } from './components/ScreenTracker'
 import { AsteriskIcon } from './components/icons'
 import type { Stage } from './types'
 import { hasSeenWelcome } from './lib/welcome'
+import { resolveEntry } from './lib/auth'
 
 // 화면들이 전부 Figma 데스크톱 프레임 그대로(고정폭 사이드바, grid-cols-5 등)라 좁은 화면에서는
 // 레이아웃이 깨진다 — Web Analytics로 실제 모바일 방문이 확인돼서(적지만 0은 아님), 반응형으로
@@ -50,6 +51,11 @@ const Session1App = lazy(() => import('./pages/session1/Session1App').then((m) =
 const JourneyMap = lazy(() => import('./pages/JourneyMap').then((m) => ({ default: m.JourneyMap })))
 const Welcome = lazy(() => import('./pages/Welcome').then((m) => ({ default: m.Welcome })))
 const Loading = lazy(() => import('./pages/Loading').then((m) => ({ default: m.Loading })))
+const Login = lazy(() => import('./pages/auth/Login').then((m) => ({ default: m.Login })))
+const Signup = lazy(() => import('./pages/auth/Signup').then((m) => ({ default: m.Signup })))
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword').then((m) => ({ default: m.ForgotPassword })))
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword').then((m) => ({ default: m.ResetPassword })))
+const AuthConfirm = lazy(() => import('./pages/auth/AuthConfirm').then((m) => ({ default: m.AuthConfirm })))
 const ComprehensiveReport = lazy(() => import('./pages/ComprehensiveReport').then((m) => ({ default: m.ComprehensiveReport })))
 const ProposalWriting = lazy(() => import('./pages/session2/ProposalWriting').then((m) => ({ default: m.ProposalWriting })))
 const AdminPage = lazy(() => import('./pages/admin/AdminPage').then((m) => ({ default: m.AdminPage })))
@@ -116,6 +122,24 @@ function Session2Route() {
 // pathname if-분기 + KNOWN_PATHS Set을 화면마다 손으로 맞춰야 해서, 새 화면을 추가할 때 한
 // 군데라도 빠뜨리면 조용히 ErrorPage로 떨어지는 실수가 나기 쉬웠다. <Routes>는 그 등록을
 // 선언 하나로 합치고, 없는 경로는 path="*"가 자동으로 받는다.
+// 루트 진입: 로그인 상태에 따라 온보딩·로그인으로 보내고(lib/auth resolveEntry), 아니면 처음 온 브라우저는
+// 시작 화면부터(브라우저당 한 번), 다시 온 브라우저는 탐색 홈.
+function RootEntry({ onOpenJob }: { onOpenJob: () => void }) {
+  const [target, setTarget] = useState<string | null | undefined>(undefined)
+  useEffect(() => {
+    let cancelled = false
+    void resolveEntry().then((to) => {
+      if (!cancelled) setTarget(to ?? (hasSeenWelcome() ? null : '/welcome'))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  if (target === undefined) return <RouteFallback />
+  if (target) return <Navigate to={target} replace />
+  return <Explore onOpenJob={onOpenJob} />
+}
+
 function App() {
   const navigate = useNavigate()
   const isNarrow = useIsNarrowViewport()
@@ -133,13 +157,15 @@ function App() {
       <ScreenTracker narrow={false} />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
-          {/* 루트에 처음 들어온 브라우저는 시작 화면부터(브라우저당 한 번). /explore 별칭은 항상 홈. */}
-          <Route
-            path="/"
-            element={hasSeenWelcome() ? <Explore onOpenJob={() => navigate('/explore/job')} /> : <Navigate to="/welcome" replace />}
-          />
+          {/* 루트 진입 분기는 RootEntry. /explore 별칭은 항상 홈. */}
+          <Route path="/" element={<RootEntry onOpenJob={() => navigate('/explore/job')} />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/loading" element={<Loading />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/confirm" element={<AuthConfirm />} />
           <Route path="/explore" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
           <Route
             path="/explore/job"

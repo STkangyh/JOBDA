@@ -11,7 +11,7 @@ function renderLoading() {
     <MemoryRouter initialEntries={['/loading']}>
       <Routes>
         <Route path="/loading" element={<Loading />} />
-        <Route path="/explore/job" element={<p>직무 상세</p>} />
+        <Route path="/login" element={<p>로그인 화면</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -43,8 +43,8 @@ describe('loading splash', () => {
   it('moves on to the next screen shortly after reaching 100%', () => {
     renderLoading()
     act(() => vi.advanceTimersByTime(LOADING_DURATION_MS))
-    expect(screen.queryByText('직무 상세')).not.toBeInTheDocument()
+    expect(screen.queryByText('로그인 화면')).not.toBeInTheDocument()
     act(() => vi.advanceTimersByTime(400))
-    expect(screen.getByText('직무 상세')).toBeInTheDocument()
+    expect(screen.getByText('로그인 화면')).toBeInTheDocument()
   })
 })
