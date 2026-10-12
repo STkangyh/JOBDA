@@ -9,6 +9,16 @@
  * approximations, not tokens from the design system.
  */
 @theme {
+  /* 세션2 스토리 브리프: 장면이 바뀔 때 그림이 짧게 떠오른다 (움직임 줄이기 설정이면 motion-safe로 꺼짐) */
+  --animate-story-fade: story-fade 240ms ease-out;
+  @keyframes story-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
   --font-sans: 'Pretendard Variable', 'Pretendard', system-ui, 'Segoe UI', Roboto, sans-serif;
 
   /* Neutral (Figma: Neutral/*) */
