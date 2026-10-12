@@ -1,6 +1,7 @@
 import type { ElementType, ReactNode } from 'react'
 
 // Figma design system typography scale (Baseline = font-normal, Emphasis = font-medium/semibold).
+// 예외(2026-10-13 디자인 시스템): Baseline/Title/Small(title-md)은 Medium, Emphasis/Title/Small은 SemiBold.
 export type TextVariant =
   | 'display-xl'
   | 'display-lg'
@@ -32,7 +33,7 @@ const SIZE_CLASS: Record<TextVariant, string> = {
 
 interface TextProps {
   variant: TextVariant
-  /** Baseline (default) uses font-normal; Emphasis bumps weight — semibold for title-md, medium otherwise. */
+  /** Baseline uses font-normal (title-md는 Medium); Emphasis bumps weight — semibold for title-md, medium otherwise. */
   emphasis?: boolean
   as?: ElementType
   className?: string
@@ -41,7 +42,7 @@ interface TextProps {
 
 export function Text({ variant, emphasis = false, as, className = '', children }: TextProps) {
   const Tag = as ?? 'p'
-  const weightClass = emphasis ? (variant === 'title-md' ? 'font-semibold' : 'font-medium') : 'font-normal'
+  const weightClass = variant === 'title-md' ? (emphasis ? 'font-semibold' : 'font-medium') : emphasis ? 'font-medium' : 'font-normal'
   return (
     <Tag className={`${SIZE_CLASS[variant]} ${weightClass} ${className}`}>
       {children}

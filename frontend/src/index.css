@@ -2,7 +2,8 @@
 @import "pretendard/dist/web/variable/pretendardvariable.css";
 
 /*
- * Design tokens pulled from Figma "Design System" (node 391:589) via get_variable_defs.
+ * Design tokens pulled from Figma "Design System" (node 391:589) via get_variable_defs,
+ * re-synced 2026-10-13 against the updated "Design System" section (node 2006:34308).
  * Colors override Tailwind's built-in `neutral` scale so existing neutral-tinted classes
  * automatically pick up the real palette. Only Light Theme tokens were published in
  * Figma at fetch time -- no dark palette exists yet, so dark: overrides below are best-effort
@@ -35,21 +36,24 @@
   --color-neutral-900: #2c2c2c;
   --color-neutral-950: #121212;
 
-  /* Primary (Figma: Primary/* swatch fills — NOT the "Primary/Yellow" variable.
-     That variable and the swatch text labels are stale leftovers from an old yellow
-     palette; the rectangles were manually recolored to this green scale with no
-     variable binding. Verified by reading the actual fill hex off each swatch node,
-     not the label text. */
-  --color-primary-50: #f0f2ef;
-  --color-primary-100: #d0d8cd;
-  --color-primary-200: #b9c5b5;
-  --color-primary-300: #98ab93;
-  --color-primary-400: #859a7e;
-  --color-primary-500: #66815e;
-  --color-primary-600: #5d7556;
-  --color-primary-700: #485c43;
-  --color-primary-800: #384734;
-  --color-primary-900: #2b3627;
+  /* Primary (Figma: Primary/* swatch fills). 2026-10-13 디자인 시스템 갱신에서 Primary 스와치가
+     Green 스케일과 같은 색으로 바뀌었다 — 그래서 별도 값 대신 Green 토큰을 그대로 가리킨다.
+     스와치 이름표의 hex(#694F02 등 노란색)는 예전 팔레트가 남은 것이라 무시하고, 실제 칠해진 색을 따랐다.
+     예외: Primary500 스와치가 Primary400과 같은 #CFF5AA로 칠해져 있는데(중복으로 보임),
+     Green/500 변수(#C3F295)를 따랐다. */
+  --color-primary-50: var(--color-green-75);
+  --color-primary-100: var(--color-green-100);
+  --color-primary-200: var(--color-green-200);
+  --color-primary-300: var(--color-green-300);
+  --color-primary-400: var(--color-green-400);
+  --color-primary-500: var(--color-green-500);
+  --color-primary-600: var(--color-green-600);
+  --color-primary-700: var(--color-green-700);
+  --color-primary-800: var(--color-green-800);
+  --color-primary-900: var(--color-green-900);
+
+  /* ETC/Gray (Figma) — 구분선·플레이스홀더용 회색 */
+  --color-etc-gray: #d9d9d9;
 
   /* Green (Figma: Green/* — component-level accent used by the CTA button and the
      step indicator's progress fill). `primary` above is real too — used for the
@@ -108,6 +112,23 @@
   --text-caption-lg--line-height: 1.2;
   --text-caption-sm: 10px;
   --text-caption-sm--line-height: 1.2;
+
+  /* Web 텍스트 스타일 (Figma: Web/*, 2026-10-13 추가) — Regular, 웹 문서형 화면용 */
+  --text-web-title-sm: 24px;
+  --text-web-title-sm--line-height: 1.3;
+  --text-web-body-lg: 18px;
+  --text-web-body-lg--line-height: 1.4;
+  --text-web-caption: 12px;
+  --text-web-caption--line-height: 1.4;
+
+  /* Effects (Figma: Box Drop Shadow / Box Inner / GNB effect / Blur/16).
+     Figma의 BACKGROUND_BLUR 반경은 CSS backdrop-filter blur의 약 2배라 절반 값을 쓴다
+     (GNB 28 → 14px, Blur/16 → 8px — 브리프 화면 Figma 코드 내보내기도 같은 환산). */
+  --shadow-box: 0 0 8px 0 rgba(0, 0, 0, 0.04);
+  --shadow-box-inner: inset 0 0 4px 2px rgba(0, 0, 0, 0.04);
+  --shadow-gnb: 0 0 16px 0 rgba(0, 0, 0, 0.04);
+  --blur-gnb: 14px;
+  --blur-panel: 8px;
 }
 
 /* color-scheme: light dark였을 때 OS/브라우저가 다크 모드면 스크롤바·폼 컨트롤 같은 네이티브
