@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Sidebar, type SidebarItem } from '../../components/Sidebar'
+import { Sidebar } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
@@ -8,8 +8,6 @@ import { ChoiceCard } from '../../components/ChoiceCard'
 import { WarningIcon } from '../../components/icons'
 import { useSession } from '../../store/session'
 import type { Branch } from '../../types'
-
-const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 
 interface ChoiceOption {
   branch: Branch
@@ -69,7 +67,7 @@ export function BranchSelect() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
+      <Sidebar active="work" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <IndicatorHeader current="피드백 수정" loading={isSubmitting} />

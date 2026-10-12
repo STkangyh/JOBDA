@@ -1,6 +1,6 @@
 import { useSession } from '../store/session'
 import { useSession1 } from '../store/session1'
-import { Sidebar, type SidebarItem } from '../components/Sidebar'
+import { Sidebar } from '../components/Sidebar'
 import { Text } from '../components/Text'
 import { ProfileSpectrum } from '../components/ProfileSpectrum'
 import { WorkProcessChain } from '../components/WorkProcessChain'
@@ -9,8 +9,7 @@ import { PROCESS_STEPS, SESSION1_STEP_INDEX, SESSION2_STEP_INDEX } from '../data
 import type { ProfileAxis } from '../types'
 
 // Figma 744:17446(Desktop-101, "직무 리포트")을 템플릿으로 재사용 — 세션1+세션2 리포트를
-// 화면 하나로 합산한 "종합 리포트". 사이드바 3개(apps/work/history) 실측은 Report.tsx와 동일.
-const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
+// 화면 하나로 합산한 "종합 리포트".
 
 const NEXT_EXPLORATIONS = ['동일 직무의 다른 업무', '유사 직무 비교', '필요한 기초 역량 체험', '현직자 인터뷰, 교육과정 추천']
 
@@ -45,7 +44,7 @@ function averageProfile(a: ProfileAxis[], b: ProfileAxis[]): ProfileAxis[] {
 function ComprehensiveReportPending() {
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
-      <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
+      <Sidebar active="report" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <div className="hidden items-center justify-end gap-[18px] lg:flex">
@@ -96,7 +95,7 @@ export function ComprehensiveReport() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
-      <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
+      <Sidebar active="report" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6 pb-6">
         <div className="hidden items-center justify-end gap-[18px] lg:flex">

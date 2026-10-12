@@ -46,7 +46,7 @@ export function Session1Brief() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
-      <Sidebar active="apps" className="shrink-0" />
+      <Sidebar active="home" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* Workspace.tsx와 동일한 이유(사이드바는 부모 행의 기본 stretch로 뷰포트 전체 높이를

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Sidebar, type SidebarItem } from '../../components/Sidebar'
+import { Sidebar } from '../../components/Sidebar'
 import { Indicator } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
@@ -43,12 +43,8 @@ const VIEWER_CONTENT: Record<SpecDoc, { title: string; description: string; imag
   },
 }
 
-// Figma "Desktop - 116"(823:57686) — get_design_context로 재확인: 윗줄 apps/work/history
-// 3개(default topItems를 안 넘겨서 브리프 기준 apps/search/history가 잘못 나가고 있었음),
-// data가 Pressed. 세션1 자료함(744:17197)과 같은 레이아웃이지만 열람 자료 패널이 다중 파일
-// 브라우저가 아니라 "시방서가 무엇인가"를 설명하는 참고 자료 하나임.
-const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
-
+// Figma "Desktop - 116"(823:57686) — 세션1 자료함(744:17197)과 같은 레이아웃이지만 열람 자료 패널이
+// 다중 파일 브라우저가 아니라 "시방서가 무엇인가"를 설명하는 참고 자료 하나임. GNB는 Work가 활성(새 GNB에 Library가 없어짐).
 export function Materials() {
   const goTo = useSession((s) => s.goTo)
   const [selectedDoc, setSelectedDoc] = useState<SpecDoc>('spec_form')
@@ -60,7 +56,7 @@ export function Materials() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <Sidebar active="data" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
+      <Sidebar active="work" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_340px_1fr]">

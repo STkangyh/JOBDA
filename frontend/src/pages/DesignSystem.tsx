@@ -121,7 +121,7 @@ const ICONS = [
 
 export function DesignSystem() {
   const [checked, setChecked] = useState(true)
-  const [sidebarActive, setSidebarActive] = useState<SidebarItem>('apps')
+  const [sidebarActive, setSidebarActive] = useState<SidebarItem>('home')
   const [step, setStep] = useState<IndicatorStep>('관계자 협업')
   // 실제 화면에서는 제출 버튼 클릭 후 1200ms만 보이고 사라져서(Workspace.tsx 등) 눈으로 확인하기
   // 번거로웠다 — 토글로 계속 켜둔 채 스피너 3종(헤더 별표/제출 버튼/메신저 답변 대기 점 3개)을

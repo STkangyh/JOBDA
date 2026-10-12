@@ -29,7 +29,7 @@ export function SeniorFeedback() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <Sidebar active="work" topItems={['apps', 'work', 'history']} className="shrink-0" />
+      <Sidebar active="work" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* Workspace.tsx와 동일한 이유(사이드바는 부모 행의 기본 stretch로 뷰포트 전체 높이를

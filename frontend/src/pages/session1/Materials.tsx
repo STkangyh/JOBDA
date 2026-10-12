@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import conceptAImage from '../../assets/illustrations/session1-concept-a.png'
-import { Sidebar, type SidebarItem } from '../../components/Sidebar'
+import { Sidebar } from '../../components/Sidebar'
 import { Indicator, INDICATOR_STEPS_S1 } from '../../components/Indicator'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
@@ -11,8 +11,6 @@ import { S1_DOCS, S1_DOC_CATEGORIES } from '../../data/session1Docs'
 import { track, useTrackView, type S1DocKey } from '../../lib/analytics'
 
 const HIGHLIGHTED_CATEGORY = '제품 디자인, 설계 자료'
-// Figma 744:17197 사이드바 실측: apps/work/history(검색 아이콘 없음), work가 active.
-const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 
 // Figma "Desktop - 44"(744:17197) — 세션1 자료함. Indicator에 "자료탐색" 라벨은 있었지만
 // 실제 화면이 없어서 브리프에서 곧장 협상 라운드로 건너뛰고 있었음. 새로 추가.
@@ -24,7 +22,7 @@ export function Session1Materials() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-50 p-6">
-      <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
+      <Sidebar active="work" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* Figma(744:15857 등)와 동일하게 인디케이터는 가운데 컬럼 폭에만, 저장상태/프로필

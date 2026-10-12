@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Sidebar, type SidebarItem } from '../../components/Sidebar'
+import { Sidebar } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { INDICATOR_STEPS_S1 } from '../../components/Indicator'
 import { Text } from '../../components/Text'
@@ -11,8 +11,6 @@ import { useSession1 } from '../../store/session1'
 import { track } from '../../lib/analytics'
 
 const NEXT_EXPLORATIONS = ['동일 직무의 다른 업무', '유사 직무 비교', '필요한 기초 역량 체험', '현직자 인터뷰, 교육과정 추천']
-// Figma 744:17446 사이드바 실측: apps/search/work/history 4개, history가 active.
-const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'search', 'work', 'history']
 
 function SectionHeading({ children }: { children: string }) {
   return <p className="text-title-lg font-semibold text-green-800">{children}</p>
@@ -42,7 +40,7 @@ export function Session1Report() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
-      <Sidebar active="history" topItems={SIDEBAR_TOP_ITEMS} />
+      <Sidebar active="report" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6 pb-6">
         {/* 브리프/자료함/라운드 화면과 같은 헤더 행 — AppHeader(배너+검색+프로필) 대신

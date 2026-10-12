@@ -1,109 +1,85 @@
-import type { ComponentType } from 'react'
+import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import brandLogo from '../assets/brand-logo.png'
-import { AppsIcon, SearchIcon, HomeRepairServiceIcon, DataUsageIcon, DatabaseIcon, MailIcon, EditIcon, type IconProps } from './icons'
-import { useSession } from '../store/session'
+import homeIcon from '../assets/gnb/home.svg'
+import workIcon from '../assets/gnb/work.svg'
+import reportIcon from '../assets/gnb/report.svg'
+import profileIcon from '../assets/gnb/profile.svg'
 
-export type SidebarItem = 'apps' | 'search' | 'work' | 'history' | 'data' | 'message' | 'memo'
+export type SidebarItem = 'home' | 'work' | 'report'
 
 interface SidebarProps {
-  /** 윗줄 아이콘 그룹 — 화면마다 실제로 다름(get_screenshot 재확인 결과). 기본값은 브리프 기준. */
-  topItems?: readonly SidebarItem[]
   active?: SidebarItem
   onSelect?: (item: SidebarItem) => void
   className?: string
 }
 
-// Figma 컴포넌트 시트(703:34358)의 실제 glyph 이름: work="home_repair_service"(공구가방),
-// history="data_usage"(원형 링). 예전엔 다른 곳(Explore 배지)에서 쓰던 WorkIcon/ClockLoaderIcon을
-// 그대로 재사용했는데 모양이 달라서 여기 전용으로 정확한 path를 다시 만듦.
-const ICON: Record<SidebarItem, ComponentType<IconProps>> = {
-  apps: AppsIcon,
-  search: SearchIcon,
-  work: HomeRepairServiceIcon,
-  history: DataUsageIcon,
-  data: DatabaseIcon,
-  message: MailIcon,
-  memo: EditIcon,
-}
+// 공통 GNB — Figma "첫 방문 · Welcome splash"(2217:9806, 2026-10-13)의 GNB를 기준으로 한다.
+// 디자인 시스템 GNB(2006:37878, 라벨 + Library 포함)에서 다시 바뀌어: 위쪽에 로고와 프로필 버튼,
+// 가운데에 라벨 없는 아이콘 3개(Home/Work/Report). Library는 빠졌다.
+// 아이콘은 Figma SVG를 모양(마스크)으로만 쓰고 색은 토큰으로 칠한다 — 기본/활성 SVG의 path가
+// 완전히 같고 fill만 달라서(활성 Green/400 #CFF5AA, 기본 Neutral/600 #8E8E8E) 모양은 원본 그대로다.
+const ITEMS: { id: SidebarItem; label: string; icon: string }[] = [
+  { id: 'home', label: 'Home', icon: homeIcon },
+  { id: 'work', label: 'Work', icon: workIcon },
+  { id: 'report', label: 'Report', icon: reportIcon },
+]
 
-// 실제 라우트가 있는 목적지만 연결 — 나머지(search/work/message/memo)는 대응하는 화면이
-// 아직 없어서 시각적 상태만 있고 클릭해도 아무 데도 안 감(가짜 링크를 만들지 않음).
-// data는 Figma 823:57686(Desktop-116, 세션2 자료함)에서 Pressed 상태로 확인돼 세션2의
-// materials 스테이지로 연결(아래 NavButton의 data 특수 처리 참고). history(네비게이션바
-// 세번째 아이콘)는 진행 상태와 무관하게 항상 종합 리포트 탭으로 연결 — 아직 아무 세션도
-// 안 끝났으면 ComprehensiveReport 자체가 안내/이어하기 화면을 보여준다(체험맵으로 대신
-// 보내지 않음, 사용자 명시적 요청).
+// 실제 화면이 있는 목적지만 연결한다(가짜 링크를 만들지 않음). Work는 대응 화면이 아직 없어 표시만 한다.
 const ROUTE: Partial<Record<SidebarItem, string>> = {
-  apps: '/',
-  history: '/comprehensive-report',
-  data: '/session2',
+  home: '/',
+  report: '/comprehensive-report',
 }
 
-const BOTTOM_ITEMS: readonly SidebarItem[] = ['data', 'message', 'memo']
+// Vite가 작은 SVG를 data URI로 넣는데 그 안에 공백·따옴표가 있어서 url()을 따옴표로 감싸야 한다.
+const maskStyle = (src: string): CSSProperties => ({
+  maskImage: `url("${src}")`,
+  WebkitMaskImage: `url("${src}")`,
+  maskSize: '100% 100%',
+  WebkitMaskSize: '100% 100%',
+  maskRepeat: 'no-repeat',
+  WebkitMaskRepeat: 'no-repeat',
+})
 
-function NavButton({
-  item,
-  active,
-  onSelect,
-}: {
-  item: SidebarItem
-  active: boolean
-  onSelect?: (item: SidebarItem) => void
-}) {
-  const Icon = ICON[item]
-  const href = ROUTE[item]
-  // 세션2 스토어를 여기서 직접 건드리는 유일한 예외 — data는 세션2 자료함(materials
-  // 스테이지)으로 가는 지름길이라, 다른 화면(세션1/탐색)에서 눌러도 세션2 진행 중이던
-  // 스테이지를 덮어쓰고 이동한다(재입장 시 자료함부터 다시 보게 됨, 되돌릴 방법 있음).
-  const goToMaterials = useSession((s) => s.goTo)
+export function Sidebar({ active = 'home', onSelect, className = '' }: SidebarProps) {
   const navigate = useNavigate()
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        onSelect?.(item)
-        if (item === 'data') goToMaterials('materials')
-        if (href) navigate(href)
-      }}
-      className={`flex size-14 shrink-0 items-center justify-center transition-colors ${
-        active ? 'text-green-500' : 'text-green-50 hover:text-green-200'
-      }`}
-    >
-      <Icon className="size-5" />
-    </button>
-  )
-}
 
-// Figma "GNB" component — get_screenshot으로 화면별 사이드바를 하나씩 확대 재확인해보니
-// 윗줄 구성이 화면마다 실제로 다름(이 섹션 특유의 프레임 간 불일치):
-//   브리프(744:15857): apps/search/history
-//   자료함(744:17197)·라운드(744:16874)·탐색(744:23143): apps/work/history
-//   리포트(744:17446): apps/search/work/history
-// 아랫줄(data/message/memo)은 모든 프레임에서 동일해서 고정. 화면마다 topItems로 넘겨서
-// 맞추고, 기본값은 가장 먼저 확인했던 브리프 기준.
-export function Sidebar({
-  topItems = ['apps', 'search', 'history'],
-  active = 'apps',
-  onSelect,
-  className = '',
-}: SidebarProps) {
   return (
-    <nav className={`flex w-[83px] flex-col items-center gap-8 rounded-xl bg-neutral-900 p-2 ${className}`}>
-      <img src={brandLogo} alt="JOB:SIM" className="aspect-square w-full shrink-0 rounded-[2px] object-cover" />
-      <div className="flex w-full flex-col items-center gap-2">
-        <div className="flex flex-col items-center">
-          {topItems.map((item) => (
-            <NavButton key={item} item={item} active={active === item} onSelect={onSelect} />
-          ))}
-        </div>
-        <div className="h-px w-full shrink-0 bg-neutral-700" />
-        <div className="flex flex-col items-center">
-          {BOTTOM_ITEMS.map((item) => (
-            <NavButton key={item} item={item} active={active === item} onSelect={onSelect} />
-          ))}
-        </div>
+    <nav
+      aria-label="주 메뉴"
+      className={`relative flex w-24 shrink-0 flex-col items-center justify-center overflow-clip rounded-lg bg-[rgba(44,44,44,0.75)] p-5 shadow-gnb backdrop-blur-gnb ${className}`}
+    >
+      <div className="absolute top-[22px] left-[22px] flex w-[54px] flex-col gap-6">
+        <img src={brandLogo} alt="JOB:DA" className="size-[54px] rounded-full bg-neutral-800 object-cover" />
+        {/* 프로필: 로그인 화면이 나오기 전까지는 모양만 둔다(2026-10-13 결정) */}
+        <span className="flex size-[54px] items-center justify-center rounded-full bg-green-400 backdrop-blur-panel" aria-hidden>
+          <img src={profileIcon} alt="" width={20} height={20} className="size-5" />
+        </span>
       </div>
+      <ul className="flex flex-col gap-2">
+        {ITEMS.map((item) => {
+          const isActive = active === item.id
+          const href = ROUTE[item.id]
+          return (
+            <li key={item.id}>
+              <button
+                type="button"
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => {
+                  onSelect?.(item.id)
+                  if (href) navigate(href)
+                }}
+                className={`block rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-green-700 ${
+                  isActive ? 'text-green-400' : 'text-neutral-600 hover:text-neutral-500'
+                }`}
+              >
+                <span className="block size-14 bg-current" style={maskStyle(item.icon)} />
+              </button>
+            </li>
+          )
+        })}
+      </ul>
     </nav>
   )
 }

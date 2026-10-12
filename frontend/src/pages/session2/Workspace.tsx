@@ -471,7 +471,7 @@ export function Workspace() {
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
       {/* Figma "Roleplay" 사이드바 아이템(823:62680, home_repair_service 글리프)이 이 라운드
           화면에서 눌림 상태 — 우리 Sidebar의 'work' 슬롯과 같은 아이콘(HomeRepairServiceIcon). */}
-      <Sidebar active="work" topItems={['apps', 'work', 'history']} className="shrink-0" />
+      <Sidebar active="work" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* 사이드바는 부모 행(align-items 기본값 stretch)을 따라 자동으로 뷰포트 전체 높이만큼

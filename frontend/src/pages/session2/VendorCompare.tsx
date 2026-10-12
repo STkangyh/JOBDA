@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Sidebar, type SidebarItem } from '../../components/Sidebar'
+import { Sidebar } from '../../components/Sidebar'
 import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { Card } from '../../components/Card'
 import { Text } from '../../components/Text'
@@ -11,8 +11,6 @@ import { useSession, feedbackSessionsRemaining } from '../../store/session'
 import { SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
 import type { VendorOption } from '../../types'
 import { useTrackView } from '../../lib/analytics'
-
-const SIDEBAR_TOP_ITEMS: readonly SidebarItem[] = ['apps', 'work', 'history']
 
 const NOTE_TAGS = {
   ...SESSION2_NOTE_TAGS,
@@ -192,7 +190,7 @@ export function VendorCompare() {
 
   return (
     <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <Sidebar active="work" topItems={SIDEBAR_TOP_ITEMS} className="shrink-0" />
+      <Sidebar active="work" className="shrink-0" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         {/* Workspace.tsx와 동일한 이유로 flex-1/min-h-0을 그리드까지 끌고 내려가 사이드바와
