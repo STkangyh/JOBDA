@@ -29,11 +29,12 @@ beforeEach(() => {
 })
 
 describe('session2 story brief', () => {
-  it('opens on the first scene with the role chapter and no way back', () => {
+  it('opens on the first scene with the role chapter and no back arrow', () => {
     renderBrief()
     expect(screen.getByText(/김기럭 사원님 반가워요/)).toBeInTheDocument()
     expect(currentChapter()).toHaveTextContent('Your Role')
-    expect(screen.getByRole('button', { name: '이전' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: '이전' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '다음' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Skip' })).toBeInTheDocument()
   })
 
@@ -61,14 +62,14 @@ describe('session2 story brief', () => {
     expect(useSession.getState().currentStage).toBe('materials')
   })
 
-  it('the last scene keeps the arrows (forward disabled), fills every chapter and turns Skip into Next', async () => {
+  it('the last scene hides the forward arrow, keeps back, fills every chapter and turns Skip into Next', async () => {
     const user = userEvent.setup()
     renderBrief()
     await user.keyboard('{ArrowRight>7/}')
     expect(screen.getByText(/업무를 시작해볼까요/)).toBeInTheDocument()
     expect(currentChapter()).toBeNull()
-    expect(screen.getByRole('button', { name: '다음' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '이전' })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: '다음' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '이전' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Skip' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Next' }))

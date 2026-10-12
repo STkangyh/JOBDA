@@ -104,9 +104,9 @@ export function Brief() {
         )}
       </div>
 
-      {/* 마지막 장면에도 화살표를 둔다(Figma 239·240, 2026-10-12 확인) — 되돌아가 다시 볼 수 있게. 다음 장면이 없으니 → 는 비활성, 진행은 Next 버튼으로. */}
-      <RoundArrowButton direction="prev" onClick={prev} disabled={index === 0} className="absolute top-[calc(50%-10.5px)] left-8 -translate-y-1/2" />
-      <RoundArrowButton direction="next" onClick={next} disabled={isLast} className="absolute top-[calc(50%-10.5px)] right-8 -translate-y-1/2" />
+      {/* 첫 장면에는 ← 이전, 마지막 장면에는 → 다음을 숨긴다(2026-10-13 결정). 마지막 장면의 진행은 Next 버튼으로. */}
+      {index > 0 && <RoundArrowButton direction="prev" onClick={prev} className="absolute top-[calc(50%-10.5px)] left-8 -translate-y-1/2" />}
+      {!isLast && <RoundArrowButton direction="next" onClick={next} className="absolute top-[calc(50%-10.5px)] right-8 -translate-y-1/2" />}
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 px-[clamp(32px,7.58vw,131px)] pb-8">
         <ChapterProgress chapters={CHAPTERS} current={scene.chapter} />
