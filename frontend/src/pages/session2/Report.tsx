@@ -1,11 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { useSession } from '../../store/session'
-import { Card } from '../../components/Card'
+import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
-import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { DotMatrix } from '../../components/DotMatrix'
-import { BrandLogoBox } from '../../components/BrandLogoBox'
 import { RATING_SCALE } from '../../types'
 import { track } from '../../lib/analytics'
 
@@ -74,25 +72,12 @@ export function Report() {
   const reasonedParts = draftParts.filter((p) => p.reasoning.trim().length > 0).length
   const understandingPercent = draftParts.length > 0 ? (reasonedParts / draftParts.length) * 100 : 0
 
+  // 업무 페이지 새 디자인 2217:10860(2026-10-13): 같은 3칸 구성을 업무 화면 틀(회색 배경·라벨형 GNB) 안에 둔다.
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <div className="flex min-w-0 flex-1 flex-col gap-[19px]">
-        {/* session1/session2 SelfAssessment.tsx와 동일한 이유(Figma 실측 결과 로고는 인디케이터와
-            한 행에만 걸쳐 있고, 그 행과 콘텐츠가 같은 부모 아래 세로로 이어진 하나의 컬럼이다) —
-            로고를 페이지 전체 높이의 별도 컬럼(바깥 flex row의 형제)으로 빼두면 콘텐츠 그리드가
-            로고 폭+간격만큼 밀려나 Figma보다 좁아진다(QA 지적). */}
-        <div className="flex items-start gap-6">
-          <BrandLogoBox />
-          <div className="min-w-0 flex-1">
-            <IndicatorHeader current="직무 리포트" icons={false} />
-          </div>
-        </div>
-
-        {/* Figma 캔버스(1728px)의 442/855/340 고정폭을 그대로 쓰면 실제 브라우저 폭(예: 1280px)에서
-            가운데 컬럼이 300px도 안 남아 긴 인용구가 세로로 짜부라짐 — 같은 비율을 fr로 유지해
-            어떤 뷰포트에서도 비례하게 분배되도록 함. */}
-        <div className="grid grid-cols-1 items-start gap-[19px] lg:grid-cols-[442fr_855fr_340fr]">
-          <Card className="flex flex-col gap-[48px] px-6 py-8">
+    <WorkFrame step="직무 리포트" sidebar="work" exitStep="report">
+      <div className="min-w-0 flex-1">
+        <div className="grid min-h-full grid-cols-1 items-stretch gap-[19px] lg:grid-cols-[442fr_855fr_340fr]">
+          <WorkPanel padded={false} className="flex flex-col gap-[48px] px-6 py-8">
             <div className="flex flex-col gap-3">
               <SectionTag>체험한 업무</SectionTag>
               <div className="flex flex-col gap-2 pt-2">
@@ -130,10 +115,10 @@ export function Report() {
                 ))}
               </div>
             </div>
-          </Card>
+          </WorkPanel>
 
           <div className="flex min-w-0 flex-col gap-[18px]">
-            <Card className="flex flex-col gap-6 px-6 py-8">
+            <WorkPanel padded={false} className="flex flex-col gap-6 px-6 py-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <SectionTag>나의 업무 행동 분석</SectionTag>
                 <Text variant="headline-md" emphasis>
@@ -145,10 +130,10 @@ export function Report() {
                 <BehaviorRow label="주의점" quotes={report.cautions} className="bg-green-100" />
                 <BehaviorRow label="놓친 업무 요소" quotes={report.missed} className="bg-green-300" />
               </div>
-            </Card>
+            </WorkPanel>
 
             <div className="flex flex-col gap-[19px] sm:flex-row">
-              <Card className="flex flex-1 flex-col justify-between gap-6 p-6">
+              <WorkPanel padded={false} className="flex flex-1 flex-col justify-between gap-6 p-6">
                 <div className="flex items-start justify-between">
                   <Text variant="title-lg" emphasis className="text-green-900">
                     흥미도
@@ -156,8 +141,8 @@ export function Report() {
                   <span className="text-display-md font-medium leading-none tracking-tight text-[#b1dc88]">{Math.round(interestPercent)}%</span>
                 </div>
                 <DotMatrix percent={interestPercent} />
-              </Card>
-              <Card className="flex flex-1 flex-col justify-between gap-6 p-6">
+              </WorkPanel>
+              <WorkPanel padded={false} className="flex flex-1 flex-col justify-between gap-6 p-6">
                 <div className="flex items-start justify-between">
                   <Text variant="title-lg" emphasis className="text-green-900">
                     이해도
@@ -165,13 +150,13 @@ export function Report() {
                   <span className="text-display-md font-medium leading-none tracking-tight text-[#b1dc88]">{Math.round(understandingPercent)}%</span>
                 </div>
                 <DotMatrix percent={understandingPercent} />
-              </Card>
+              </WorkPanel>
             </div>
           </div>
 
-          <div className="flex flex-col gap-[18px]">
+          <div className="flex flex-col justify-end gap-[18px]">
             {report.burdenNote && (
-              <Card className="flex flex-col gap-[48px] p-6">
+              <WorkPanel padded={false} className="flex flex-col gap-[48px] p-6">
                 <SectionTag>부담 기록</SectionTag>
                 {BURDEN_TAG_GROUPS.map((group) => (
                   <div key={group.label} className="flex flex-col gap-3">
@@ -187,7 +172,7 @@ export function Report() {
                     </div>
                   </div>
                 ))}
-              </Card>
+              </WorkPanel>
             )}
             <div className="flex flex-col gap-3">
               <Button
@@ -211,6 +196,6 @@ export function Report() {
           </div>
         </div>
       </div>
-    </div>
+    </WorkFrame>
   )
 }

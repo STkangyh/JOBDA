@@ -35,9 +35,8 @@ describe('Materials 다운로드', () => {
     const user = userEvent.setup()
     renderMaterials()
 
-    await user.click(screen.getByRole('button', { name: '한도 견본 판정표.docs' }))
+    await user.click(screen.getByRole('button', { name: '한도 견본 판정표' }))
 
-    expect(screen.getByText('한도 견본 판정표 파일')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: '한도 견본 판정표.png 다운로드' })
     expect(link).toHaveAttribute('download', '한도 견본 판정표.png')
     expect(link).toHaveAttribute('href', expect.stringContaining('limit-sample-reference'))
@@ -51,5 +50,15 @@ describe('Materials 다운로드', () => {
     expect(link.className).toContain('text-neutral-400')
     expect(link.className).toContain('hover:text-neutral-500')
     expect(link.className).toContain('active:text-neutral-700')
+  })
+})
+
+describe('Materials 이동', () => {
+  it('자료함(Library)에서 GNB의 Work를 누르면 업무(시방서 초안)를 시작한다', async () => {
+    const user = userEvent.setup()
+    renderMaterials()
+    expect(screen.getByRole('button', { name: 'Library' })).toHaveAttribute('aria-current', 'page')
+    await user.click(screen.getByRole('button', { name: 'Work' }))
+    expect(useSession.getState().currentStage).toBe('workspace')
   })
 })

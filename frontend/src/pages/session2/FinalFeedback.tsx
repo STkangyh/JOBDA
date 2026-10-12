@@ -1,17 +1,13 @@
 import { useState } from 'react'
-import { Sidebar } from '../../components/Sidebar'
-import { IndicatorHeader } from '../../components/IndicatorHeader'
-import { Card } from '../../components/Card'
-import { Text } from '../../components/Text'
-import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
-import { ChoiceCard } from '../../components/ChoiceCard'
 import { WarningIcon } from '../../components/icons'
+import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
 import { SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
 import type { Branch } from '../../types'
 
+// 업무 페이지 새 디자인 2217:10722(2026-10-13): 위 카드(최종본 파일 + 2차 피드백), 아래 카드(수정 방향 3지선다 + 근거 + 제출 버튼).
 // Figma "관계자 협업" 라운드의 2차 피드백 상태 — 823:55878("Desktop - 135") 실측. 같은 노드에
 // 이어져 있던 "수정 방향 선택"(3지 선다) UI를 처음엔 별도 화면(branch_select)으로 분리했는데,
 // 실사용 결과("image 242" QA 지적) 두 화면을 오가는 게 불편해 원안대로 한 화면에 병합함
@@ -97,132 +93,116 @@ export function FinalFeedback() {
     },
   ]
 
+  // Figma(2217:10722)의 버튼 문구는 1번 선택 기준 "외주업체 조사" — 선택에 따라 다음 단계에 맞는 문구로 바꾼다.
+  const submitLabel = selected === 'outsourcing' ? '외주업체 조사' : selected === 'sheet_wrap' ? '시트지 래핑으로 확정' : selected === 'wood_dropped' ? '시방서 다시 쓰기' : '선택 제출'
+
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <Sidebar active="work" className="shrink-0" />
+    <WorkFrame step="관계자 협업" sidebar="work" loading={isSubmitting} exitStep="final_feedback" flushRight>
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
+        {revisitCount > 0 && (
+          <p role="alert" className="flex items-center gap-2 rounded-lg bg-[rgba(250,250,250,0.85)] p-4 text-body-md text-error-300">
+            <WarningIcon className="size-5 shrink-0 text-error-200" />
+            이미 한 번 시방서를 다시 작성했습니다. 이번에도 목재를 포기하면 이번 선택으로 바로 마무리돼요.
+          </p>
+        )}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-6">
-        {/* Workspace.tsx와 동일한 이유로 flex-1/min-h-0을 그리드까지 끌고 내려가 사이드바와
-            전체 높이를 맞춘다. */}
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <IndicatorHeader current="관계자 협업" gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]" loading={isSubmitting} />
-
-          <div className="grid min-h-0 flex-1 grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
-            <Messenger defaultActive="engineering" />
-
-            <div className="flex flex-col gap-[18px]">
-              {revisitCount > 0 && (
-                <Card className="flex items-center gap-2 border border-error-100 bg-error-100/20 p-4">
-                  <WarningIcon className="size-5 shrink-0 text-error-200" />
-                  <Text variant="body-md" className="text-error-300">
-                    이미 한 번 시방서를 다시 작성했습니다. 이번에도 목재를 포기하면 이번 선택으로 바로
-                    마무리돼요.
-                  </Text>
-                </Card>
-              )}
-
-              <Card className="flex flex-col gap-8 p-6">
-                <div className="flex flex-col gap-3">
-                  <Text variant="title-lg" emphasis className="text-green-900">
-                    시방서 최종본
-                  </Text>
-                  <div className="flex flex-col items-start gap-1.5">
-                    <Text variant="body-lg" className="text-neutral-500 underline">
-                      마루 시방서 최종본.docs
-                    </Text>
-                    {final.limitSampleAttached && (
-                      <Text variant="body-lg" className="text-neutral-500 underline">
-                        마루 한도 견본 판정표 최종본.docs
-                      </Text>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Text variant="title-lg" emphasis className="text-green-900">
-                      2차 피드백
-                    </Text>
-                    <FeedbackRemainingBadge remaining={remaining} />
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    {items.map((item) => (
-                      <div
-                        key={item.from}
-                        className={`rounded-md p-5 ${item.ok ? 'bg-green-50' : 'border border-amber-400 bg-white'}`}
-                      >
-                        <Text variant="body-md" emphasis className="mb-1 text-neutral-500">
-                          {item.from}
-                        </Text>
-                        <Text variant="body-lg" className="text-neutral-700">
-                          {item.text}
-                        </Text>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <Text variant="title-lg" emphasis className="text-green-900">
-                    수정 방향 선택
-                  </Text>
-                  <div className="grid grid-cols-1 gap-[9px] sm:grid-cols-3">
-                    {OPTIONS.map((o, i) => (
-                      <ChoiceCard key={o.branch} index={i} title={o.title} selected={selected === o.branch} onClick={() => setSelected(o.branch)}>
-                        <div className="flex flex-col gap-0.5">
-                          {o.bullets.map((b) => (
-                            <div key={b} className="flex items-center gap-2">
-                              <span className="size-1 shrink-0 rounded-full bg-neutral-400" />
-                              <Text variant="body-md" className="text-neutral-600">
-                                {b}
-                              </Text>
-                            </div>
-                          ))}
-                        </div>
-                      </ChoiceCard>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-end gap-2">
-                    <Text variant="title-lg" emphasis className="text-green-900">
-                      선택 근거 입력
-                    </Text>
-                    <Text variant="body-sm" className="text-neutral-400">
-                      3번 선택 시 대체 아이디어 서술
-                    </Text>
-                  </div>
-                  <textarea
-                    value={reasoning}
-                    onChange={(e) => setReasoning(e.target.value)}
-                    rows={3}
-                    placeholder="이 방향을 선택한 이유를 적어주세요."
-                    className="rounded-md bg-neutral-75 px-4 py-3 text-sm outline-none placeholder:text-neutral-500"
-                  />
-                </div>
-              </Card>
+        <WorkPanel className="flex flex-col gap-8">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-title-lg font-semibold text-green-900">시방서 최종본</h1>
+            <ul className="flex flex-col gap-1 text-body-sm text-neutral-700 underline">
+              <li>마루 시방서 최종본.docs</li>
+              {final.limitSampleAttached && <li>마루 한도 견본 판정표 최종본.docs</li>}
+            </ul>
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <h2 className="text-title-lg font-semibold text-green-900">2차 피드백</h2>
+              <FeedbackRemainingBadge remaining={remaining} />
             </div>
+            {/* 미리 물어본 관계자의 피드백은 연한 색, 묻지 않은 쪽은 진한 색으로 구분한다 */}
+            {items.map((item) => (
+              <div key={item.from} className={`flex flex-col gap-1 px-3 py-6 ${item.ok ? 'bg-green-50' : 'bg-green-200'}`}>
+                <span className="text-body-md font-medium text-neutral-500">{item.from}</span>
+                <p className="text-body-lg text-neutral-700">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </WorkPanel>
 
-            {/* Figma(Workspace.tsx 1184:11043 실측과 동일 패턴) — 제출류 버튼은 시방서 카드 밑이
-                아니라 업무노트 칸 밑에 붙고, 업무노트 카드 자체는 메신저보다 버튼 높이만큼
-                짧다. WorkNotesCard의 flex-1이 남는 세로 공간을 흡수해서 버튼을 칸 맨 아래로
-                붙이고, 이 래퍼의 h-full이 메신저와 전체 높이를 맞춘다. */}
-            <div className="flex h-full flex-col gap-[18px]">
-              <WorkNotesCard
-                groups={[
-                  { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-                  { label: '제조 제약', tags: NOTE_TAGS.constraints },
-                  { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
-                ]}
-              />
-              <PrimaryCTAButton disabled={!canSubmit || isSubmitting} onClick={handleSubmit}>
-                {isSubmitting ? '로딩중' : '선택 제출'}
-              </PrimaryCTAButton>
+        <WorkPanel className="flex flex-col gap-8">
+          <div className="flex items-start justify-between gap-6">
+            <h2 className="text-title-lg font-semibold text-neutral-700">수정 방향성을 선택하세요.</h2>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!canSubmit || isSubmitting}
+              className={`flex h-[82px] w-[280px] shrink-0 items-center justify-center rounded-xl px-3 text-headline-md font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
+                isSubmitting ? 'cursor-wait bg-[#9fbf80] text-green-50' : 'bg-green-500 text-neutral-900 hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50'
+              }`}
+            >
+              {isSubmitting ? '로딩 중...' : submitLabel}
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            <h3 className="text-title-lg font-semibold text-green-900">수정 방향 선택</h3>
+            <div className="grid grid-cols-3 gap-[9px]">
+              {OPTIONS.map((o, i) => {
+                const isSelected = selected === o.branch
+                return (
+                  <button
+                    key={o.branch}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => setSelected(o.branch)}
+                    className={`flex flex-col items-start gap-1 p-5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-green-700 ${
+                      isSelected ? 'bg-green-400' : 'bg-green-50 hover:bg-green-100'
+                    }`}
+                  >
+                    <span className={`text-body-lg font-medium ${isSelected ? 'text-[#8aac6a]' : 'text-green-600'}`}>{String(i + 1).padStart(2, '0')}</span>
+                    <span className="text-title-lg font-semibold text-neutral-900">{o.title}</span>
+                    <span className="flex flex-col gap-0.5">
+                      {o.bullets.map((b) => (
+                        <span key={b} className="flex items-center gap-2 text-body-lg font-medium text-neutral-600">
+                          <span className="size-1 shrink-0 rounded-full bg-neutral-600" />
+                          {b}
+                        </span>
+                      ))}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           </div>
-        </div>
+
+          <label className="flex flex-col gap-3">
+            <span className="flex items-end gap-2">
+              <span className="text-title-lg font-semibold text-green-900">선택 근거 입력</span>
+              <span className="text-body-sm text-neutral-500">3번 선택 시 대체 아이디어 서술</span>
+            </span>
+            <textarea
+              value={reasoning}
+              onChange={(e) => setReasoning(e.target.value)}
+              rows={3}
+              placeholder="이 방향을 선택한 이유를 적어주세요."
+              className="rounded-[4px] bg-green-50 px-4 py-3 text-body-lg text-neutral-700 shadow-[inset_0_0_4px_2px_rgba(0,0,0,0.04)] outline-none placeholder:text-neutral-500"
+            />
+          </label>
+        </WorkPanel>
       </div>
-    </div>
+
+      <aside className="flex w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
+        <WorkNotesCard
+          groups={[
+            { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
+            { label: '제조 제약', tags: NOTE_TAGS.constraints },
+            { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
+          ]}
+        />
+        <div className="min-h-[520px] flex-1">
+          <Messenger defaultActive="engineering" />
+        </div>
+      </aside>
+    </WorkFrame>
   )
 }

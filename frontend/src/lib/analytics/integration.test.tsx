@@ -97,7 +97,7 @@ describe('screen tracking in the real app', () => {
 
     await user.click(screen.getByText('🧭 단계 이동'))
     await user.click(screen.getByRole('button', { name: '자료탐색' }))
-    await screen.findByText('시방서 양식 폴더')
+    await screen.findByRole('heading', { name: '자료함' })
     await drain()
 
     const views = byName('screen_view')

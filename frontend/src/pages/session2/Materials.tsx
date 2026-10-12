@@ -1,10 +1,6 @@
 import { useState } from 'react'
-import { Sidebar } from '../../components/Sidebar'
-import { Indicator } from '../../components/Indicator'
-import { Card } from '../../components/Card'
-import { Text } from '../../components/Text'
-import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
-import { CloudSavedIcon, DownloadIcon, ProfileIcon } from '../../components/icons'
+import { DownloadIcon } from '../../components/icons'
+import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { useSession } from '../../store/session'
 import specFormReference from '../../assets/illustrations/spec-form-reference.png'
 import limitSampleReference from '../../assets/illustrations/limit-sample-reference.png'
@@ -43,8 +39,9 @@ const VIEWER_CONTENT: Record<SpecDoc, { title: string; description: string; imag
   },
 }
 
-// Figma "Desktop - 116"(823:57686) — 세션1 자료함(744:17197)과 같은 레이아웃이지만 열람 자료 패널이
-// 다중 파일 브라우저가 아니라 "시방서가 무엇인가"를 설명하는 참고 자료 하나임. GNB는 Work가 활성(새 GNB에 Library가 없어짐).
+// Figma 업무 페이지 "자료탐색"(2217:10065, 2026-10-13) — 자료함(Library) 화면. 자료 목록 + 미리보기 두 칸.
+// 업무로 넘어가는 버튼이 없어 GNB의 Work를 누르면 업무(시방서 초안)를 시작한다(2026-10-13 결정).
+// TODO(2026-10-13): Work를 누르라고 안내하는 컴포넌트가 디자인에 아직 없다 — 나오면 추가.
 export function Materials() {
   const goTo = useSession((s) => s.goTo)
   const [selectedDoc, setSelectedDoc] = useState<SpecDoc>('spec_form')
@@ -54,121 +51,59 @@ export function Materials() {
   // 그대로("...docs")를 download 속성에 쓰면 확장자가 실제 내용물과 달라 열리지 않는다.
   const viewerFileName = `${SPEC_DOCS.find((d) => d.key === selectedDoc)?.tagLabel ?? viewer.title}.png`
 
+  const startWork = () => {
+    track('step_complete', { step: 'materials', via: 'gnb_work' })
+    goTo('workspace')
+  }
+
+  const itemClass = 'flex h-14 w-full items-center rounded-2xl border-2 px-8 text-title-md font-semibold whitespace-nowrap'
+
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <Sidebar active="work" />
+    <WorkFrame step="자료탐색" sidebar="library" onSidebarSelect={{ work: startWork }} exitStep="materials">
+      <WorkPanel className="flex max-w-[554px] min-w-[360px] flex-1 flex-col gap-6">
+        <h1 className="text-title-lg font-semibold text-neutral-500">자료함</h1>
+        <ul className="flex flex-col gap-2.5">
+          {DOC_CATEGORIES.map((cat) => (
+            <li key={cat} className={`${itemClass} border-neutral-50 bg-green-50 text-neutral-700`}>
+              {cat}
+            </li>
+          ))}
+          {SPEC_DOCS.map(({ key, tagLabel }) => (
+            <li key={key}>
+              <button
+                type="button"
+                aria-pressed={selectedDoc === key}
+                onClick={() => setSelectedDoc(key)}
+                className={`${itemClass} transition-colors focus-visible:outline-2 focus-visible:outline-green-700 ${
+                  selectedDoc === key ? 'border-green-200 bg-green-300 text-green-900' : 'border-neutral-50 bg-green-50 text-neutral-700 hover:bg-green-100'
+                }`}
+              >
+                {tagLabel}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </WorkPanel>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-6">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_340px_1fr]">
-          <div className="hidden lg:block" />
-          <div className="hidden items-center gap-6 lg:col-span-2 lg:flex">
-            <Indicator current="자료탐색" className="flex-1" />
-            <div className="flex items-center gap-[18px]">
-              <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-                <CloudSavedIcon className="size-5" />
-              </div>
-              <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-900 text-neutral-50">
-                <ProfileIcon className="size-5" />
-              </div>
-            </div>
-          </div>
-          <Indicator current="자료탐색" className="lg:hidden" />
-
-          <div className="flex flex-col gap-6">
-            <Card className="flex items-center justify-center p-6">
-              <Text variant="title-lg" emphasis className="text-center">
-                시방서 작성 및 설계팀 이관
-              </Text>
-            </Card>
-            <Card className="flex flex-col gap-4 p-6">
-              <Text variant="title-lg" emphasis>
-                자료함
-              </Text>
-              <div className="flex flex-col items-start gap-2">
-                {DOC_CATEGORIES.map((cat) => (
-                  <span
-                    key={cat}
-                    className="rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-body-md text-green-900"
-                  >
-                    {cat}
-                  </span>
-                ))}
-                {SPEC_DOCS.map(({ key, tagLabel }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setSelectedDoc(key)}
-                    className={`rounded-full border border-green-200 px-3 py-1.5 text-body-md text-green-900 transition-colors ${
-                      selectedDoc === key ? 'bg-green-300' : 'bg-green-50 hover:bg-green-100'
-                    }`}
-                  >
-                    {tagLabel}
-                  </button>
-                ))}
-              </div>
-            </Card>
-          </div>
-
-          <Card className="flex flex-col gap-6 p-6">
-            <Text variant="title-lg" emphasis>
-              시방서 양식 폴더
-            </Text>
-            <div className="flex flex-col items-start gap-2.5">
-              {SPEC_DOCS.map(({ key, fileName }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setSelectedDoc(key)}
-                  className={`text-body-md underline transition-colors ${
-                    selectedDoc === key ? 'text-green-800' : 'text-neutral-600 hover:text-neutral-800'
-                  }`}
-                >
-                  {fileName}
-                </button>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="flex flex-col gap-4 p-6">
-            <Text variant="title-lg" emphasis>
-              열람 자료
-            </Text>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-1">
-                <Text variant="title-lg" emphasis>
-                  {viewer.title}
-                </Text>
-                {/* Figma 1341:10735 실측: 양식 폴더에서 파일을 열면(=선택되면) 열람 자료 제목
-                    옆에 다운로드 버튼이 뜬다. hover=neutral-500, pressed=neutral-700(QA 지정). */}
-                <a
-                  href={viewer.image}
-                  download={viewerFileName}
-                  onClick={() => track('download', { doc: selectedDoc })}
-                  aria-label={`${viewerFileName} 다운로드`}
-                  className="flex size-6 shrink-0 items-center justify-center text-neutral-400 transition-colors hover:text-neutral-500 active:text-neutral-700"
-                >
-                  <DownloadIcon className="size-[18px]" />
-                </a>
-              </div>
-              <Text variant="body-lg" className="text-neutral-600">
-                {viewer.description}
-              </Text>
-            </div>
-            <div className="overflow-hidden rounded-md bg-neutral-100">
-              <img src={viewer.image} alt={viewer.imageAlt} loading="lazy" className="w-full object-contain" />
-            </div>
-          </Card>
+      <WorkPanel className="flex min-w-0 flex-[1.75] flex-col gap-6">
+        <div className="flex items-center gap-2">
+          <h2 className="text-title-lg font-semibold text-neutral-500">미리보기</h2>
+          {/* 미리보기 중인 참고 자료 내려받기 — 기존 기능 유지(Figma 1341:10735 QA) */}
+          <a
+            href={viewer.image}
+            download={viewerFileName}
+            onClick={() => track('download', { doc: selectedDoc })}
+            aria-label={`${viewerFileName} 다운로드`}
+            className="flex size-6 items-center justify-center text-neutral-400 transition-colors hover:text-neutral-500 active:text-neutral-700"
+          >
+            <DownloadIcon className="size-[18px]" />
+          </a>
         </div>
-
-        <PrimaryCTAButton
-          onClick={() => {
-            track('step_complete', { step: 'materials' })
-            goTo('workspace')
-          }}
-        >
-          업무 시작하기
-        </PrimaryCTAButton>
-      </div>
-    </div>
+        <div className="flex min-h-[400px] flex-1 items-center justify-center overflow-hidden rounded-2xl bg-neutral-100">
+          <img src={viewer.image} alt={viewer.imageAlt} loading="lazy" className="max-h-full w-full object-contain" />
+        </div>
+        <p className="text-title-lg text-neutral-600">{viewer.description}</p>
+      </WorkPanel>
+    </WorkFrame>
   )
 }

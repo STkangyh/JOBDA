@@ -1,12 +1,8 @@
 import { useState } from 'react'
 import { useSession } from '../../store/session'
-import { Text } from '../../components/Text'
-import { Card } from '../../components/Card'
-import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
-import { IndicatorHeader } from '../../components/IndicatorHeader'
 import { RatingRow } from '../../components/RatingRow'
 import { ReportSkeleton } from '../../components/ReportSkeleton'
-import { BrandLogoBox } from '../../components/BrandLogoBox'
+import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { RATING_SCALE } from '../../types'
 
 type RatingField = 'interestScore' | 'expectationGap' | 'repeatWillingness'
@@ -45,89 +41,61 @@ export function SelfAssessment() {
     }
   }
 
-  // 리포트 생성 대기(1.8~3.7초 실측)를 버튼 텍스트만 바꿔서 보여주면 화면이 멈춘 것처럼 느껴짐 —
-  // Report.tsx와 같은 3컬럼 그리드 자리에 펄스 스켈레톤을 띄워 "이제 이 리포트가 채워질 것"을
-  // 미리 보여준다. 실제 리포트 도착 시 currentStage가 넘어가며 이 화면 자체가 Report로 교체된다.
+  // 리포트 생성 대기(1.8~3.7초 실측) 동안 리포트 자리에 펄스 스켈레톤을 띄운다. 도착하면 currentStage가 넘어가며 Report로 교체된다.
   if (submitting) {
     return (
-      <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-        <BrandLogoBox />
-        <div className="flex min-w-0 flex-1 flex-col gap-[19px]">
-          <IndicatorHeader current="직무 리포트" icons={false} loading />
+      <WorkFrame step="직무 리포트" sidebar="work" loading exitStep="self_assessment">
+        <div className="min-w-0 flex-1">
           <ReportSkeleton />
         </div>
-      </div>
+      </WorkFrame>
     )
   }
 
+  // 업무 페이지 새 디자인 2217:10818(2026-10-13): 오른쪽 메신저 자리는 비우고 카드 하나에 문항과 제출 버튼을 담는다.
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
-        {/* Figma 823:52713(Desktop-118) 실측: 로고와 인디케이터가 한 행에 나란히 있고, 그
-            행과 카드가 같은 부모 아래 세로로 이어진 하나의 컬럼이다 — 로고를 페이지 전체
-            높이의 별도 컬럼(바깥 flex row의 형제)으로 빼두면 카드가 로고 폭+간격만큼 밀려나
-            Figma보다 좁아진다(QA 지적). 로고는 이 행 안에서만 폭을 차지하고, 카드/버튼은
-            이 컬럼의 전체 폭을 그대로 쓴다. */}
-        <div className="flex items-start gap-6">
-          <BrandLogoBox />
-          <div className="min-w-0 flex-1">
-            <IndicatorHeader current="자기 평가" icons={false} loading={submitting} />
-          </div>
+    <WorkFrame step="자기 평가" sidebar="work" exitStep="self_assessment" flushRight>
+      <WorkPanel className="flex min-w-0 flex-1 flex-col gap-12">
+        <div className="flex flex-col gap-3">
+          <h1 className="text-headline-lg font-medium text-neutral-900">방금 수행한 업무, 어떠셨나요?</h1>
+          <p className="text-body-lg text-neutral-600">학습 과정에 대한 리뷰를 등록해주세요. 솔직한 응답일수록 정확한 직무 이해 리포트를 받을 수 있어요.</p>
         </div>
 
-        {/* Figma 823:52713(Desktop-118) 실측: 카드가 h-[920px] 고정값으로 뷰포트 거의 전체
-            높이를 차지한다 — 콘텐츠 크기만큼만 차지하게 두면 카드 밑에 페이지 배경색 여백이
-            크게 남아 Figma보다 훨씬 짧아 보였다(QA 지적). flex-1로 남는 세로 공간을 카드
-            자신이 흡수하게 해서 아래 spacer 없이도 카드가 버튼 바로 위까지 늘어나게 한다. */}
-        <Card className="flex flex-1 flex-col gap-[48px] p-6">
-          <div className="flex flex-col gap-3">
-            {/* Figma 823:52713(Desktop-118) 실측: "Emphasis/Headline/Large"(32px). */}
-            <Text variant="headline-lg" emphasis>
-              방금 수행한 업무, 어떠셨나요?
-            </Text>
-            <Text variant="title-lg" className="text-neutral-600">
-              학습 과정에 대한 리뷰를 등록해주세요. 솔직한 응답일수록 정확한 직무 이해 리포트를 받을 수 있어요.
-            </Text>
-          </div>
+        <div className="flex flex-col gap-6">
+          {QUESTIONS.map((q) => (
+            <RatingRow key={q.field} tone="work" label={q.label} value={value[q.field]} onChange={(v) => setSelfAssessment({ [q.field]: v })} scale={RATING_SCALE} />
+          ))}
 
-          <div className="flex flex-col gap-6">
-            {QUESTIONS.map((q) => (
-              <RatingRow
-                key={q.field}
-                label={q.label}
-                value={value[q.field]}
-                onChange={(v) => setSelfAssessment({ [q.field]: v })}
-                scale={RATING_SCALE}
-              />
-            ))}
+          {/* Figma 4번째 문항 제목은 1번과 같은 자리표시라, 기존 문항(부담 기록)을 그대로 쓴다 */}
+          <label className="flex flex-col gap-3">
+            <span className="text-title-lg font-semibold text-green-900">업무 중 부담을 느낀 부분이 있었나요?</span>
+            <textarea
+              value={value.burdenNote}
+              onChange={(e) => setSelfAssessment({ burdenNote: e.target.value })}
+              rows={2}
+              placeholder="ex) 설계팀과의 커뮤니케이션에서 제 의도를 정확히 전달하기 어려웠어요."
+              className="resize-none rounded-[4px] bg-green-50 px-4 py-3 text-body-lg text-neutral-700 shadow-[inset_0_0_4px_2px_rgba(0,0,0,0.04)] placeholder:text-neutral-500 focus:outline-none"
+            />
+          </label>
+        </div>
 
-            <div className="flex flex-col gap-3">
-              <Text variant="title-lg" emphasis className="text-green-900">
-                업무 중 부담을 느낀 부분이 있었나요?
-              </Text>
-              <div className="rounded-xl border border-neutral-600 p-6">
-                <textarea
-                  value={value.burdenNote}
-                  onChange={(e) => setSelfAssessment({ burdenNote: e.target.value })}
-                  rows={2}
-                  placeholder="ex) 설계팀과의 커뮤니케이션에서 제 의도를 정확히 전달하기 어려웠어요."
-                  className="w-full resize-none text-body-lg text-neutral-500 placeholder:text-neutral-400 focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {error && (
-          <Text variant="body-md" className="self-end text-error-200">
-            리포트를 생성하지 못했어요. 잠시 후 다시 시도해주세요.
-          </Text>
-        )}
-
-        <PrimaryCTAButton onClick={submit} disabled={submitting}>
-          {submitting ? '리포트 생성 중...' : '제출하기'}
-        </PrimaryCTAButton>
-      </div>
-    </div>
+        <div className="mt-auto flex flex-col items-end gap-3">
+          {error && (
+            <p role="alert" className="text-body-md text-error-300">
+              리포트를 생성하지 못했어요. 잠시 후 다시 시도해주세요.
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={submit}
+            disabled={submitting}
+            className="h-[82px] w-[280px] rounded-xl bg-green-500 text-headline-md font-semibold text-neutral-900 transition-colors hover:bg-green-400 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+          >
+            제출하기
+          </button>
+        </div>
+      </WorkPanel>
+      <div aria-hidden className="w-[clamp(320px,25vw,433px)] shrink-0" />
+    </WorkFrame>
   )
 }

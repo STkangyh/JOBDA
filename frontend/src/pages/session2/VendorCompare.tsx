@@ -1,9 +1,6 @@
 import { useState } from 'react'
-import { Sidebar } from '../../components/Sidebar'
-import { IndicatorHeader } from '../../components/IndicatorHeader'
-import { Card } from '../../components/Card'
+import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { Text } from '../../components/Text'
-import { PrimaryCTAButton } from '../../components/PrimaryCTAButton'
 import { Checkbox } from '../../components/Checkbox'
 import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
@@ -152,6 +149,21 @@ function VendorTable({
 // editingFinal/finalApproved와 같은 패턴) — 인디케이터 라벨도 phase에 따라
 // "제안서 작성"→"피드백 수정"으로 바뀐다(823:56790 GNB 실측: 137~140은 "제안서 작성"이 활성,
 // 141은 "피드백 수정"이 활성).
+function CtaButton({ disabled, busy = false, onClick, children }: { disabled: boolean; busy?: boolean; onClick: () => void; children: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`flex h-[82px] w-[280px] items-center justify-center rounded-xl text-headline-md font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
+        busy ? 'cursor-wait bg-[#9fbf80] text-green-50' : 'bg-green-500 text-neutral-900 hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50'
+      }`}
+    >
+      {busy ? '로딩 중...' : children}
+    </button>
+  )
+}
+
 export function VendorCompare() {
   const vendors = useSession((s) => s.vendors)
   const updateVendor = useSession((s) => s.updateVendor)
@@ -188,39 +200,22 @@ export function VendorCompare() {
     }, 1200)
   }
 
+  // 새 업무 페이지 디자인에 이 화면(외주업체 조사)은 아직 없어, 내용은 그대로 두고 업무 화면 틀(2026-10-13)에만 맞췄다.
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-75 p-6">
-      <Sidebar active="work" className="shrink-0" />
-
-      <div className="flex min-w-0 flex-1 flex-col gap-6">
-        {/* Workspace.tsx와 동일한 이유로 flex-1/min-h-0을 그리드까지 끌고 내려가 사이드바와
-            전체 높이를 맞춘다. */}
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <IndicatorHeader
-            current={vendorProposed ? '피드백 수정' : '제안서 작성'}
-            gridCols="grid-cols-1 lg:grid-cols-[340px_1fr_340px]"
-            loading={isSubmitting}
-          />
-
-          <div className="grid min-h-0 flex-1 grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-[340px_1fr_340px]">
-            <Messenger defaultActive="purchasing" intro={{ persona: 'senior', text: SENIOR_VENDOR_INTRO }} />
-
-            {/* min-w-0: 안 주면 그리드 1fr 트랙의 기본 최소폭이 VendorTable의 min-content로
-                고정돼, 좁은 화면에서 표가 안에서 스크롤되는 대신 이 칸 자체가 넓어지면서 페이지
-                전체가 가로 스크롤되고 오른쪽 업무노트 칸이 화면 밖으로 밀려났다(QA 지적). */}
-            <div className="flex min-w-0 flex-col gap-6">
+    <WorkFrame step={vendorProposed ? '피드백 수정' : '제안서 작성'} sidebar="work" loading={isSubmitting} exitStep="vendor_compare" flushRight>
+            <div className="flex min-w-0 flex-1 flex-col gap-6">
               {phase === 'research' ? (
                 <>
-                  <Card className="flex flex-col gap-3 p-6">
+                  <WorkPanel className="flex flex-col gap-3">
                     <Text variant="title-lg" emphasis className="text-green-900">
                       외주 업체 탐색
                     </Text>
                     <Text variant="body-lg" className="text-neutral-700">
                       필요한 업체를 찾고 아래 항목에 맞게 리스트에 정리하세요.
                     </Text>
-                  </Card>
+                  </WorkPanel>
 
-                  <Card className="flex flex-col gap-6 p-6">
+                  <WorkPanel className="flex flex-col gap-6">
                     <Text variant="title-lg" emphasis className="text-green-900">
                       외주 업체 리스트
                     </Text>
@@ -232,11 +227,11 @@ export function VendorCompare() {
                       selectedIndex={selectedVendorIndex}
                       onSelect={selectVendor}
                     />
-                  </Card>
+                  </WorkPanel>
                 </>
               ) : (
                 <>
-                  <Card className="flex flex-col gap-6 p-6">
+                  <WorkPanel className="flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                       <Text variant="title-lg" emphasis className="text-green-900">
                         외주 업체 선정
@@ -270,9 +265,9 @@ export function VendorCompare() {
                         </div>
                       </div>
                     )}
-                  </Card>
+                  </WorkPanel>
 
-                  <Card className="flex flex-col gap-6 p-6">
+                  <WorkPanel className="flex flex-col gap-6">
                     <Text variant="title-lg" emphasis className="text-green-900">
                       외주 업체 리스트
                     </Text>
@@ -284,16 +279,27 @@ export function VendorCompare() {
                       selectedIndex={selectedVendorIndex}
                       onSelect={selectVendor}
                     />
-                  </Card>
+                  </WorkPanel>
                 </>
               )}
+              <div className="flex justify-end">
+              {phase === 'research' ? (
+                <CtaButton disabled={!complete} onClick={() => setPhase('select')}>
+                  조사 완료
+                </CtaButton>
+              ) : vendorProposed ? (
+                <CtaButton disabled={isSubmitting} busy={isSubmitting} onClick={handleSubmit}>
+                  수정안 제출
+                </CtaButton>
+              ) : (
+                <CtaButton disabled={isSubmitting} busy={isSubmitting} onClick={handlePropose}>
+                  제안서 전달
+                </CtaButton>
+              )}
+              </div>
             </div>
 
-            {/* Figma(Workspace.tsx 1184:11043 실측과 동일 패턴) — 제출류 버튼은 카드 밑이 아니라
-                업무노트 칸 밑에 붙고, 업무노트 카드 자체는 메신저보다 버튼 높이만큼 짧다.
-                WorkNotesCard의 flex-1이 남는 세로 공간을 흡수해서 버튼을 칸 맨 아래로 붙이고,
-                이 래퍼의 h-full이 메신저와 전체 높이를 맞춘다. */}
-            <div className="flex h-full flex-col gap-[18px]">
+            <aside className="flex w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
               <WorkNotesCard
                 groups={[
                   { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
@@ -301,23 +307,10 @@ export function VendorCompare() {
                   { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
                 ]}
               />
-              {phase === 'research' ? (
-                <PrimaryCTAButton disabled={!complete} onClick={() => setPhase('select')}>
-                  조사 완료
-                </PrimaryCTAButton>
-              ) : vendorProposed ? (
-                <PrimaryCTAButton disabled={isSubmitting} onClick={handleSubmit}>
-                  {isSubmitting ? '로딩 중...' : '수정안 제출'}
-                </PrimaryCTAButton>
-              ) : (
-                <PrimaryCTAButton disabled={isSubmitting} onClick={handlePropose}>
-                  {isSubmitting ? '로딩 중...' : '제안서 전달'}
-                </PrimaryCTAButton>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+              <div className="min-h-[520px] flex-1">
+                <Messenger defaultActive="purchasing" intro={{ persona: 'senior', text: SENIOR_VENDOR_INTRO }} />
+              </div>
+            </aside>
+    </WorkFrame>
   )
 }
