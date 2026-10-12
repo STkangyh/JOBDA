@@ -49,6 +49,7 @@ const ErrorPage = lazy(() => import('./pages/explore/ErrorPage').then((m) => ({ 
 const Session1App = lazy(() => import('./pages/session1/Session1App').then((m) => ({ default: m.Session1App })))
 const JourneyMap = lazy(() => import('./pages/JourneyMap').then((m) => ({ default: m.JourneyMap })))
 const Welcome = lazy(() => import('./pages/Welcome').then((m) => ({ default: m.Welcome })))
+const Loading = lazy(() => import('./pages/Loading').then((m) => ({ default: m.Loading })))
 const ComprehensiveReport = lazy(() => import('./pages/ComprehensiveReport').then((m) => ({ default: m.ComprehensiveReport })))
 const ProposalWriting = lazy(() => import('./pages/session2/ProposalWriting').then((m) => ({ default: m.ProposalWriting })))
 const AdminPage = lazy(() => import('./pages/admin/AdminPage').then((m) => ({ default: m.AdminPage })))
@@ -138,6 +139,7 @@ function App() {
             element={hasSeenWelcome() ? <Explore onOpenJob={() => navigate('/explore/job')} /> : <Navigate to="/welcome" replace />}
           />
           <Route path="/welcome" element={<Welcome />} />
+          <Route path="/loading" element={<Loading />} />
           <Route path="/explore" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
           <Route
             path="/explore/job"

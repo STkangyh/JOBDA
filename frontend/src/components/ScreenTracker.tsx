@@ -6,7 +6,7 @@ import { setContext, setScreen, type Flow } from '../lib/analytics'
 
 // App.tsx의 탐색 화면 라우트. 여기 없는 주소(오타, 주소창에 입력한 아무 문자열)는 경로를 그대로
 // 남기지 않고 not_found로 묶는다 — 주소창에 이메일 등을 입력하면 그대로 화면 이름에 기록되던 문제.
-const EXPLORE_PATHS = new Set(['/', '/welcome', '/explore', '/explore/job', '/design-system', '/proposal-writing', '/admin', '/journey-map', '/comprehensive-report'])
+const EXPLORE_PATHS = new Set(['/', '/welcome', '/loading', '/explore', '/explore/job', '/design-system', '/proposal-writing', '/admin', '/journey-map', '/comprehensive-report'])
 
 // 화면(screen) = 주소, 단 세션은 주소가 하나(/session1, /session2)뿐이라 단계까지 붙인다
 // (예: session2/vendor_compare). 이탈률·퍼널이 이 단위로 계산된다.

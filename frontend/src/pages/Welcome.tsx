@@ -14,9 +14,8 @@ const JOURNEY = [
   { title: '하나의 제품을 완성해요', body: '소재 선정과 양산까지, 전체 과정을 경험해요.' },
 ]
 
-// 체험 시작하기 → (예정) 로딩 → 로그인(로그인 상태 유지 체크) → 온보딩. 세 화면 디자인이 오기 전까지는
-// 지금의 체험 진입점인 직무 상세로 임시 연결한다.
-const START_PATH = '/explore/job'
+// 체험 시작하기 → 로딩 → (예정) 로그인(로그인 상태 유지 체크) → 온보딩. 로딩 뒤 연결은 pages/Loading.tsx.
+const START_PATH = '/loading'
 
 export function Welcome() {
   const navigate = useNavigate()

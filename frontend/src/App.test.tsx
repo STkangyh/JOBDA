@@ -61,12 +61,13 @@ describe('App routing', () => {
     expect(localStorage.getItem('jobda-welcome-seen')).toBe('1')
   })
 
-  it('"체험 시작하기" goes to the job detail for now (until loading/login/onboarding screens exist)', async () => {
+  it('"체험 시작하기" goes through the loading splash to the job detail for now (until login/onboarding exist)', async () => {
     const user = userEvent.setup()
     localStorage.removeItem('jobda-welcome-seen')
     renderAt('/welcome')
     await user.click(await screen.findByRole('button', { name: '체험 시작하기' }))
-    expect(await screen.findByText('생활 가전 제품디자이너')).toBeInTheDocument()
+    expect(await screen.findByText('체험 공간을 준비하고 있어요')).toBeInTheDocument()
+    expect(await screen.findByText('생활 가전 제품디자이너', {}, { timeout: 5000 })).toBeInTheDocument()
   })
 
   it('renders Explore at the "/explore" alias too', async () => {
