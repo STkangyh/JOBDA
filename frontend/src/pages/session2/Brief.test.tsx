@@ -61,13 +61,14 @@ describe('session2 story brief', () => {
     expect(useSession.getState().currentStage).toBe('materials')
   })
 
-  it('the last scene drops the arrows, fills every chapter and turns Skip into Next', async () => {
+  it('the last scene keeps the arrows (forward disabled), fills every chapter and turns Skip into Next', async () => {
     const user = userEvent.setup()
     renderBrief()
     await user.keyboard('{ArrowRight>7/}')
     expect(screen.getByText(/업무를 시작해볼까요/)).toBeInTheDocument()
     expect(currentChapter()).toBeNull()
-    expect(screen.queryByRole('button', { name: '다음' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '다음' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '이전' })).toBeEnabled()
     expect(screen.queryByRole('button', { name: 'Skip' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Next' }))

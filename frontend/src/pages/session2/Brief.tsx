@@ -20,7 +20,7 @@ interface Scene {
 }
 
 // Figma Desktop-230~236, 238. 대사는 디자인 원문 그대로(6번 장면 쉼표 없음도 원문 유지 — 2026-10-12 확인).
-// 4·5번 장면은 같은 요구사항 보드 그림을 쓴다. 마지막 장면은 그림·좌우 화살표 없이 진행 막대가 모두 채워진다.
+// 4·5번 장면은 같은 요구사항 보드 그림을 쓴다. 마지막 장면은 그림 없이 진행 막대가 모두 채워진다.
 const SCENES: Scene[] = [
   { chapter: 0, image: sceneWelcome, lines: ['김기럭 사원님 반가워요. 저는 앞으로 사원님의 회사 생활', '전반을 도울 생활 가전 부서 선임 디자이너 고프로예요.'] },
   { chapter: 1, image: sceneProduct, lines: ['이번에 다룰 제품은 탁상용 공기청정기예요.', '오크 원목을 하우징 소재로 사용할 예정이에요.'] },
@@ -104,12 +104,9 @@ export function Brief() {
         )}
       </div>
 
-      {!isLast && (
-        <>
-          <RoundArrowButton direction="prev" onClick={prev} disabled={index === 0} className="absolute top-[calc(50%-10.5px)] left-8 -translate-y-1/2" />
-          <RoundArrowButton direction="next" onClick={next} className="absolute top-[calc(50%-10.5px)] right-8 -translate-y-1/2" />
-        </>
-      )}
+      {/* 마지막 장면에도 화살표를 둔다(Figma 239·240, 2026-10-12 확인) — 되돌아가 다시 볼 수 있게. 다음 장면이 없으니 → 는 비활성, 진행은 Next 버튼으로. */}
+      <RoundArrowButton direction="prev" onClick={prev} disabled={index === 0} className="absolute top-[calc(50%-10.5px)] left-8 -translate-y-1/2" />
+      <RoundArrowButton direction="next" onClick={next} disabled={isLast} className="absolute top-[calc(50%-10.5px)] right-8 -translate-y-1/2" />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 px-[clamp(32px,7.58vw,131px)] pb-8">
         <ChapterProgress chapters={CHAPTERS} current={scene.chapter} />
