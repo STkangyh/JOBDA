@@ -9,6 +9,7 @@ import dotIcon from '../../assets/explore/dot.svg'
 import { Sidebar } from '../../components/Sidebar'
 import { ProfileMeter } from '../../components/ProfileMeter'
 import { track } from '../../lib/analytics'
+import { useSession } from '../../store/session'
 import type { ProfileAxis } from '../../types'
 
 // Figma "Desktop - 272"(2217:13409, 2026-10-13) — 탐색 홈. 직무는 "생활 가전 제품 디자이너" 하나만 남기고
@@ -16,8 +17,8 @@ import type { ProfileAxis } from '../../types'
 // 카드는 모두 업무 화면(/explore/job)으로 간다 — 업무 화면에서 실제로 고를 수 있는 단계는 시방서(세션2)뿐.
 // 카드 줄은 화살표로만 넘긴다(2026-10-13 결정).
 //
-// TODO(업무 페이지 디자인을 받은 뒤 함께 작업 — 2026-10-13 결정): 오른쪽 위 "3일차 업무를 이어서 할까요?"와
-// 아래 카드 3개(경험한 업무·유사 업무·직무 이해 프로필)는 진행 상태와 아직 연결하지 않고 Figma 예시 그대로 둔다.
+// 오른쪽 위 문구와 "내 직무 이해 프로필"은 세션2 진행 상태를 따른다(업무 페이지와 함께 연결, 2026-10-13).
+// 앱에 "며칠차" 개념이 없어 Figma 예시의 "3일차"는 빼고 진행 단계로만 문구를 나눈다.
 
 interface TaskCard {
   id: string
@@ -58,27 +59,14 @@ const TASKS: TaskCard[] = [
 
 const CARD_STEP = 430 + 12 // 카드 너비 + 간격
 
-// Figma 예시 값(마커 위치를 막대 너비 비율로 환산) — 위 TODO 참고
-const SAMPLE_PROFILE: ProfileAxis[] = [
-  {
-    leftLabel: '수용형',
-    rightLabel: '대안 제시형',
-    caption: '이해관계자 설득 선호도',
-    value: 32,
-  },
-  {
-    leftLabel: '품질 우선',
-    rightLabel: '일정 우선',
-    caption: '반복 수정에 대한 반응',
-    value: 86,
-  },
-  {
-    leftLabel: '수용적',
-    rightLabel: '근거 요구형',
-    caption: '피드백 후 판단 수정 성향',
-    value: 20,
-  },
-]
+// 카드 높이에 맞춰 리포트 프로필 축 중 앞의 3개만 보여준다(종합 리포트에는 전부 나온다)
+const PROFILE_AXES_SHOWN = 3
+
+function progressLine(started: boolean, finished: boolean) {
+  if (finished) return '다른 업무도 체험해 볼까요?'
+  if (started) return '업무를 이어서 할까요?'
+  return '첫 업무를 시작해 볼까요?'
+}
 
 function Dot() {
   return <img src={dotIcon} alt="" width={3} height={3} className="size-[3px]" />
@@ -107,6 +95,9 @@ function PanelTitle({ children }: { children: string }) {
 }
 
 export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
+  const currentStage = useSession((s) => s.currentStage)
+  const report = useSession((s) => s.report)
+  const profile: ProfileAxis[] = report?.profile.slice(0, PROFILE_AXES_SHOWN) ?? []
   const trackRef = useRef<HTMLUListElement>(null)
   const [scroll, setScroll] = useState({ atStart: true, atEnd: false })
 
@@ -139,7 +130,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
         <div className="flex flex-col gap-8">
           <header className="flex flex-wrap items-end justify-between gap-4">
             <h1 className="text-display-lg font-medium tracking-[-0.12px] text-green-400">생활 가전 제품 디자이너</h1>
-            <p className="text-headline-md font-semibold text-neutral-300">3일차 업무를 이어서 할까요?</p>
+            <p className="text-headline-md font-semibold text-neutral-300">{progressLine(currentStage !== 'brief', Boolean(report))}</p>
           </header>
 
           <div className="relative">
@@ -213,11 +204,20 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
               <PanelTitle>내 직무 이해 프로필</PanelTitle>
               <p className="text-body-lg text-neutral-400">사용자 패턴에서 반복적으로 나타난 판단, 협업 성향을 보여줍니다.</p>
             </div>
-            <div className="flex flex-col gap-6">
-              {SAMPLE_PROFILE.map((axis) => (
-                <ProfileMeter key={axis.caption} {...axis} />
-              ))}
-            </div>
+            {profile.length > 0 ? (
+              <div className="flex flex-col gap-6">
+                {profile.map((axis) => (
+                  <ProfileMeter key={axis.caption} {...axis} />
+                ))}
+              </div>
+            ) : (
+              // 업무를 끝내기 전 — 온보딩 화면(2217:9726)의 빈 프로필 안내 문구를 쓴다
+              <p className="text-body-md leading-[1.6] text-neutral-500">
+                아직은 빈 프로필이에요.
+                <br />
+                업무 속 선택이 쌓이면 나의 성향을 확인할 수 있어요.
+              </p>
+            )}
           </section>
         </div>
       </main>

@@ -93,6 +93,18 @@ describe('App routing', () => {
     expect(await screen.findByText('생활 가전 제품디자이너')).toBeInTheDocument()
   })
 
+  it('shows the progress line and empty profile on the explore home by session progress', async () => {
+    renderAt('/explore')
+    expect(await screen.findByText('첫 업무를 시작해 볼까요?')).toBeInTheDocument()
+    expect(screen.getByText(/아직은 빈 프로필이에요/)).toBeInTheDocument()
+  })
+
+  it('asks to continue once the task has started', async () => {
+    useSession.setState({ currentStage: 'workspace' })
+    renderAt('/explore')
+    expect(await screen.findByText('업무를 이어서 할까요?')).toBeInTheDocument()
+  })
+
   it('renders Explore at the "/explore" alias too', async () => {
     renderAt('/explore')
     expect(await screen.findByRole('heading', { level: 1, name: '생활 가전 제품 디자이너' })).toBeInTheDocument()
