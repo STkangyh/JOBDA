@@ -139,6 +139,7 @@ const STAGES: Record<string, string> = {
 
 const PAGES: Record<string, string> = {
   '/': '홈',
+  '/welcome': '첫 방문 시작 화면',
   '/explore': '홈',
   '/explore/job': '직무 상세',
   '/journey-map': '체험맵',

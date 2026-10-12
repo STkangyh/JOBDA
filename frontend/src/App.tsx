@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState, type ComponentType } from 'react'
-import { Route, Routes, useNavigate } from 'react-router-dom'
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useSession } from './store/session'
 import { Explore } from './pages/explore/Explore'
 import { StageJumper } from './components/StageJumper'
@@ -7,6 +7,7 @@ import { MobileNotice } from './components/MobileNotice'
 import { ScreenTracker } from './components/ScreenTracker'
 import { AsteriskIcon } from './components/icons'
 import type { Stage } from './types'
+import { hasSeenWelcome } from './lib/welcome'
 
 // 화면들이 전부 Figma 데스크톱 프레임 그대로(고정폭 사이드바, grid-cols-5 등)라 좁은 화면에서는
 // 레이아웃이 깨진다 — Web Analytics로 실제 모바일 방문이 확인돼서(적지만 0은 아님), 반응형으로
@@ -47,6 +48,7 @@ const JobDetail = lazy(() => import('./pages/explore/JobDetail').then((m) => ({ 
 const ErrorPage = lazy(() => import('./pages/explore/ErrorPage').then((m) => ({ default: m.ErrorPage })))
 const Session1App = lazy(() => import('./pages/session1/Session1App').then((m) => ({ default: m.Session1App })))
 const JourneyMap = lazy(() => import('./pages/JourneyMap').then((m) => ({ default: m.JourneyMap })))
+const Welcome = lazy(() => import('./pages/Welcome').then((m) => ({ default: m.Welcome })))
 const ComprehensiveReport = lazy(() => import('./pages/ComprehensiveReport').then((m) => ({ default: m.ComprehensiveReport })))
 const ProposalWriting = lazy(() => import('./pages/session2/ProposalWriting').then((m) => ({ default: m.ProposalWriting })))
 const AdminPage = lazy(() => import('./pages/admin/AdminPage').then((m) => ({ default: m.AdminPage })))
@@ -130,7 +132,12 @@ function App() {
       <ScreenTracker narrow={false} />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
-          <Route path="/" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
+          {/* 루트에 처음 들어온 브라우저는 시작 화면부터(브라우저당 한 번). /explore 별칭은 항상 홈. */}
+          <Route
+            path="/"
+            element={hasSeenWelcome() ? <Explore onOpenJob={() => navigate('/explore/job')} /> : <Navigate to="/welcome" replace />}
+          />
+          <Route path="/welcome" element={<Welcome />} />
           <Route path="/explore" element={<Explore onOpenJob={() => navigate('/explore/job')} />} />
           <Route
             path="/explore/job"

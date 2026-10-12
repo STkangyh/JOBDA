@@ -28,6 +28,8 @@ function mockNarrowViewport() {
 
 beforeEach(() => {
   useSession.getState().resetSession()
+  // 기존 테스트는 재방문 브라우저 기준(시작 화면을 이미 본 상태) — 첫 방문은 아래 별도 테스트
+  localStorage.setItem('jobda-welcome-seen', '1')
 })
 
 afterEach(() => {
@@ -46,6 +48,25 @@ describe('App routing', () => {
   it('renders Explore at "/"', async () => {
     renderAt('/')
     expect(await screen.findByText('New Arrival')).toBeInTheDocument()
+  })
+
+  it('sends a first-time visitor at "/" to the welcome splash, once per browser', async () => {
+    const user = userEvent.setup()
+    localStorage.removeItem('jobda-welcome-seen')
+    renderAt('/')
+    expect(await screen.findByText(/직접 경험해 보세요/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '직무 알아보기' }))
+    expect(await screen.findByText('New Arrival')).toBeInTheDocument()
+    expect(localStorage.getItem('jobda-welcome-seen')).toBe('1')
+  })
+
+  it('"체험 시작하기" goes to the job detail for now (until loading/login/onboarding screens exist)', async () => {
+    const user = userEvent.setup()
+    localStorage.removeItem('jobda-welcome-seen')
+    renderAt('/welcome')
+    await user.click(await screen.findByRole('button', { name: '체험 시작하기' }))
+    expect(await screen.findByText('생활 가전 제품디자이너')).toBeInTheDocument()
   })
 
   it('renders Explore at the "/explore" alias too', async () => {
