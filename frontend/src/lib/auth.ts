@@ -99,7 +99,8 @@ function sessionEndedByChoice(): boolean {
   }
 }
 
-function hasSignedInBefore(): boolean {
+/** 이 브라우저에서 이메일 계정으로 로그인한 적이 있으면 true. */
+export function hasSignedInBefore(): boolean {
   try {
     return localStorage.getItem(HAS_ACCOUNT_KEY) === '1'
   } catch {

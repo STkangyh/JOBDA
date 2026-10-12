@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AFTER_AUTH_PATH, passwordProblem, PASSWORD_RULE, resendSignupEmail, signUp, type AuthFailure } from '../../lib/auth'
-import { AuthField, AuthLayout, BackToLogin, CardHeading, ErrorNotice, InfoBox, SubmitButton, SwitchPrompt, type Intro } from './AuthUI'
+import { AuthField, AuthLayout, BackToLogin, CardHeading, ErrorNotice, InfoBox, SubmitButton, SwitchPrompt } from './AuthUI'
+import type { Intro } from './intros'
 
 // Figma 회원가입 2217:9897. 새 계정으로 가입하고(2026-10-13 결정) 메일의 인증 링크(/auth/confirm)를 누르면 완료된다.
 const SIGNUP_INTRO: Intro = {

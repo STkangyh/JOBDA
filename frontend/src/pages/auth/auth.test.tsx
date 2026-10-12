@@ -64,6 +64,20 @@ beforeEach(() => {
 
 afterAll(() => vi.unstubAllEnvs())
 
+describe('login copy', () => {
+  it('greets a first-time visitor with the first-visit copy', () => {
+    renderAt('/login')
+    expect(screen.getByRole('heading', { name: '체험을 시작해 볼까요?' })).toBeInTheDocument()
+    expect(screen.queryByText('다시 만나 반가워요!')).not.toBeInTheDocument()
+  })
+
+  it('welcomes back a browser that has signed in before', () => {
+    localStorage.setItem('jobda-has-account', '1')
+    renderAt('/login')
+    expect(screen.getByRole('heading', { name: '다시 만나 반가워요!' })).toBeInTheDocument()
+  })
+})
+
 describe('login', () => {
   async function fillLogin(password = 'wrong-pass1!') {
     const user = userEvent.setup()

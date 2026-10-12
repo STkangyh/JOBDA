@@ -67,7 +67,7 @@ describe('App routing', () => {
     renderAt('/welcome')
     await user.click(await screen.findByRole('button', { name: '체험 시작하기' }))
     expect(await screen.findByText('체험 공간을 준비하고 있어요')).toBeInTheDocument()
-    expect(await screen.findByRole('heading', { name: '다시 만나 반가워요!' }, { timeout: 5000 })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '체험을 시작해 볼까요?' }, { timeout: 5000 })).toBeInTheDocument()
   })
 
   it('sends a browser that has signed in before (now logged out) at "/" straight to login, skipping the splash', async () => {

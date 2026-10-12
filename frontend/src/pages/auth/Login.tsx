@@ -1,12 +1,21 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AFTER_AUTH_PATH, hasAccountSession, resendSignupEmail, signIn, type AuthFailure } from '../../lib/auth'
+import { AFTER_AUTH_PATH, hasAccountSession, hasSignedInBefore, resendSignupEmail, signIn, type AuthFailure } from '../../lib/auth'
 import { AuthField, AuthLayout, CardHeading, ErrorNotice, RememberCheckbox, SubmitButton, SwitchPrompt } from './AuthUI'
+import { LOGIN_INTRO, type Intro } from './intros'
 
 // Figma 로그인 2217:9633 · 로그인 오류 2220:35215. 로딩 화면 다음에 온다.
-// 로그인하면 (예정) 온보딩으로 — 디자인이 오기 전까지는 AFTER_AUTH_PATH.
+// 로그인하면 온보딩(AFTER_AUTH_PATH)으로.
+// 문구는 방문 이력에 따라 나눈다(2026-10-13 A안): 이 브라우저에서 로그인한 적이 있으면 Figma 원문("다시 만나 반가워요!"),
+// 처음이면 아래 초안 — 디자이너 확인 전 임시 문구다.
+const FIRST_VISIT_INTRO: Intro = {
+  title: LOGIN_INTRO.title,
+  body: ['오늘의 작은 경험이 내일의 나를 만듭니다.', '로그인하고 나만의 직무 여정을 시작하세요.'],
+}
+
 export function Login() {
   const navigate = useNavigate()
+  const [returning] = useState(hasSignedInBefore)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   // Figma 기본값은 체크 해제 — 끄고 로그인하면 브라우저를 닫을 때 로그아웃된다.
@@ -49,10 +58,17 @@ export function Login() {
   const credentialsInvalid = error?.code === 'invalid_credentials'
 
   return (
-    <AuthLayout>
+    <AuthLayout intro={returning ? LOGIN_INTRO : FIRST_VISIT_INTRO}>
       <form onSubmit={submit} className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
-          <CardHeading title="다시 만나 반가워요!" body="로그인하고 멈춰 있던 경험을 이어가세요." />
+          {returning ? (
+            <CardHeading title="다시 만나 반가워요!" body="로그인하고 멈춰 있던 경험을 이어가세요." />
+          ) : (
+            <CardHeading
+              title="체험을 시작해 볼까요?"
+              body="로그인하고 생활 가전 제품 디자이너의 하루를 경험해 보세요. 계정이 없다면 회원가입부터 시작할 수 있어요."
+            />
+          )}
           {error && <ErrorNotice error={error} />}
           {error?.code === 'email_not_confirmed' && !resent && (
             <button type="button" onClick={resend} className="w-fit rounded text-body-md text-green-400 underline underline-offset-2">

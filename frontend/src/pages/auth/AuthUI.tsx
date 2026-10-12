@@ -11,20 +11,11 @@ import fieldBadgeIcon from '../../assets/auth/badge-field.svg'
 import durationBadgeIcon from '../../assets/auth/badge-duration.svg'
 import { Sidebar } from '../../components/Sidebar'
 import type { AuthFailure } from '../../lib/auth'
+import { LOGIN_INTRO, type Intro } from './intros'
 
 // 로그인 · 회원가입 · 비밀번호 찾기 · 비밀번호 재설정 화면이 함께 쓰는 틀과 입력 요소.
 // Figma: 로그인 2217:9633, 로그인 오류 2220:35215, 회원가입 2217:9897, 비밀번호 찾기 2217:9847, 비밀번호 재설정 2223:36129 (2026-10-13)
 // 화면마다 왼쪽 소개 문구와 오른쪽 카드만 다르다.
-
-export interface Intro {
-  title: [string, string]
-  body: [string, string]
-}
-
-const LOGIN_INTRO: Intro = {
-  title: ['경험으로 찾는,', '나만의 가능성.'],
-  body: ['오늘의 작은 경험이 내일의 나를 만듭니다.', '로그인하고 나만의 직무 여정을 이어가세요.'],
-}
 
 export function AuthLayout({ intro = LOGIN_INTRO, children }: { intro?: Intro; children: ReactNode }) {
   const navigate = useNavigate()
