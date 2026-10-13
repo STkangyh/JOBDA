@@ -60,7 +60,7 @@ export function Materials() {
 
   return (
     <WorkFrame step="자료탐색" sidebar="library" onSidebarSelect={{ work: startWork }} exitStep="materials">
-      <WorkPanel className="flex max-w-[554px] min-w-[360px] flex-1 flex-col gap-6">
+      <WorkPanel className="flex max-w-[554px] min-w-[360px] flex-1 flex-col gap-6 overflow-y-auto">
         <h1 className="text-title-lg font-semibold text-neutral-500">자료함</h1>
         <ul className="flex flex-col gap-2.5">
           {DOC_CATEGORIES.map((cat) => (
@@ -85,7 +85,7 @@ export function Materials() {
         </ul>
       </WorkPanel>
 
-      <WorkPanel className="flex min-w-0 flex-[1.75] flex-col gap-6">
+      <WorkPanel className="flex min-h-0 min-w-0 flex-[1.75] flex-col gap-6">
         <div className="flex items-center gap-2">
           <h2 className="text-title-lg font-semibold text-neutral-500">미리보기</h2>
           {/* 미리보기 중인 참고 자료 내려받기 — 기존 기능 유지(Figma 1341:10735 QA) */}
@@ -99,10 +99,10 @@ export function Materials() {
             <DownloadIcon className="size-[18px]" />
           </a>
         </div>
-        <div className="flex min-h-[400px] flex-1 items-center justify-center overflow-hidden rounded-2xl bg-neutral-100">
-          <img src={viewer.image} alt={viewer.imageAlt} loading="lazy" className="max-h-full w-full object-contain" />
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-2xl bg-neutral-100">
+          <img src={viewer.image} alt={viewer.imageAlt} loading="lazy" className="size-full object-contain" />
         </div>
-        <p className="text-title-lg text-neutral-600">{viewer.description}</p>
+        <p className="max-h-[30%] shrink-0 overflow-y-auto text-title-lg text-neutral-600">{viewer.description}</p>
       </WorkPanel>
     </WorkFrame>
   )

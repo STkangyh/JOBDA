@@ -40,10 +40,10 @@ export function WorkSidebar({ active, onSelect = {} }: WorkSidebarProps) {
   return (
     <nav
       aria-label="주 메뉴"
-      className="flex h-full w-24 shrink-0 flex-col items-center gap-6 overflow-clip rounded-lg bg-[rgba(1,1,1,0.75)] p-5 shadow-gnb backdrop-blur-gnb"
+      className="flex h-full w-24 shrink-0 flex-col items-center gap-[clamp(12px,2.2svh,24px)] overflow-y-auto rounded-lg [scrollbar-width:none] bg-[rgba(1,1,1,0.75)] p-5 shadow-gnb backdrop-blur-gnb"
     >
       <img src={brandLogo} alt="JOB:DA" className="size-[54px] rounded-full object-cover" />
-      <ul className="flex flex-col items-center gap-4">
+      <ul className="flex flex-col items-center gap-[clamp(4px,1.4svh,16px)]">
         {ITEMS.map((item) => {
           const isActive = active === item.id
           const handler = onSelect[item.id]

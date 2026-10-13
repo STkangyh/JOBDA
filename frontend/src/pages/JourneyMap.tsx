@@ -43,7 +43,7 @@ export function JourneyMap() {
 
   return (
     <WorkFrame step="직무 리포트" sidebar="work" exitStep="journey_map" flushRight>
-      <WorkPanel className="flex min-w-0 flex-1 flex-col gap-8">
+      <WorkPanel className="flex min-h-0 min-w-0 flex-1 flex-col gap-[clamp(12px,3svh,32px)] overflow-y-auto">
         <div className="flex flex-col gap-1">
           <h1 className="text-headline-lg font-medium text-neutral-900">체험맵</h1>
           <p className="text-body-lg text-neutral-600">지금까지 진행한 업무 내용을 확인해보세요.</p>

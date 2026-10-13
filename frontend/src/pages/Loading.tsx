@@ -40,10 +40,10 @@ export function Loading() {
   }, [percent, navigate])
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-neutral-950 px-4 py-12">
-      <div className="rounded-[20px] bg-[rgba(44,44,44,0.75)] p-[60px]">
-        <div className="flex w-[479px] max-w-full flex-col items-center gap-10">
-          <img src={reportStack} alt="" width={437} height={265} className="h-[265px] w-[437px] max-w-full object-cover" />
+    <main className="flex h-svh items-center justify-center overflow-hidden bg-neutral-950 px-4 py-[clamp(16px,4svh,48px)]">
+      <div className="max-h-full rounded-[20px] bg-[rgba(44,44,44,0.75)] p-[clamp(24px,5.4svh,60px)]">
+        <div className="flex w-[479px] max-w-full flex-col items-center gap-[clamp(16px,3.6svh,40px)]">
+          <img src={reportStack} alt="" width={437} height={265} className="h-[clamp(120px,23.7svh,265px)] w-auto max-w-full object-cover" />
 
           <div className="flex w-full flex-col items-center gap-4 text-center">
             <span className="flex size-[50px] items-center justify-center rounded-full bg-neutral-900 backdrop-blur-panel" aria-hidden>

@@ -123,11 +123,12 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
   }
 
   return (
-    <div className="flex min-h-svh gap-[clamp(24px,3.1vw,54px)] bg-neutral-950 pt-14 pr-[clamp(32px,3.1vw,54px)] pb-8 pl-8">
+    <div className="flex h-svh gap-[clamp(24px,3.1vw,54px)] overflow-hidden bg-neutral-950 pt-[clamp(24px,5svh,56px)] pr-[clamp(32px,3.1vw,54px)] pb-[clamp(16px,3svh,32px)] pl-8">
       <Sidebar active="home" />
 
-      <main className="flex min-w-0 flex-1 flex-col justify-between gap-12 pt-12">
-        <div className="flex flex-col gap-8">
+      {/* 위쪽(제목·카드 줄·설명)은 고정 높이, 아래 카드 3개가 남는 높이를 나눠 쓴다 — 페이지는 스크롤되지 않는다 */}
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col gap-[clamp(12px,3svh,48px)] pt-[clamp(0px,4svh,48px)]">
+        <div className="flex shrink-0 flex-col gap-[clamp(12px,3svh,32px)]">
           <header className="flex flex-wrap items-end justify-between gap-4">
             <h1 className="text-display-lg font-medium tracking-[-0.12px] text-green-400">생활 가전 제품 디자이너</h1>
             <p className="text-headline-md font-semibold text-neutral-300">{progressLine(currentStage !== 'brief', Boolean(report))}</p>
@@ -145,7 +146,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
                   <button
                     type="button"
                     onClick={() => openTask(task)}
-                    className="group relative block h-[310px] w-[430px] overflow-clip rounded-lg bg-neutral-800 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+                    className="group relative block h-[clamp(160px,27.7svh,310px)] w-[clamp(240px,38.5svh,430px)] overflow-clip rounded-lg bg-neutral-800 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
                   >
                     <img src={task.image} alt="" width={1200} height={675} className={task.imageClass ?? 'h-[318px] w-full rounded-[4px] object-cover'} />
                     <span className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.5)_1.774%,rgba(0,0,0,0)_56.129%)]" />
@@ -190,22 +191,22 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <section className="flex min-h-[351px] flex-col justify-between gap-6 rounded-lg bg-[rgba(44,44,44,0.75)] p-6 shadow-gnb backdrop-blur-gnb">
+        <div className="grid min-h-0 flex-1 grid-cols-3 gap-4">
+          <section className="flex min-h-0 flex-col justify-between gap-[clamp(8px,2svh,24px)] overflow-hidden rounded-lg bg-[rgba(44,44,44,0.75)] p-[clamp(16px,2.2svh,24px)] shadow-gnb backdrop-blur-gnb">
             <PanelTitle>이번에 경험한 업무</PanelTitle>
-            <img src={reportStack} alt="" width={874} height={530} className="aspect-[1936/1174] w-full object-cover" />
+            <img src={reportStack} alt="" width={874} height={530} className="min-h-0 w-full flex-1 object-contain object-bottom" />
           </section>
-          <section className="flex min-h-[351px] flex-col justify-between gap-6 rounded-lg bg-[rgba(44,44,44,0.75)] p-6 shadow-gnb backdrop-blur-gnb">
+          <section className="flex min-h-0 flex-col justify-between gap-[clamp(8px,2svh,24px)] overflow-hidden rounded-lg bg-[rgba(44,44,44,0.75)] p-[clamp(16px,2.2svh,24px)] shadow-gnb backdrop-blur-gnb">
             <PanelTitle>체험해 볼 만한 유사한 업무</PanelTitle>
-            <img src={reportStack} alt="" width={874} height={530} className="aspect-[1936/1174] w-full object-cover" />
+            <img src={reportStack} alt="" width={874} height={530} className="min-h-0 w-full flex-1 object-contain object-bottom" />
           </section>
-          <section className="flex min-h-[351px] flex-col justify-between gap-6 rounded-lg bg-[rgba(44,44,44,0.75)] p-6 shadow-gnb backdrop-blur-gnb">
+          <section className="flex min-h-0 flex-col justify-between gap-[clamp(8px,2svh,24px)] overflow-hidden rounded-lg bg-[rgba(44,44,44,0.75)] p-[clamp(16px,2.2svh,24px)] shadow-gnb backdrop-blur-gnb">
             <div className="flex flex-col gap-1">
               <PanelTitle>내 직무 이해 프로필</PanelTitle>
               <p className="text-body-lg text-neutral-400">사용자 패턴에서 반복적으로 나타난 판단, 협업 성향을 보여줍니다.</p>
             </div>
             {profile.length > 0 ? (
-              <div className="flex flex-col gap-6">
+              <div className="flex min-h-0 flex-col gap-[clamp(12px,2.2svh,24px)] overflow-y-auto pt-1">
                 {profile.map((axis) => (
                   <ProfileMeter key={axis.caption} {...axis} />
                 ))}

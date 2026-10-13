@@ -59,7 +59,7 @@ export function Login() {
 
   return (
     <AuthLayout intro={returning ? LOGIN_INTRO : FIRST_VISIT_INTRO}>
-      <form onSubmit={submit} className="flex flex-col gap-8">
+      <form onSubmit={submit} className="flex flex-col gap-[clamp(16px,2.9svh,32px)]">
         <div className="flex flex-col gap-4">
           {returning ? (
             <CardHeading title="다시 만나 반가워요!" body="로그인하고 멈춰 있던 경험을 이어가세요." />
@@ -82,7 +82,7 @@ export function Login() {
           )}
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-[clamp(10px,2.1svh,24px)]">
           <AuthField
             label="이메일"
             kind="email"

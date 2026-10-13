@@ -75,7 +75,7 @@ export function Report() {
   // 업무 페이지 새 디자인 2217:10860(2026-10-13): 같은 3칸 구성을 업무 화면 틀(회색 배경·라벨형 GNB) 안에 둔다.
   return (
     <WorkFrame step="직무 리포트" sidebar="work" exitStep="report">
-      <div className="min-w-0 flex-1">
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">
         <div className="grid min-h-full grid-cols-1 items-stretch gap-[19px] lg:grid-cols-[442fr_855fr_340fr]">
           <WorkPanel padded={false} className="flex flex-col gap-[48px] px-6 py-8">
             <div className="flex flex-col gap-3">

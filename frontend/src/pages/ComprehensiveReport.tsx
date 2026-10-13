@@ -45,10 +45,10 @@ function averageProfile(a: ProfileAxis[], b: ProfileAxis[]): ProfileAxis[] {
 // 분기하던 이전 로직은 제거하고 세션2 하나만 기준으로 삼는다.
 function ComprehensiveReportPending() {
   return (
-    <div className="flex min-h-svh gap-6 bg-neutral-950 p-6">
+    <div className="flex h-svh gap-6 overflow-hidden bg-neutral-950 p-6">
       <Sidebar active="report" />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-6">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-y-auto">
         <div className="hidden items-center justify-end gap-[18px] lg:flex">
           <div className="flex size-[50px] shrink-0 items-center justify-center rounded-full bg-neutral-800 text-neutral-50">
             <CloudSavedIcon className="size-5" />
@@ -153,10 +153,10 @@ export function ComprehensiveReport() {
   const activeSteps = s1Report ? [SESSION1_STEP_INDEX, SESSION2_STEP_INDEX] : [SESSION2_STEP_INDEX]
 
   return (
-    <div className="flex min-h-svh gap-[clamp(24px,3.1vw,54px)] bg-neutral-950 pt-14 pr-[clamp(32px,3.1vw,54px)] pb-8 pl-8">
+    <div className="flex h-svh gap-[clamp(24px,3.1vw,54px)] overflow-hidden bg-neutral-950 pt-[clamp(24px,5svh,56px)] pr-[clamp(32px,3.1vw,54px)] pb-[clamp(16px,3svh,32px)] pl-8">
       <Sidebar active="report" />
 
-      <main className="flex min-w-0 flex-1 flex-col justify-end gap-[18px]">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col gap-[18px] overflow-y-auto">
         <h1 className="sr-only">종합 리포트</h1>
 
         <div className="grid grid-cols-3 gap-[18px]">

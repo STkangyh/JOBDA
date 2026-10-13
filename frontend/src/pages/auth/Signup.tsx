@@ -48,7 +48,7 @@ export function Signup() {
     // 인증 대기 화면 — 디자인이 없어 비밀번호 찾기 카드의 안내 상자 구성을 그대로 따른다.
     return (
       <AuthLayout intro={SIGNUP_INTRO}>
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-[clamp(16px,2.9svh,32px)]">
           <CardHeading title="메일함을 확인해 주세요" body={<>{email.trim()}(으)로 인증 메일을 보냈어요.<br />메일의 인증 링크를 누르면 가입이 완료돼요.</>} />
           {problem && <ErrorNotice error={problem.error} />}
           <InfoBox
@@ -71,12 +71,12 @@ export function Signup() {
 
   return (
     <AuthLayout intro={SIGNUP_INTRO}>
-      <form onSubmit={submit} className="flex flex-col gap-8">
+      <form onSubmit={submit} className="flex flex-col gap-[clamp(16px,2.9svh,32px)]">
         <div className="flex flex-col gap-4">
           <CardHeading title="새로운 여정을 시작하세요" body="회원가입을 통해 나만의 경험을 저장하고, 다양한 직무를 탐색하세요." />
           {problem && <ErrorNotice error={problem.error} />}
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-[clamp(10px,2.1svh,24px)]">
           <AuthField
             label="이메일 주소"
             kind="email"

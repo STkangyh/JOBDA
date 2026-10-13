@@ -71,11 +71,11 @@ function TaskCard({ editingFinal, remaining }: { editingFinal: boolean; remainin
   }
 
   return (
-    <WorkPanel className="flex flex-col gap-6">
+    <WorkPanel className="flex shrink-0 flex-col gap-[clamp(12px,2svh,24px)]">
       <h1 className="text-title-lg font-semibold text-neutral-700">시방서 초안 작성하기</h1>
       <div className="flex gap-6">
-        <img src={productImage} alt="" className="h-[280px] w-[clamp(240px,22vw,376px)] shrink-0 rounded-2xl bg-neutral-100 object-cover" />
-        <div className="flex min-h-[280px] min-w-0 flex-1 flex-col justify-between gap-6">
+        <img src={productImage} alt="" className="h-[clamp(120px,25svh,280px)] w-[clamp(160px,22vw,376px)] shrink-0 rounded-2xl bg-neutral-100 object-cover" />
+        <div className="flex min-h-[clamp(120px,25svh,280px)] min-w-0 flex-1 flex-col justify-between gap-[clamp(12px,2svh,24px)]">
           <p className="text-title-lg text-neutral-700">{DRAFT_DESCRIPTION}</p>
           {editingFinal && (
             <div className="flex flex-col gap-3">
@@ -398,7 +398,7 @@ export function Workspace() {
 
   return (
     <WorkFrame step="관계자 협업" sidebar="work" loading={isSubmitting} exitStep="workspace" flushRight>
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto">
         <TaskCard editingFinal={editingFinal} remaining={remaining} />
         {editingFinal ? (
           <FinalSpecCard isSubmitting={isSubmitting} setIsSubmitting={setIsSubmitting} />
@@ -407,7 +407,7 @@ export function Workspace() {
         )}
       </div>
 
-      <aside className={`flex ${SIDE_WIDTH} shrink-0 flex-col gap-4`}>
+      <aside className={`flex min-h-0 ${SIDE_WIDTH} shrink-0 flex-col gap-4`}>
         <WorkNotesCard
           groups={[
             { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
@@ -415,7 +415,7 @@ export function Workspace() {
             { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
           ]}
         />
-        <div className="min-h-[520px] flex-1">
+        <div className="min-h-0 flex-1">
           <Messenger defaultActive="senior" intro={{ persona: 'senior', text: SENIOR_INTRO }} />
         </div>
       </aside>

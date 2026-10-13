@@ -17,9 +17,9 @@ export function JobDetail({ onSubmit }: { onSubmit: (stepIndex: number) => void 
   const [selected, setSelected] = useState<number | null>(null)
 
   return (
-    <div className="grid min-h-svh grid-cols-[minmax(0,1fr)_401px] gap-x-[clamp(24px,2.5vw,44px)] bg-neutral-950 pt-[clamp(48px,16svh,181px)] pr-8 pb-8 pl-[clamp(32px,2.4vw,41px)]">
+    <div className="grid h-svh grid-cols-[minmax(0,1fr)_401px] gap-x-[clamp(24px,2.5vw,44px)] overflow-hidden bg-neutral-950 pt-[clamp(24px,16svh,181px)] pr-8 pb-[clamp(16px,3svh,32px)] pl-[clamp(32px,2.4vw,41px)]">
       {/* 일러스트는 Figma처럼 카드보다 넓게 깔고(114%) 왼쪽으로 옮겨 인물이 가운데 오게 한다 */}
-      <section className="relative flex max-h-[777px] min-h-[560px] flex-col overflow-hidden rounded-lg bg-neutral-800 px-6 pt-12 pb-6">
+      <section className="relative flex max-h-[777px] min-h-0 flex-col overflow-hidden rounded-lg bg-neutral-800 px-6 pt-12 pb-6">
         <img src={illustration} alt="" className="pointer-events-none absolute top-0 left-[-9.53%] h-full w-[114.16%] max-w-none object-cover" />
         <div className="relative flex flex-col gap-3">
           <h1 className="text-display-md font-medium tracking-[-0.09px] text-green-400">생활 가전 제품디자이너</h1>
@@ -27,8 +27,8 @@ export function JobDetail({ onSubmit }: { onSubmit: (stepIndex: number) => void 
         </div>
       </section>
 
-      <div className="flex flex-col justify-between gap-8">
-        <ul className="flex flex-col gap-4" aria-label="업무 프로세스">
+      <div className="flex min-h-0 flex-col justify-between gap-[clamp(12px,3svh,32px)]">
+        <ul className="flex min-h-0 flex-col gap-[clamp(6px,1.4svh,16px)] overflow-y-auto" aria-label="업무 프로세스">
           {PROCESS_STEPS.map((step, i) => {
             const isAvailable = AVAILABLE_STEP_INDICES.includes(i)
             const isSelected = selected === i
@@ -39,7 +39,7 @@ export function JobDetail({ onSubmit }: { onSubmit: (stepIndex: number) => void 
                   disabled={!isAvailable}
                   aria-pressed={isSelected}
                   onClick={() => setSelected(i)}
-                  className={`flex h-12 w-full items-center gap-0.5 rounded-xl border px-12 text-title-lg whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
+                  className={`flex h-[clamp(40px,4.3svh,48px)] w-full shrink-0 items-center gap-0.5 rounded-xl border px-12 text-title-lg whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
                     isSelected
                       ? 'border-green-400 bg-neutral-800 font-semibold text-neutral-100'
                       : `border-neutral-800 bg-neutral-900 text-neutral-300 ${isAvailable ? 'hover:border-neutral-600 hover:text-neutral-100' : ''}`
@@ -61,7 +61,7 @@ export function JobDetail({ onSubmit }: { onSubmit: (stepIndex: number) => void 
             track('job_start', { step: selected })
             onSubmit(selected)
           }}
-          className="h-[72px] w-full rounded-lg bg-green-500 text-headline-md font-semibold text-neutral-900 transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+          className="h-[clamp(56px,6.4svh,72px)] w-full shrink-0 rounded-lg bg-green-500 text-headline-md font-semibold text-neutral-900 transition-colors hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
         >
           업무 시작하기
         </button>

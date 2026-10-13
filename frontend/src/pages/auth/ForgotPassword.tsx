@@ -21,7 +21,7 @@ export function ForgotPassword() {
 
   return (
     <AuthLayout>
-      <form onSubmit={submit} className="flex flex-col gap-8">
+      <form onSubmit={submit} className="flex flex-col gap-[clamp(16px,2.9svh,32px)]">
         <div className="flex flex-col gap-4">
           <CardHeading
             title="비밀번호를 잊으셨나요?"
@@ -35,7 +35,7 @@ export function ForgotPassword() {
           />
           {error && <ErrorNotice error={error} />}
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-[clamp(10px,2.1svh,24px)]">
           <AuthField
             label="이메일"
             kind="email"

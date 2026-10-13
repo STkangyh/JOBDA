@@ -98,7 +98,7 @@ export function FinalFeedback() {
 
   return (
     <WorkFrame step="관계자 협업" sidebar="work" loading={isSubmitting} exitStep="final_feedback" flushRight>
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto">
         {revisitCount > 0 && (
           <p role="alert" className="flex items-center gap-2 rounded-lg bg-[rgba(250,250,250,0.85)] p-4 text-body-md text-error-300">
             <WarningIcon className="size-5 shrink-0 text-error-200" />
@@ -191,7 +191,7 @@ export function FinalFeedback() {
         </WorkPanel>
       </div>
 
-      <aside className="flex w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
+      <aside className="flex min-h-0 w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
         <WorkNotesCard
           groups={[
             { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
@@ -199,7 +199,7 @@ export function FinalFeedback() {
             { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
           ]}
         />
-        <div className="min-h-[520px] flex-1">
+        <div className="min-h-0 flex-1">
           <Messenger defaultActive="engineering" />
         </div>
       </aside>

@@ -33,14 +33,15 @@ export function WorkFrame({ step, sidebar, onSidebarSelect, loading = false, exi
   }
 
   return (
-    <div className="flex min-h-svh bg-neutral-500">
-      <div className="sticky top-0 flex h-svh w-40 shrink-0 px-8 pt-14 pb-8">
+    // 창 높이에 고정 — 페이지는 세로로 스크롤되지 않고, 긴 내용은 각 칸 안에서 스크롤한다(2026-10-13 결정).
+    <div className="flex h-svh overflow-hidden bg-neutral-500">
+      <div className="flex h-full w-40 shrink-0 px-8 pt-[clamp(24px,5svh,56px)] pb-[clamp(16px,3svh,32px)]">
         <WorkSidebar active={sidebar} onSelect={onSidebarSelect} />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="relative flex h-[110px] shrink-0 items-center justify-end gap-3 px-8 pt-[54px]">
-          <Indicator current={step} tone="gray" className="absolute top-[58px] left-1/2 w-[min(855px,calc(100%-420px))] -translate-x-[calc(50%+79.5px)]" />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="relative flex h-[clamp(80px,10svh,110px)] shrink-0 items-center justify-end gap-3 px-8 pt-[clamp(24px,5svh,54px)]">
+          <Indicator current={step} tone="gray" className="absolute top-[clamp(28px,5.2svh,58px)] left-1/2 w-[min(855px,calc(100%-420px))] -translate-x-[calc(50%+79.5px)]" />
           {loading && (
             <span className="flex size-14 items-center justify-center rounded-full bg-neutral-900 text-green-500" role="status" aria-label="처리 중">
               <AsteriskIcon className="size-6 animate-spin" />
@@ -54,7 +55,7 @@ export function WorkFrame({ step, sidebar, onSidebarSelect, loading = false, exi
           </button>
         </header>
 
-        <div className={`flex min-h-0 flex-1 gap-4 pt-11 pb-8 ${flushRight ? '' : 'pr-8'}`}>{children}</div>
+        <div className={`flex min-h-0 flex-1 gap-4 pt-[clamp(16px,4svh,44px)] pb-[clamp(16px,3svh,32px)] ${flushRight ? '' : 'pr-8'}`}>{children}</div>
       </div>
     </div>
   )

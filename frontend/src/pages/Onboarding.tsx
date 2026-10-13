@@ -37,10 +37,10 @@ export function Onboarding() {
   }
 
   return (
-    <div className="flex min-h-svh gap-[clamp(24px,3.1vw,54px)] bg-neutral-950 pt-14 pr-[clamp(32px,3.1vw,54px)] pb-8 pl-8">
+    <div className="flex h-svh gap-[clamp(24px,3.1vw,54px)] overflow-hidden bg-neutral-950 pt-[clamp(24px,5svh,56px)] pr-[clamp(32px,3.1vw,54px)] pb-[clamp(16px,3svh,32px)] pl-8">
       <Sidebar active="home" />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-8 pt-3">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-[clamp(12px,3svh,32px)] pt-3">
         <header className="flex min-h-14 flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-headline-lg font-medium text-green-50">처음 오셨나요?</h1>
@@ -63,8 +63,9 @@ export function Onboarding() {
           </nav>
         </header>
 
-        <main className="flex flex-1 flex-col justify-between gap-12">
-          <section className="flex items-end gap-[clamp(24px,3.2vw,56px)]" aria-label="체험 소개">
+        {/* 소개·버튼은 고정, 안내 카드 줄이 남는 높이를 쓰고 넘치면 카드 안에서 스크롤 — 페이지는 스크롤되지 않는다 */}
+        <main className="flex min-h-0 flex-1 flex-col justify-between gap-[clamp(12px,3svh,48px)]">
+          <section className="flex shrink-0 items-end gap-[clamp(24px,3.2vw,56px)]" aria-label="체험 소개">
             <div className="flex min-w-0 flex-1 flex-col gap-5">
               <h2 className="text-headline-lg font-medium text-green-50">
                 당신의 첫 디자인 업무,
@@ -84,16 +85,16 @@ export function Onboarding() {
               alt=""
               width={1200}
               height={675}
-              className="aspect-[550/356] w-[min(550px,40%)] shrink-0 rounded-xl object-cover"
+              className="aspect-[550/356] max-h-[26svh] w-auto max-w-[40%] shrink-0 rounded-xl object-cover"
             />
           </section>
 
-          <section className="flex flex-col gap-5" aria-labelledby="onboarding-areas">
+          <section className="flex min-h-0 flex-1 flex-col gap-[clamp(8px,1.8svh,20px)]" aria-labelledby="onboarding-areas">
             <h2 id="onboarding-areas" className="text-headline-md font-bold text-green-50">
               이렇게 체험하고, 나를 알아가요
             </h2>
-            <div className="grid grid-cols-3 gap-[18px]">
-              <article className="flex min-h-[288px] flex-col justify-between gap-6 rounded-xl bg-neutral-900 p-6">
+            <div className="grid min-h-0 flex-1 grid-cols-3 gap-[18px]">
+              <article className="flex max-h-[288px] min-h-0 flex-col justify-between gap-[clamp(8px,2svh,24px)] overflow-y-auto rounded-xl bg-neutral-900 p-[clamp(16px,2.2svh,24px)]">
                 <CardHeading badge="업무 경험" title="이번에 경험한 업무" body="하루의 업무를 따라가며 디자이너의 판단과 협업을 경험해요." />
                 <ul className="flex flex-col gap-2">
                   {TASKS.map((task) => (
@@ -105,7 +106,7 @@ export function Onboarding() {
                 </ul>
               </article>
 
-              <article className="flex min-h-[288px] flex-col justify-between gap-6 rounded-xl bg-neutral-900 p-6">
+              <article className="flex max-h-[288px] min-h-0 flex-col justify-between gap-[clamp(8px,2svh,24px)] overflow-y-auto rounded-xl bg-neutral-900 p-[clamp(16px,2.2svh,24px)]">
                 <CardHeading badge="관심 확장" title="체험해 볼 만한 유사한 업무" body="경험한 업무와 연결되는 다른 업무를 살펴보며 관심의 폭을 넓혀요." />
                 <div className="flex gap-4">
                   {SIMILAR_WORK.map((src) => (
@@ -114,7 +115,7 @@ export function Onboarding() {
                 </div>
               </article>
 
-              <article className="flex min-h-[288px] flex-col justify-between gap-6 rounded-xl bg-neutral-900 p-6">
+              <article className="flex max-h-[288px] min-h-0 flex-col justify-between gap-[clamp(8px,2svh,24px)] overflow-y-auto rounded-xl bg-neutral-900 p-[clamp(16px,2.2svh,24px)]">
                 <CardHeading badge="나의 발견" title="내 직무 이해 프로필" body="사용자 패턴에서 반복적으로 나타난 판단, 협업 성향을 보여줍니다." />
                 <div className="flex flex-col gap-3">
                   <p className="flex items-center gap-2.5 text-body-md text-neutral-300">
@@ -132,11 +133,11 @@ export function Onboarding() {
             </div>
           </section>
 
-          <div className="flex justify-end">
+          <div className="flex shrink-0 justify-end">
             <button
               type="button"
               onClick={start}
-              className="h-[72px] w-[340px] rounded-xl bg-green-500 text-headline-md font-semibold text-[#1b1b1b] transition-colors hover:bg-green-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+              className="h-[clamp(56px,6.4svh,72px)] w-[340px] rounded-xl bg-green-500 text-headline-md font-semibold text-[#1b1b1b] transition-colors hover:bg-green-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
             >
               체험 시작하기
             </button>

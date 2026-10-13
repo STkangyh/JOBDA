@@ -27,15 +27,15 @@ export function Welcome() {
   }
 
   return (
-    <div className="flex min-h-svh gap-[clamp(24px,3.1vw,54px)] bg-neutral-950 pt-[54px] pr-8 pb-12 pl-12">
+    <div className="flex h-svh gap-[clamp(24px,3.1vw,54px)] overflow-hidden bg-neutral-950 pt-[clamp(24px,5svh,54px)] pr-8 pb-[clamp(16px,4svh,48px)] pl-12">
       <Sidebar active="home" />
 
-      <main className="flex min-w-0 flex-1 flex-col justify-center gap-0 pr-[clamp(0px,1.4vw,22px)]">
-        {/* Figma 소개 영역 높이 720px(1117px 화면 기준) — 낮은 화면에서는 비율대로 줄인다 */}
-        <section className="grid min-h-[clamp(560px,64.5svh,720px)] grid-cols-[minmax(0,742px)_minmax(0,650px)] items-center gap-[clamp(32px,4.6vw,80px)] py-20">
-          <div className="flex flex-col gap-20">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-[clamp(12px,2svh,24px)] overflow-y-auto pr-[clamp(0px,1.4vw,22px)]">
+        {/* Figma 소개 영역 높이 720px(1117px 화면 기준) — 창 높이에 맞춰 여백을 줄인다 */}
+        <section className="grid grid-cols-[minmax(0,742px)_minmax(0,650px)] items-center gap-[clamp(32px,4.6vw,80px)] py-[clamp(8px,6svh,80px)]">
+          <div className="flex flex-col gap-[clamp(20px,6svh,80px)]">
             <img src={wordmark} alt="JOB:DA" width={240} height={67} className="h-[67px] w-60 object-contain object-left" />
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-[clamp(16px,2.8svh,32px)]">
               <h1 className="text-headline-lg font-medium text-green-400">
                 생활을 바꾸는 디자인,
                 <br />
@@ -64,14 +64,14 @@ export function Welcome() {
               </div>
             </div>
           </div>
-          <div className="aspect-[650/482] w-full overflow-clip rounded-3xl">
+          <div className="aspect-[650/482] max-h-[44svh] w-full justify-self-end overflow-clip rounded-3xl">
             <img src={designerArtwork} alt="" width={1200} height={675} className="size-full object-cover" />
           </div>
         </section>
 
-        <ul className="grid min-h-[185px] grid-cols-3 gap-5" aria-label="체험 과정">
+        <ul className="grid shrink-0 grid-cols-3 gap-5" aria-label="체험 과정">
           {JOURNEY.map((step) => (
-            <li key={step.title} className="flex flex-col items-center justify-center gap-2 rounded-lg bg-[rgba(44,44,44,0.75)] px-5 py-10 text-center">
+            <li key={step.title} className="flex flex-col items-center justify-center gap-2 rounded-lg bg-[rgba(44,44,44,0.75)] px-5 py-[clamp(16px,3.5svh,40px)] text-center">
               <p className="text-title-lg text-green-500">{step.title}</p>
               <p className="text-body-lg text-neutral-500">{step.body}</p>
             </li>

@@ -36,7 +36,7 @@ export function AuthConfirm() {
   if (!link) {
     return (
       <AuthLayout>
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-[clamp(16px,2.9svh,32px)]">
           <CardHeading title="링크를 확인할 수 없어요" body="메일에 있는 버튼을 다시 눌러 주세요. 계속 안 되면 메일을 다시 요청해 주세요." />
           <BackToLogin />
         </div>
@@ -62,7 +62,7 @@ export function AuthConfirm() {
           e.preventDefault()
           void confirm()
         }}
-        className="flex flex-col gap-8"
+        className="flex flex-col gap-[clamp(16px,2.9svh,32px)]"
       >
         <div className="flex flex-col gap-4">
           <CardHeading title={copy.title} body={copy.body} />

@@ -20,9 +20,9 @@ import { LOGIN_INTRO, type Intro } from './intros'
 export function AuthLayout({ intro = LOGIN_INTRO, children }: { intro?: Intro; children: ReactNode }) {
   const navigate = useNavigate()
   return (
-    <div className="flex min-h-svh gap-[clamp(24px,3.1vw,54px)] bg-neutral-950 pt-14 pr-[clamp(32px,4.7vw,82px)] pb-8 pl-[clamp(32px,3.7vw,64px)]">
+    <div className="flex h-svh gap-[clamp(24px,3.1vw,54px)] overflow-hidden bg-neutral-950 pt-[clamp(24px,5svh,56px)] pr-[clamp(32px,4.7vw,82px)] pb-[clamp(16px,3svh,32px)] pl-[clamp(32px,3.7vw,64px)]">
       <Sidebar active="home" />
-      <div className="flex min-w-0 flex-1 flex-col justify-between gap-12">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-between gap-[clamp(12px,3svh,48px)]">
         <div className="flex h-16 items-center">
           <button
             type="button"
@@ -33,7 +33,7 @@ export function AuthLayout({ intro = LOGIN_INTRO, children }: { intro?: Intro; c
           </button>
         </div>
 
-        <div className="flex items-end gap-[clamp(32px,6vw,104px)] py-12 pl-[clamp(0px,1.6vw,28px)]">
+        <div className="flex min-h-0 items-end gap-[clamp(32px,6vw,104px)] py-[clamp(0px,3svh,48px)] pl-[clamp(0px,1.6vw,28px)]">
           <section className="flex max-w-[740px] min-w-0 flex-1 flex-col gap-8" aria-label="체험 소개">
             <div className="flex flex-col gap-5">
               <p className="text-headline-lg font-medium text-green-400">
@@ -49,7 +49,7 @@ export function AuthLayout({ intro = LOGIN_INTRO, children }: { intro?: Intro; c
             </div>
             <FeaturedExperience />
           </section>
-          <main className="w-[560px] max-w-full shrink-0 rounded-xl bg-[#262626] p-10">{children}</main>
+          <main className="max-h-full w-[560px] max-w-full shrink-0 overflow-y-auto rounded-xl bg-[#262626] p-[clamp(24px,3.6svh,40px)]">{children}</main>
         </div>
       </div>
     </div>
@@ -59,7 +59,7 @@ export function AuthLayout({ intro = LOGIN_INTRO, children }: { intro?: Intro; c
 function FeaturedExperience() {
   return (
     <div className="overflow-clip rounded-xl bg-neutral-900">
-      <img src={designerArtwork} alt="" width={1200} height={675} className="aspect-[740/400] w-full object-cover" />
+      <img src={designerArtwork} alt="" width={1200} height={675} className="aspect-[740/400] max-h-[34svh] w-full object-cover" />
       <div className="flex flex-wrap items-center justify-between gap-3 p-6">
         <p className="text-title-lg whitespace-nowrap text-green-50">생활 가전 제품 디자이너</p>
         <div className="flex gap-2 rounded-[32px] bg-[rgba(207,245,170,0.07)] px-3 py-2">
@@ -129,12 +129,12 @@ export function AuthField({ label, kind, invalid = false, ...input }: FieldProps
   const [visible, setVisible] = useState(false)
   const isPassword = kind === 'password'
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-[clamp(6px,1.1svh,12px)]">
       <label htmlFor={id} className="w-fit text-body-lg text-neutral-300">
         {label}
       </label>
       <div
-        className={`flex h-16 items-center gap-3 rounded-lg border bg-[#202020] px-[18px] transition-colors focus-within:border-neutral-500 ${
+        className={`flex h-[clamp(48px,5.7svh,64px)] items-center gap-3 rounded-lg border bg-[#202020] px-[18px] transition-colors focus-within:border-neutral-500 ${
           invalid ? 'border-error-200 focus-within:border-error-200' : 'border-[#454545]'
         }`}
       >
@@ -204,7 +204,7 @@ export function SubmitButton({ busy, children, outlined = false }: { busy: boole
       type="submit"
       disabled={busy}
       aria-busy={busy || undefined}
-      className={`flex h-[72px] w-full items-center justify-center rounded-xl bg-green-500 px-6 text-headline-md font-semibold text-neutral-900 transition-colors hover:bg-green-400 disabled:cursor-wait disabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
+      className={`flex h-[clamp(56px,6.4svh,72px)] w-full items-center justify-center rounded-xl bg-green-500 px-6 text-headline-md font-semibold text-neutral-900 transition-colors hover:bg-green-400 disabled:cursor-wait disabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
         outlined ? 'border-2 border-[rgba(225,225,225,0.5)]' : ''
       }`}
     >

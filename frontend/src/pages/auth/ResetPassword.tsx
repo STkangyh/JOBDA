@@ -32,7 +32,7 @@ export function ResetPassword() {
   if (done) {
     return (
       <AuthLayout>
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-[clamp(16px,2.9svh,32px)]">
           <CardHeading title="비밀번호를 바꿨어요" body="새 비밀번호로 로그인되어 있어요. 멈춰 있던 경험을 이어가세요." />
           <button
             type="button"
@@ -50,7 +50,7 @@ export function ResetPassword() {
 
   return (
     <AuthLayout>
-      <form onSubmit={submit} className="flex flex-col gap-8">
+      <form onSubmit={submit} className="flex flex-col gap-[clamp(16px,2.9svh,32px)]">
         <div className="flex flex-col gap-4">
           <CardHeading
             title="새 비밀번호를 설정해 주세요"
@@ -68,7 +68,7 @@ export function ResetPassword() {
             </Link>
           )}
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-[clamp(10px,2.1svh,24px)]">
           <AuthField
             label="새 비밀번호"
             kind="password"

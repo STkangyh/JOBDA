@@ -55,7 +55,7 @@ export function SelfAssessment() {
   // 업무 페이지 새 디자인 2217:10818(2026-10-13): 오른쪽 메신저 자리는 비우고 카드 하나에 문항과 제출 버튼을 담는다.
   return (
     <WorkFrame step="자기 평가" sidebar="work" exitStep="self_assessment" flushRight>
-      <WorkPanel className="flex min-w-0 flex-1 flex-col gap-12">
+      <WorkPanel className="flex min-h-0 min-w-0 flex-1 flex-col gap-[clamp(20px,4svh,48px)] overflow-y-auto">
         <div className="flex flex-col gap-3">
           <h1 className="text-headline-lg font-medium text-neutral-900">방금 수행한 업무, 어떠셨나요?</h1>
           <p className="text-body-lg text-neutral-600">학습 과정에 대한 리뷰를 등록해주세요. 솔직한 응답일수록 정확한 직무 이해 리포트를 받을 수 있어요.</p>

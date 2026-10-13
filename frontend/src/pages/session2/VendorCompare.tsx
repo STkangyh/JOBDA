@@ -203,7 +203,7 @@ export function VendorCompare() {
   // 새 업무 페이지 디자인에 이 화면(외주업체 조사)은 아직 없어, 내용은 그대로 두고 업무 화면 틀(2026-10-13)에만 맞췄다.
   return (
     <WorkFrame step={vendorProposed ? '피드백 수정' : '제안서 작성'} sidebar="work" loading={isSubmitting} exitStep="vendor_compare" flushRight>
-            <div className="flex min-w-0 flex-1 flex-col gap-6">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-y-auto">
               {phase === 'research' ? (
                 <>
                   <WorkPanel className="flex flex-col gap-3">
@@ -299,7 +299,7 @@ export function VendorCompare() {
               </div>
             </div>
 
-            <aside className="flex w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
+            <aside className="flex min-h-0 w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
               <WorkNotesCard
                 groups={[
                   { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
@@ -307,7 +307,7 @@ export function VendorCompare() {
                   { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
                 ]}
               />
-              <div className="min-h-[520px] flex-1">
+              <div className="min-h-0 flex-1">
                 <Messenger defaultActive="purchasing" intro={{ persona: 'senior', text: SENIOR_VENDOR_INTRO }} />
               </div>
             </aside>
