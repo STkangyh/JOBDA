@@ -33,7 +33,8 @@ interface WorkSidebarProps {
   onSelect?: Partial<Record<WorkSidebarItem, () => void>>
 }
 
-const DEFAULT_ROUTE: Partial<Record<WorkSidebarItem, string>> = { home: '/', report: '/comprehensive-report' }
+// 앱 안의 홈은 탐색 홈(/explore) — 루트(/)는 로그인 상태별 진입 분기라 온보딩으로 갈 수 있다
+const DEFAULT_ROUTE: Partial<Record<WorkSidebarItem, string>> = { home: '/explore', report: '/comprehensive-report' }
 
 export function WorkSidebar({ active, onSelect = {} }: WorkSidebarProps) {
   const navigate = useNavigate()
@@ -42,7 +43,14 @@ export function WorkSidebar({ active, onSelect = {} }: WorkSidebarProps) {
       aria-label="주 메뉴"
       className="flex h-full w-24 shrink-0 flex-col items-center gap-[clamp(12px,2.2svh,24px)] overflow-y-auto rounded-lg [scrollbar-width:none] bg-[rgba(1,1,1,0.75)] p-5 shadow-gnb backdrop-blur-gnb"
     >
-      <img src={brandLogo} alt="JOB:DA" className="size-[54px] rounded-full object-cover" />
+      <button
+        type="button"
+        onClick={() => navigate('/explore')}
+        aria-label="홈으로"
+        className="size-[54px] shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+      >
+        <img src={brandLogo} alt="" className="size-[54px] rounded-full object-cover" />
+      </button>
       <ul className="flex flex-col items-center gap-[clamp(4px,1.4svh,16px)]">
         {ITEMS.map((item) => {
           const isActive = active === item.id

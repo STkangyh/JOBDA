@@ -105,6 +105,13 @@ describe('App routing', () => {
     expect(await screen.findByText('업무를 이어서 할까요?')).toBeInTheDocument()
   })
 
+  it('the logo at the top left of the GNB goes to the explore home', async () => {
+    const user = userEvent.setup()
+    renderAt('/onboarding')
+    await user.click(await screen.findByRole('button', { name: '홈으로' }))
+    expect(await screen.findByRole('heading', { level: 1, name: '생활 가전 제품 디자이너' })).toBeInTheDocument()
+  })
+
   it('renders Explore at the "/explore" alias too', async () => {
     renderAt('/explore')
     expect(await screen.findByRole('heading', { level: 1, name: '생활 가전 제품 디자이너' })).toBeInTheDocument()

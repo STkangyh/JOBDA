@@ -27,7 +27,8 @@ const ITEMS: { id: SidebarItem; label: string; icon: string }[] = [
 
 // 실제 화면이 있는 목적지만 연결한다(가짜 링크를 만들지 않음). Work는 대응 화면이 아직 없어 표시만 한다.
 const ROUTE: Partial<Record<SidebarItem, string>> = {
-  home: '/',
+  // 루트(/)는 로그인 상태에 따라 온보딩·로그인으로 보내는 진입 분기라, 앱 안의 홈은 탐색 홈(/explore)으로 바로 간다
+  home: '/explore',
   report: '/comprehensive-report',
 }
 
@@ -50,7 +51,14 @@ export function Sidebar({ active = 'home', onSelect, className = '' }: SidebarPr
       className={`relative flex w-24 shrink-0 flex-col items-center justify-center overflow-clip rounded-lg bg-[rgba(44,44,44,0.75)] p-5 shadow-gnb backdrop-blur-gnb ${className}`}
     >
       <div className="absolute top-[22px] left-[22px] flex w-[54px] flex-col gap-6">
-        <img src={brandLogo} alt="JOB:DA" className="size-[54px] rounded-full bg-neutral-800 object-cover" />
+        <button
+          type="button"
+          onClick={() => navigate('/explore')}
+          aria-label="홈으로"
+          className="size-[54px] rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+        >
+          <img src={brandLogo} alt="" className="size-[54px] rounded-full bg-neutral-800 object-cover" />
+        </button>
         {/* 프로필: 로그인 화면이 나오기 전까지는 모양만 둔다(2026-10-13 결정) */}
         <span className="flex size-[54px] items-center justify-center rounded-full bg-green-400 backdrop-blur-panel" aria-hidden>
           <img src={profileIcon} alt="" width={20} height={20} className="size-5" />
