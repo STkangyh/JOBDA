@@ -2,12 +2,48 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import { CoachTour } from './CoachTour'
 import { WorkSidePanel } from './NegotiationPanels'
 import { stageNeighbors, useSession } from '../store/session'
 
 beforeEach(() => {
   localStorage.clear()
   useSession.getState().resetSession()
+})
+
+describe('coach marks', () => {
+  const steps = [
+    { target: 'a', side: 'bottom' as const, title: '첫 단계', body: '첫 설명' },
+    { target: 'b', side: 'left' as const, title: '둘째 단계', body: '둘째 설명' },
+  ]
+
+  it('walks through the steps with Next and is not shown again once finished', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(
+      <>
+        <div data-coach="a" />
+        <div data-coach="b" />
+        <CoachTour id="t" steps={steps} enabled />
+      </>,
+    )
+    expect(screen.getByRole('dialog', { name: '첫 단계' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    expect(screen.getByRole('dialog', { name: '둘째 단계' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    unmount()
+
+    render(<CoachTour id="t" steps={steps} enabled />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('Skip ends the tour right away', async () => {
+    const user = userEvent.setup()
+    render(<CoachTour id="s" steps={steps} enabled />)
+    await user.click(screen.getByRole('button', { name: 'Skip' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(localStorage.getItem('jobda-coach-s')).toBe('1')
+  })
 })
 
 describe('work notes panel', () => {

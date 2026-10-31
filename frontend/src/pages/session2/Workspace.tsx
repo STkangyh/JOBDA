@@ -8,6 +8,7 @@ import { DRAFT_DESCRIPTION, SENIOR_INTRO, FEEDBACK_PASS, FEEDBACK_FAIL } from '.
 import type { PartSpecSize } from '../../types'
 import productPhoto from '../../assets/work/product-photo.jpg'
 import seniorAvatar from '../../assets/work/avatars/senior-large.png'
+import { CoachTour, type CoachStep } from '../../components/CoachTour'
 import { SendRoundButton, ModelAnswerChip } from '../../components/WorkControls'
 import { track, useTrackView } from '../../lib/analytics'
 
@@ -390,13 +391,32 @@ export function Workspace() {
   const remaining = feedbackSessionsRemaining(currentStage, editingFinal)
   // 제출 버튼 로딩 상태 — 버튼뿐 아니라 헤더 로딩 표시도 같이 반응해야 해서 여기(부모)에 둔다.
   const [isSubmitting, setIsSubmitting] = useState(false)
-  // 오른쪽 칸(업무 노트/메신저) — 바깥에서 펼칠 칸·탭을 정할 수 있게 여기서 들고 있다
+  // 오른쪽 칸(업무 노트/메신저) — 코치 마크가 업무 일정·메모장을 짚을 때 펼치려고 여기서 들고 있다
   const [sideMode, setSideMode] = useState<SidePanelMode>('messenger')
   const [notesTab, setNotesTab] = useState<NotesTab>('tasks')
 
+  // Figma 시방서 초안 작성 코치 마크(2349:31979~2350:20643) 문구 원문. "전체화면" 단계는 기능이 아직 없어 뺐다.
+  const tour: CoachStep[] = [
+    { target: 'task', side: 'bottom', title: '업무 지시', body: '지금 해야할 업무와 피드백을 확인할 수 있어요.' },
+    { target: 'work-area', side: 'top', title: '업무 영역', body: '현재 작업 상황을 확인할 수 있어요.' },
+    { target: 'messenger', side: 'left', title: '메신저', body: '업무 관계자와 업무 관련 대화를 나눌 수 있어요.', onEnter: () => setSideMode('messenger') },
+    {
+      target: 'notes',
+      side: 'left',
+      title: '업무 일정',
+      body: '우선순위에 따라 업무 일정을 관리할 수 있어요.',
+      onEnter: () => {
+        setSideMode('notes')
+        setNotesTab('tasks')
+      },
+    },
+    { target: 'notes', side: 'left', title: '메모장', body: '중요한 대화내용을 한눈에 확인할 수 있어요.', onEnter: () => setNotesTab('memo') },
+    { target: 'stage-nav', side: 'bottom', title: '단계 이동 및 종료', body: '전후 단계로 이동하거나 체험을 종료할 수 있어요.', onEnter: () => setSideMode('messenger') },
+  ]
 
   return (
     <WorkFrame step="관계자 협업" sidebar="work" loading={isSubmitting} exitStep="workspace" flushRight>
+      {!draftSubmitted && <CoachTour id="workspace" steps={tour} />}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto">
         <TaskCard editingFinal={editingFinal} remaining={remaining} />
         {editingFinal ? (

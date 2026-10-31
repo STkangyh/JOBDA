@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { DownloadIcon } from '../../components/icons'
 import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
+import { CoachTour, type CoachStep } from '../../components/CoachTour'
 import { useSession } from '../../store/session'
 import specFormReference from '../../assets/illustrations/spec-form-reference.png'
 import limitSampleReference from '../../assets/illustrations/limit-sample-reference.png'
@@ -41,6 +42,15 @@ const VIEWER_CONTENT: Record<SpecDoc, { title: string; description: string; imag
 
 // Figma 업무 페이지 "자료탐색"(2217:10065, 2026-10-13) — 자료함(Library) 화면. 자료 목록 + 미리보기 두 칸.
 // 업무로 넘어가는 버튼이 없어 GNB의 Work를 누르면 업무(시방서 초안)를 시작한다(2026-10-13 결정).
+// 처음 들어오면 코치 마크로 진행 막대·자료함·미리보기를 짚는다(Figma 자료 탐색 코치 마크 2344:18783~2346:19131, 문구 원문).
+// 마지막 "업무 시작" 단계는 디자인에 없어 같은 말풍선으로 덧붙인 초안 문구다 — Work를 눌러야 넘어간다는 안내(2026-10-13 TODO).
+const TOUR: CoachStep[] = [
+  { target: 'progress', side: 'bottom', title: 'Progress Bar', body: '현재 작업 상황을 확인할 수 있어요.' },
+  { target: 'library', side: 'right', title: '자료함', body: '작업에 필요한 양식을 찾을 수 있어요.' },
+  { target: 'preview', side: 'left', title: '미리보기', body: '시방서 작성에 필요한 정보들을 찾을 수 있어요.' },
+  { target: 'gnb-work', side: 'right', title: '업무 시작', body: '자료를 다 살펴봤다면 Work를 눌러 시방서 작성을 시작하세요.' },
+]
+
 export function Materials() {
   const goTo = useSession((s) => s.goTo)
   const [selectedDoc, setSelectedDoc] = useState<SpecDoc>('spec_form')
@@ -59,6 +69,7 @@ export function Materials() {
 
   return (
     <WorkFrame step="자료탐색" sidebar="library" onSidebarSelect={{ work: startWork }} exitStep="materials">
+      <CoachTour id="materials" steps={TOUR} />
       <WorkPanel coach="library" className="flex max-w-[554px] min-w-[360px] flex-1 flex-col gap-6 overflow-y-auto">
         <h1 className="text-title-lg font-semibold text-neutral-500">자료함</h1>
         <ul className="flex flex-col gap-2.5">
