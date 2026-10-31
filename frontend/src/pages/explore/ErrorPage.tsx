@@ -1,30 +1,41 @@
-import illustration from '../../assets/illustrations/illustration-error-window.png'
+import illustration from '../../assets/illustrations/error-window-nobg.png'
 
-// Figma "에러창"(652:29005 계열) — 404/일반 오류 화면. Desktop-98(744:17317)에서
-// 같은 컴포넌트를 다시 실측해보니 이전에 옮겨둔 버전과 두 군데가 달랐음:
-// "Error" 제목이 24px가 아니라 40px였고, 확인 버튼도 밝은 배경이 아니라
-// bg-#2c2c2c(neutral-900)+밝은 텍스트였음(반대로 되어 있었음) — 둘 다 이 실측값으로 정정.
+// Figma 오류 페이지(2217:13356 Dark · 2217:13381 White, 2026-10-31). 반투명 막 위에 에러창 그림·제목·확인 버튼.
+// dark: 어두운 화면(탐색·인증 등) 위, light: 밝은 업무 화면 위. 주소를 잘못 입력했을 때는 dark를 쓴다.
 export function ErrorPage({
   message = '알 수 없는 오류가 발생했습니다.',
+  tone = 'dark',
   onConfirm,
 }: {
   message?: string
+  tone?: 'dark' | 'light'
   onConfirm: () => void
 }) {
+  const dark = tone === 'dark'
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-neutral-900/80 px-4 py-10">
-      <img src={illustration} alt="" loading="lazy" className="w-full max-w-md" />
-      <div className="flex flex-col items-center gap-2">
-        <p className="text-[40px] font-semibold leading-tight text-error-200">Error</p>
-        <p className="text-body-lg font-semibold text-neutral-50">{message}</p>
+    <div
+      role="alert"
+      className={`flex h-svh flex-col items-center justify-center overflow-hidden px-4 ${dark ? 'bg-[#2b2b2b]' : 'bg-neutral-400'}`}
+    >
+      {/* 그림 아래쪽이 제목과 겹치도록(-82px) 붙인다 — Figma 배치 그대로 */}
+      <div className="-mb-[clamp(40px,7.3svh,82px)] aspect-[2/1] w-[min(746px,90vw,66svh)] overflow-hidden">
+        <img src={illustration} alt="" className="size-full object-cover object-bottom" />
       </div>
-      <button
-        type="button"
-        onClick={onConfirm}
-        className="h-[72px] w-[340px] rounded-xl bg-neutral-900 text-2xl font-semibold text-neutral-50 transition-colors hover:bg-neutral-800"
-      >
-        확인
-      </button>
+      <div className="relative flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <p className="text-[40px] leading-[1.2] font-semibold text-error-200">Error</p>
+          <p className={`text-body-lg font-semibold ${dark ? 'text-neutral-75' : 'text-neutral-900'}`}>{message}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onConfirm}
+          className={`h-[72px] w-[340px] max-w-full rounded-xl text-headline-md font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
+            dark ? 'bg-neutral-100 text-neutral-900 hover:bg-neutral-50' : 'bg-neutral-900 text-neutral-75 hover:bg-neutral-800'
+          }`}
+        >
+          확인
+        </button>
+      </div>
     </div>
   )
 }
