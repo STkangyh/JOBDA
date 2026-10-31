@@ -61,6 +61,7 @@ export function WorkSidebar({ active, onSelect = {} }: WorkSidebarProps) {
             <li key={item.id}>
               <button
                 type="button"
+                data-coach={`gnb-${item.id}`}
                 aria-current={isActive ? 'page' : undefined}
                 disabled={!clickable && !isActive}
                 onClick={() => {

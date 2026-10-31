@@ -79,6 +79,7 @@ const emptyVendors = (): VendorOption[] => Array.from({ length: 4 }, emptyVendor
 const initialState = (): SessionState => ({
   sessionId: crypto.randomUUID(),
   currentStage: 'brief',
+  furthestStage: 'brief',
   currentStep: 's1',
   viewedDocs: {},
   askedCapability: false,
@@ -86,6 +87,7 @@ const initialState = (): SessionState => ({
   chatHistory: { senior: [], engineering: [], purchasing: [] },
   disclosedInfo: {},
   savedNotes: [],
+  savedNoteMeta: {},
   draft: emptyDraft(),
   draftParts: Array.from({ length: PART_COUNT }, emptyPartSpec),
   draftSubmitted: false,
@@ -108,7 +110,7 @@ interface SessionActions {
   goTo: (stage: Stage) => void
   viewDoc: (key: string) => void
   sendMessage: (persona: Persona, message: string) => Promise<string>
-  saveNote: (text: string) => void
+  saveNote: (text: string, persona?: Persona) => void
   updateDraftPart: (index: number, fields: Partial<PartSpec>) => void
   setPartAttachment: (index: number, attachment: PartAttachment, fileName?: string | null) => void
   updateDraft: (fields: Partial<SpecDraft>) => void
@@ -239,7 +241,15 @@ export const useSession = create<SessionState & SessionActions>()(
         pushLog(set, get, 'doc_view', { target: key })
       },
 
-      saveNote: (text) => set((s) => (s.savedNotes.includes(text) ? s : { savedNotes: [...s.savedNotes, text] })),
+      saveNote: (text, persona) =>
+        set((s) =>
+          s.savedNotes.includes(text)
+            ? s
+            : {
+                savedNotes: [...s.savedNotes, text],
+                savedNoteMeta: persona ? { ...s.savedNoteMeta, [text]: { persona, t: Date.now() } } : s.savedNoteMeta,
+              },
+        ),
 
       updateDraftPart: (index, fields) =>
         set((s) => ({
@@ -465,6 +475,8 @@ export const useSession = create<SessionState & SessionActions>()(
       migrate: (persistedState) => persistedState as SessionState,
       merge: (persistedState, currentState) => {
         const merged = { ...currentState, ...(persistedState as Partial<SessionState>) }
+        // furthestStage가 생기기 전에 저장된 진행 상태는 지금 단계까지 도달한 것으로 본다
+        if (!(persistedState as Partial<SessionState> | undefined)?.furthestStage) merged.furthestStage = merged.currentStage
         const vendorsShapeOk =
           Array.isArray(merged.vendors) && merged.vendors.length === 4 && merged.vendors.every((v) => typeof v?.location === 'string')
         if (!vendorsShapeOk) {
@@ -491,3 +503,29 @@ function pushLog(
   set((state) => ({ actionLogs: [...state.actionLogs, entry] }))
   track(type, { ...extra, ...trackProps })
 }
+
+// ── 업무 화면 헤더의 이전/다음 단계 이동(◀ ▶, 업무 페이지 새 디자인 2026-10-31) ─────────────
+// 진행 순서. 외주업체 조사는 "외부 업체 탐색"을 고른 경우에만 거친다.
+const STAGE_ORDER: Stage[] = ['brief', 'materials', 'workspace', 'senior_feedback', 'final_feedback', 'vendor_compare', 'self_assessment', 'report']
+
+export function stageSequence(branch: SessionState['branch']): Stage[] {
+  return STAGE_ORDER.filter((s) => s !== 'vendor_compare' || branch === 'outsourcing')
+}
+
+/** 지금 단계 기준으로 ◀ 이전 단계와 ▶ 다음 단계(이미 도달한 범위 안에서만). 없으면 null. */
+export function stageNeighbors(s: Pick<SessionState, 'currentStage' | 'furthestStage' | 'branch'>): { prev: Stage | null; next: Stage | null } {
+  const seq = stageSequence(s.branch)
+  const i = seq.indexOf(s.currentStage)
+  const furthest = Math.max(seq.indexOf(s.furthestStage), i)
+  return {
+    // 브리프로는 돌아가지 않는다(별도 이야기 화면) — 자료탐색이 가장 앞
+    prev: i > 1 ? seq[i - 1] : null,
+    next: i >= 0 && i < furthest ? seq[i + 1] : null,
+  }
+}
+
+// 단계가 앞으로 나아가면 도달 기록을 늘린다(뒤로 이동해서 생긴 변화는 무시).
+useSession.subscribe((state) => {
+  const order = STAGE_ORDER.indexOf(state.currentStage)
+  if (order > STAGE_ORDER.indexOf(state.furthestStage)) useSession.setState({ furthestStage: state.currentStage })
+})

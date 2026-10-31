@@ -2,17 +2,12 @@ import { useState } from 'react'
 import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { Text } from '../../components/Text'
 import { Checkbox } from '../../components/Checkbox'
-import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
+import { WorkSidePanel } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
-import { SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
 import type { VendorOption } from '../../types'
 import { useTrackView } from '../../lib/analytics'
 
-const NOTE_TAGS = {
-  ...SESSION2_NOTE_TAGS,
-  cmf: ['화이트 오크 재질의 흡기구', '목재 접합', '한도 견본 판정표'],
-}
 
 // Figma 823:57101(Desktop-141) "3차 피드백" 배너 실측 — 이전엔 이 문구를 표 기준(납기일/가능
 // 수량/단가 3개)으로 오해해서 VendorOption 자체를 잘못 만들었었다. 실제 표 기준은 아래 ROWS
@@ -300,16 +295,7 @@ export function VendorCompare() {
             </div>
 
             <aside className="flex min-h-0 w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
-              <WorkNotesCard
-                groups={[
-                  { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-                  { label: '제조 제약', tags: NOTE_TAGS.constraints },
-                  { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
-                ]}
-              />
-              <div className="min-h-0 flex-1">
-                <Messenger defaultActive="purchasing" intro={{ persona: 'senior', text: SENIOR_VENDOR_INTRO }} />
-              </div>
+              <WorkSidePanel messenger={{ defaultActive: 'purchasing', intro: { persona: 'senior', text: SENIOR_VENDOR_INTRO } }} />
             </aside>
     </WorkFrame>
   )

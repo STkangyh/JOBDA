@@ -204,6 +204,8 @@ export interface SelfAssessment {
 export interface SessionState {
   sessionId: string
   currentStage: Stage
+  /** 지금까지 도달한 가장 먼 단계 — 업무 화면 헤더의 이전/다음 단계 이동(◀ ▶)이 앞으로 갈 수 있는 한계 */
+  furthestStage: Stage
   currentStep: string
   viewedDocs: Record<string, boolean>
   askedCapability: boolean
@@ -213,6 +215,8 @@ export interface SessionState {
   // Figma 823:53712(Desktop-123) 등 — 메신저에서 관계자 답변에 "답변 내용 노트에 저장" 버튼.
   // 세션1(store/session1.ts)의 savedNotes/saveNote와 같은 발상.
   savedNotes: string[]
+  /** 저장한 답변을 누가·언제 보냈는지 — 업무 노트 메모장 카드 제목("고프로와의 대화")과 시각에 쓴다 */
+  savedNoteMeta: Record<string, { persona: Persona; t: number }>
   draft: SpecDraft
   draftParts: PartSpec[]
   draftSubmitted: boolean

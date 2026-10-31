@@ -5,6 +5,16 @@ import { useSession } from '../store/session'
 import { PERSONA_LABEL, PERSONA_SENDER_NAME, type Persona } from '../types'
 import { track, useTrackView } from '../lib/analytics'
 import { ChatRetentionNotice } from './ChatRetentionNotice'
+import seniorAvatar from '../assets/work/avatars/senior.png'
+import engineeringAvatar from '../assets/work/avatars/engineering.png'
+import purchasingAvatar from '../assets/work/avatars/purchasing.png'
+
+// 관계자 얼굴 — 디자인 시스템 이미지 에셋(2026-10-31). 메신저 칩·받은 말풍선·입력 중 표시에 붙는다.
+const AVATAR: Record<Persona, string> = { senior: seniorAvatar, engineering: engineeringAvatar, purchasing: purchasingAvatar }
+
+function Avatar({ persona, size = 32 }: { persona: Persona; size?: number }) {
+  return <img src={AVATAR[persona]} alt="" width={size} height={size} className="shrink-0 rounded-full bg-neutral-50 object-cover" style={{ width: size, height: size }} />
+}
 
 function formatTime(t: number): string {
   const d = new Date(t)
@@ -16,7 +26,8 @@ function formatTime(t: number): string {
 // 각각 베껴 넣는 대신 여기 하나로 뽑았다. 실제 채팅은 store의 chatHistory/sendMessage(진짜 백엔드
 // apiChat)를 그대로 쓰고, 화면별로 다른 건 기본 활성 탭과 시나리오 인트로 문구뿐이라 props로 받는다.
 
-const PERSONAS: Persona[] = ['engineering', 'purchasing', 'senior']
+// 디자인 순서: 선배 디자이너 → 설계팀 → 구매팀
+const PERSONAS: Persona[] = ['senior', 'engineering', 'purchasing']
 
 interface MessengerProps {
   /** 라운드마다 피드백을 주는 사람이 달라서(1차는 선배 디자이너, 2차는 설계팀) 화면별로 다른 탭을 기본으로 연다. */
@@ -88,9 +99,8 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   }, [history.length, sending, showIntro, failed])
 
   return (
-    // 업무 페이지 새 디자인(2217:10088 등): 화면 오른쪽 끝에 붙은 회색 반투명 패널. 관계자 탭 3개는 디자인에
-    // 없지만 대화 상대를 바꾸는 기능이 필요해 제목 아래 칩으로 남겼다.
-    <section className="flex h-full min-h-0 flex-col gap-2.5 rounded-l-lg bg-[rgba(234,234,234,0.75)] p-8 shadow-[-4px_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[6px]">
+    // 업무 페이지 새 디자인(2342:15295 등, 2026-10-31): 화면 오른쪽 끝에 붙은 회색 반투명 패널, 관계자 칩에 얼굴.
+    <section data-coach="messenger" className="flex h-full min-h-0 flex-col gap-4 rounded-l-lg bg-[rgba(234,234,234,0.75)] p-8 shadow-[-4px_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[6px]">
       <h2 className="text-title-lg font-semibold text-neutral-700">메신저</h2>
       <div className="flex flex-wrap gap-2">
         {PERSONAS.map((p) => {
@@ -99,11 +109,13 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
             <button
               key={p}
               onClick={() => selectTab(p)}
-              className={`flex shrink-0 items-center gap-2 rounded-[80px] border-2 px-3 py-1.5 text-body-md transition-colors ${
-                active === p && !isUnread ? 'border-green-200 bg-green-300 text-green-900' : 'border-neutral-100 bg-green-50 text-neutral-700 hover:bg-green-100'
+              aria-pressed={active === p}
+              className={`flex h-[42px] shrink-0 items-center gap-1 rounded-[80px] border-2 py-[3px] pr-3 pl-[3px] text-body-lg text-neutral-700 drop-shadow-[0_0_8px_rgba(0,0,0,0.04)] transition-colors ${
+                active === p && !isUnread ? 'border-green-200 bg-green-300' : 'border-neutral-100 bg-green-50 hover:bg-green-100'
               }`}
             >
-              {isUnread && <span className="size-2 shrink-0 rounded-full bg-success-200" />}
+              <Avatar persona={p} />
+              {isUnread && <span className="size-2 shrink-0 rounded-full bg-success-200" aria-label="새 메시지" />}
               {PERSONA_LABEL[p]}
             </button>
           )
@@ -118,7 +130,8 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
         <div className="flex min-h-full flex-col justify-end gap-3">
           {showIntro && (
             <div className="flex items-end gap-2 self-start">
-              <div className="flex max-w-[229px] flex-col gap-2 rounded-tl-xl rounded-tr-xl rounded-br-xl bg-neutral-100 px-[18px] py-3">
+              <Avatar persona={intro!.persona} />
+              <div className="flex max-w-[260px] flex-col gap-2 rounded-tl-2xl rounded-tr-2xl rounded-br-2xl bg-neutral-100 px-[18px] py-3">
                 <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
                   {intro!.text}
                 </Text>
@@ -128,7 +141,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
                   </span>
                   <button
                     type="button"
-                    onClick={() => saveNote(intro!.text)}
+                    onClick={() => saveNote(intro!.text, intro!.persona)}
                     disabled={savedNotes.includes(intro!.text)}
                     className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
                   >
@@ -145,11 +158,12 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           )}
           {history.map((m, i) => (
             <div key={i} className={`flex items-end gap-2 ${m.role === 'user' ? 'flex-row-reverse self-end' : 'self-start'}`}>
+              {m.role === 'assistant' && <Avatar persona={active} />}
               <div
-                className={`flex max-w-[229px] flex-col gap-2 px-[18px] py-3 ${
+                className={`flex max-w-[260px] flex-col gap-2 px-[18px] py-3 ${
                   m.role === 'user'
-                    ? 'rounded-tl-xl rounded-tr-xl rounded-bl-xl bg-green-300 text-green-900'
-                    : 'rounded-tl-xl rounded-tr-xl rounded-br-xl bg-neutral-100 text-neutral-700'
+                    ? 'rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl bg-green-300 text-green-900'
+                    : 'rounded-tl-2xl rounded-tr-2xl rounded-br-2xl bg-neutral-100 text-neutral-700'
                 }`}
               >
                 <Text variant="body-md">{m.content}</Text>
@@ -160,7 +174,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
                     </span>
                     <button
                       type="button"
-                      onClick={() => saveNote(m.content)}
+                      onClick={() => saveNote(m.content, active)}
                       disabled={savedNotes.includes(m.content)}
                       className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
                     >
@@ -180,11 +194,12 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
               실측)를 잘 놓쳤다는 피드백 — 다른 관계자 말풍선과 같은 모양(rounded-br-xl 등)의
               점 3개 바운스 애니메이션으로 바꿔서 "지금 뭔가 진행 중"이 시각적으로 분명하게 함. */}
           {sending && (
-            <div className="flex items-end gap-2 self-start">
-              <div className="flex items-center gap-1.5 rounded-br-xl rounded-tl-xl rounded-tr-xl bg-neutral-100 px-4 py-3.5">
-                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '0ms' }} />
-                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '150ms' }} />
-                <span className="size-2 animate-bounce rounded-full bg-neutral-400" style={{ animationDelay: '300ms' }} />
+            <div className="flex items-end gap-2 self-start" role="status" aria-label={`${PERSONA_LABEL[active]} 답변 작성 중`}>
+              <Avatar persona={active} />
+              <div className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-4 py-3">
+                <span className="size-2 animate-bounce rounded-full bg-neutral-600" style={{ animationDelay: '0ms' }} />
+                <span className="size-2 animate-bounce rounded-full bg-neutral-600" style={{ animationDelay: '150ms' }} />
+                <span className="size-2 animate-bounce rounded-full bg-neutral-600" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           )}
@@ -243,63 +258,220 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   )
 }
 
-interface WorkNotesCardProps {
-  groups: { label: string; tags: string[] }[]
+// ── 업무 노트 + 메신저 (업무 페이지 새 디자인 2262:12359 · 2263:16757 · 2262:12350, 디자인 시스템 Component 249, 2026-10-31) ──
+// 오른쪽 칸에서 둘 중 하나만 펼친다. 접힌 쪽은 제목 막대로 남고, 업무 노트 막대에는 남은 할 일 수,
+// 메신저 막대에는 접혀 있는 동안 온 메시지 수를 빨간 배지로 띄운다.
+// 업무 노트는 두 탭: 업무 일정(우선순위가 붙은 할 일 카드, Remove/Done) · 메모장(대화 요약 + 저장한 답변).
+
+export type SidePanelMode = 'messenger' | 'notes'
+export type NotesTab = 'tasks' | 'memo'
+
+interface WorkTask {
+  id: string
+  title: string
+  priority: 1 | 2
+  body: string
 }
 
-// Figma 823:53679 "업무 노트" 패널 — 세션1 store/session1.ts의 NOTE_TAGS와 같은 발상이지만
-// 세션2는 자체 CMF 협상 서사(화이트 오크 흡기구 -> 목재 접합 -> 한도 견본 판정표)가 있어서
-// 화면마다 그룹 내용이 달라진다(특히 CMF 결정 사항은 1차 피드백 전후로 태그가 하나 늘어남).
-export function WorkNotesCard({ groups }: WorkNotesCardProps) {
+// Figma 업무 일정 카드 원문
+const WORK_TASKS: WorkTask[] = [
+  { id: 'write_spec', title: '시방서 작성하기', priority: 1, body: '마루의 CMF 선정 작업이 완료되었어요.\n설계팀 이관을 위한 시방서를 작성해요.' },
+  {
+    id: 'team_meeting',
+    title: '업무 회의',
+    priority: 2,
+    body: '설계팀에 문서를 이관하기 전 디자인팀 안에서 작성한 시방서를 가지고 수정사항을 다같이 확인해요. 2번 미팅룸으로 모이세요.',
+  },
+]
+
+// Figma 메모장 카드 원문 — 체험 전에 있었던 회의 대화 요약(시나리오 자료)
+const SCENARIO_MEMOS = [
+  { title: '고프로와의 대화', time: '10.12.23:11', body: '상하부 하우징은 5000번대 알루미늄,\n스트랩은 가죽으로. 컬러는 미정\n토출구 커버는 목재로. 이것도 아직 미정' },
+  { title: '이프로와의 대화', time: '10.13.23:11', body: '목재는 화이트 오크 원목으로 결정\n부식 방지를 위해 유성 스테인 마감으로' },
+]
+
+type TaskStatus = 'done' | 'removed'
+const TASKS_KEY = 'jobda-work-tasks'
+
+function loadTaskStatus(): Record<string, TaskStatus> {
+  try {
+    return JSON.parse(localStorage.getItem(TASKS_KEY) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
+function Badge({ count, label }: { count: number; label: string }) {
+  if (count <= 0) return null
+  return (
+    <span aria-label={label} className="flex h-8 min-w-8 items-center justify-center rounded-2xl bg-error-200 px-2.5 text-body-lg font-medium text-white">
+      {String(count).padStart(2, '0')}
+    </span>
+  )
+}
+
+const BAR = 'flex h-16 shrink-0 items-center justify-between rounded-l-lg bg-[rgba(234,234,234,0.75)] px-8 text-left text-title-lg font-semibold text-neutral-700 shadow-[-4px_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[6px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-green-700'
+
+function formatMemoTime(t: number) {
+  const d = new Date(t)
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${p(d.getMonth() + 1)}.${p(d.getDate())}.${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
+interface WorkSidePanelProps {
+  messenger: MessengerProps
+  /** 펼칠 칸·탭을 바깥에서 정할 때(예: 코치 마크가 업무 일정/메모장을 짚을 때) */
+  mode?: SidePanelMode
+  onModeChange?: (mode: SidePanelMode) => void
+  tab?: NotesTab
+  onTabChange?: (tab: NotesTab) => void
+}
+
+export function WorkSidePanel({ messenger, mode: modeProp, onModeChange, tab: tabProp, onTabChange }: WorkSidePanelProps) {
+  const [modeState, setModeState] = useState<SidePanelMode>('messenger')
+  const [tabState, setTabState] = useState<NotesTab>('tasks')
+  const mode = modeProp ?? modeState
+  const tab = tabProp ?? tabState
+  const setMode = (m: SidePanelMode) => {
+    setModeState(m)
+    onModeChange?.(m)
+    track('side_panel', { open: m })
+  }
+  const setTab = (t: NotesTab) => {
+    setTabState(t)
+    onTabChange?.(t)
+  }
+
+  const [taskStatus, setTaskStatus] = useState<Record<string, TaskStatus>>(loadTaskStatus)
+  const updateTask = (id: string, status: TaskStatus) => {
+    const next = { ...taskStatus, [id]: status }
+    setTaskStatus(next)
+    track('work_task', { task: id, status })
+    try {
+      localStorage.setItem(TASKS_KEY, JSON.stringify(next))
+    } catch {
+      // 저장소가 막히면 이번 화면에서만 유지
+    }
+  }
+  const visibleTasks = WORK_TASKS.filter((t) => taskStatus[t.id] !== 'removed')
+  const pendingTasks = visibleTasks.filter((t) => taskStatus[t.id] !== 'done').length
+
+  // 메신저가 접혀 있는 동안 도착한 답장 수
+  const chatHistory = useSession((s) => s.chatHistory)
+  const assistantTotal = Object.values(chatHistory).reduce((n, list) => n + list.filter((m) => m.role === 'assistant').length, 0)
+  const [seenTotal, setSeenTotal] = useState(assistantTotal)
+  useEffect(() => {
+    if (mode === 'messenger') setSeenTotal(assistantTotal)
+  }, [mode, assistantTotal])
+  const unread = mode === 'notes' ? assistantTotal - seenTotal : 0
+
   const savedNotes = useSession((s) => s.savedNotes)
-  // 업무 페이지 새 디자인에서는 "업무 노트"가 제목 막대로만 보인다 — 누르면 펼쳐서 기존 내용(태그·저장한 답변)을 보여준다.
-  const [open, setOpen] = useState(false)
+  const savedNoteMeta = useSession((s) => s.savedNoteMeta)
 
   return (
-    <section className="flex shrink-0 flex-col rounded-l-lg bg-[rgba(234,234,234,0.75)] shadow-[-4px_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[6px]">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex h-16 items-center justify-between px-8 text-left text-title-lg font-semibold text-neutral-700 focus-visible:outline-2 focus-visible:outline-green-700"
-      >
-        업무 노트
-        <span aria-hidden className={`text-body-md text-neutral-500 transition-transform ${open ? 'rotate-180' : ''}`}>
-          ▾
-        </span>
-      </button>
-      {open && (
-        <div className="flex max-h-[360px] flex-col gap-5 overflow-y-auto px-8 pb-6">
-          {groups.map((g) => (
-            <div key={g.label} className="flex flex-col gap-2">
-              <Text variant="body-lg" className="text-neutral-600">
-                {g.label}
-              </Text>
-              <div className="flex flex-wrap gap-2">
-                {g.tags.map((tag) => (
-                  <span key={tag} className="rounded-full border-2 border-neutral-100 bg-green-50 px-3 py-1.5 text-body-md text-neutral-700">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      {mode === 'messenger' ? (
+        <button type="button" onClick={() => setMode('notes')} aria-expanded={false} className={BAR}>
+          업무노트
+          <Badge count={pendingTasks} label={`남은 할 일 ${pendingTasks}개`} />
+        </button>
+      ) : (
+        <section data-coach="notes" aria-label="업무 노트" className="flex min-h-0 flex-1 flex-col gap-6 rounded-l-lg bg-[rgba(234,234,234,0.75)] p-8 shadow-[-4px_0_16px_rgba(0,0,0,0.04)] backdrop-blur-[6px]">
+          <div className="flex flex-col gap-4">
+            <button type="button" onClick={() => setMode('messenger')} aria-expanded className="w-fit text-title-lg font-semibold text-neutral-700">
+              업무 노트
+            </button>
+            <div role="tablist" className="flex gap-2">
+              {(
+                [
+                  ['tasks', '업무 일정'],
+                  ['memo', '메모장'],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === id}
+                  onClick={() => setTab(id)}
+                  className={`h-[42px] rounded-[80px] border-2 px-3 text-body-lg text-neutral-700 drop-shadow-[0_0_8px_rgba(0,0,0,0.04)] ${
+                    tab === id ? 'border-green-200 bg-green-300' : 'border-neutral-100 bg-green-50 hover:bg-green-100'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-          ))}
-          {savedNotes.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <Text variant="body-lg" className="text-neutral-600">
-                저장한 답변
-              </Text>
-              <ul className="flex flex-col gap-2">
-                {savedNotes.map((note, i) => (
-                  <li key={i} className="rounded-md bg-neutral-50 px-3 py-2 text-body-md text-neutral-700">
-                    {note}
-                  </li>
+          </div>
+
+          <div role="tabpanel" className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
+            {tab === 'tasks' ? (
+              visibleTasks.length === 0 ? (
+                <p className="text-body-md text-neutral-500">남은 업무 일정이 없어요.</p>
+              ) : (
+                visibleTasks.map((t) => {
+                  const done = taskStatus[t.id] === 'done'
+                  return (
+                    <article key={t.id} className={`overflow-hidden rounded-2xl bg-neutral-100 ${done ? 'opacity-60' : ''}`}>
+                      <div className="flex flex-col gap-2 px-6 pt-6 pb-5">
+                        <h3 className={`text-title-lg font-semibold text-neutral-900 ${done ? 'line-through' : ''}`}>{t.title}</h3>
+                        <span className={`w-fit rounded-md px-2 py-0.5 text-body-md ${t.priority === 1 ? 'bg-error-200 text-white' : 'bg-error-100 text-error-300'}`}>
+                          우선순위 {t.priority}
+                        </span>
+                        <p className="text-body-md whitespace-pre-line text-neutral-600">{t.body}</p>
+                      </div>
+                      <div className="flex bg-neutral-50">
+                        <button type="button" onClick={() => updateTask(t.id, 'removed')} className="h-12 flex-1 text-body-lg font-medium text-neutral-500 hover:text-neutral-700">
+                          Remove
+                        </button>
+                        <button type="button" disabled={done} onClick={() => updateTask(t.id, 'done')} className="h-12 flex-1 text-body-lg font-medium text-neutral-500 hover:text-neutral-700 disabled:text-green-800">
+                          {done ? '완료' : 'Done'}
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })
+              )
+            ) : (
+              <>
+                {SCENARIO_MEMOS.map((m) => (
+                  <article key={m.title} className="flex flex-col gap-4 rounded-2xl bg-neutral-100 px-7 py-6">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h3 className="text-title-lg font-semibold text-neutral-900">{m.title}</h3>
+                      <span className="text-caption-lg text-neutral-500">{m.time}</span>
+                    </div>
+                    <p className="text-body-md whitespace-pre-line text-neutral-600">{m.body}</p>
+                  </article>
                 ))}
-              </ul>
-            </div>
-          )}
-        </div>
+                {/* 메신저에서 "답변 내용 노트에 저장"한 답변 */}
+                {savedNotes.map((note) => {
+                  const meta = savedNoteMeta[note]
+                  return (
+                    <article key={note} className="flex flex-col gap-4 rounded-2xl bg-neutral-100 px-7 py-6">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <h3 className="text-title-lg font-semibold text-neutral-900">{meta ? `${PERSONA_SENDER_NAME[meta.persona]}와의 대화` : '저장한 답변'}</h3>
+                        {meta && <span className="text-caption-lg text-neutral-500">{formatMemoTime(meta.t)}</span>}
+                      </div>
+                      <p className="text-body-md whitespace-pre-line text-neutral-600">{note}</p>
+                    </article>
+                  )
+                })}
+              </>
+            )}
+          </div>
+        </section>
       )}
-    </section>
+
+      {/* 메신저는 접혀도 대화 상대·입력 중인 글이 유지되게 숨기기만 한다 */}
+      <div className={mode === 'messenger' ? 'min-h-0 flex-1' : 'hidden'}>
+        <Messenger {...messenger} />
+      </div>
+      {mode === 'notes' && (
+        <button type="button" onClick={() => setMode('messenger')} aria-expanded={false} className={BAR}>
+          메신저
+          <Badge count={unread} label={`새 메시지 ${unread}개`} />
+        </button>
+      )}
+    </div>
   )
 }

@@ -41,7 +41,6 @@ const VIEWER_CONTENT: Record<SpecDoc, { title: string; description: string; imag
 
 // Figma 업무 페이지 "자료탐색"(2217:10065, 2026-10-13) — 자료함(Library) 화면. 자료 목록 + 미리보기 두 칸.
 // 업무로 넘어가는 버튼이 없어 GNB의 Work를 누르면 업무(시방서 초안)를 시작한다(2026-10-13 결정).
-// TODO(2026-10-13): Work를 누르라고 안내하는 컴포넌트가 디자인에 아직 없다 — 나오면 추가.
 export function Materials() {
   const goTo = useSession((s) => s.goTo)
   const [selectedDoc, setSelectedDoc] = useState<SpecDoc>('spec_form')
@@ -60,7 +59,7 @@ export function Materials() {
 
   return (
     <WorkFrame step="자료탐색" sidebar="library" onSidebarSelect={{ work: startWork }} exitStep="materials">
-      <WorkPanel className="flex max-w-[554px] min-w-[360px] flex-1 flex-col gap-6 overflow-y-auto">
+      <WorkPanel coach="library" className="flex max-w-[554px] min-w-[360px] flex-1 flex-col gap-6 overflow-y-auto">
         <h1 className="text-title-lg font-semibold text-neutral-500">자료함</h1>
         <ul className="flex flex-col gap-2.5">
           {DOC_CATEGORIES.map((cat) => (
@@ -85,7 +84,7 @@ export function Materials() {
         </ul>
       </WorkPanel>
 
-      <WorkPanel className="flex min-h-0 min-w-0 flex-[1.75] flex-col gap-6">
+      <WorkPanel coach="preview" className="flex min-h-0 min-w-0 flex-[1.75] flex-col gap-6">
         <div className="flex items-center gap-2">
           <h2 className="text-title-lg font-semibold text-neutral-500">미리보기</h2>
           {/* 미리보기 중인 참고 자료 내려받기 — 기존 기능 유지(Figma 1341:10735 QA) */}

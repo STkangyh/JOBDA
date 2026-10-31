@@ -1,12 +1,14 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
-import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
+import { WorkSidePanel, type NotesTab, type SidePanelMode } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { PlusIcon } from '../../components/icons'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
-import { DRAFT_DESCRIPTION, SENIOR_INTRO, FEEDBACK_PASS, FEEDBACK_FAIL, SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
+import { DRAFT_DESCRIPTION, SENIOR_INTRO, FEEDBACK_PASS, FEEDBACK_FAIL } from '../../data/session2Scenario'
 import type { PartSpecSize } from '../../types'
-import productImage from '../../assets/illustrations/product-angle-1.png'
+import productPhoto from '../../assets/work/product-photo.jpg'
+import seniorAvatar from '../../assets/work/avatars/senior-large.png'
+import { SendRoundButton, ModelAnswerChip } from '../../components/WorkControls'
 import { track, useTrackView } from '../../lib/analytics'
 
 // 업무 페이지 새 디자인(2026-10-13): 시방서 초안 작성 2217:10088 · 제출 로딩 2217:10180 · 1차 피드백 반영 2217:10277 ·
@@ -36,10 +38,6 @@ const SIZE_FIELDS: { key: keyof PartSpecSize; label: string; unit: string }[] = 
   { key: 'thickness', label: 'Thickness', unit: 't' },
 ]
 
-const NOTE_TAGS = SESSION2_NOTE_TAGS
-const CMF_NOTES_DRAFT = ['화이트 오크 재질의 흡기구', '목재 접합']
-// Figma 823:55090 — 1차 피드백(한도 견본 판정표 요청) 이후 CMF 결정 사항에 태그가 하나 늘어남.
-const CMF_NOTES_FINAL = [...CMF_NOTES_DRAFT, '한도 견본 판정표']
 
 // 업무 노트·메신저 칸 폭(Figma 433px) — 화면 오른쪽 끝에 붙는다
 const SIDE_WIDTH = 'w-[clamp(320px,25vw,433px)]'
@@ -54,7 +52,7 @@ function TaskCard({ editingFinal, remaining }: { editingFinal: boolean; remainin
   // 재승인 후(Figma 2217:10505): 그림·설명 대신 최종본 파일 목록, 1차 피드백은 제목만 남는다.
   if (editingFinal && finalApproved) {
     return (
-      <WorkPanel className="flex flex-col gap-8">
+      <WorkPanel coach="task" className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <h1 className="text-title-lg font-semibold text-green-900">시방서 최종본</h1>
           <ul className="flex flex-col gap-1 text-body-sm text-neutral-700 underline">
@@ -70,30 +68,38 @@ function TaskCard({ editingFinal, remaining }: { editingFinal: boolean; remainin
     )
   }
 
+  // 업무 페이지 새 디자인(2342:15295, 2026-10-31): 왼쪽에 요청한 선배 디자이너 얼굴과 지시, 오른쪽에 제품 사진.
   return (
-    <WorkPanel className="flex shrink-0 flex-col gap-[clamp(12px,2svh,24px)]">
-      <h1 className="text-title-lg font-semibold text-neutral-700">시방서 초안 작성하기</h1>
-      <div className="flex gap-6">
-        <img src={productImage} alt="" className="h-[clamp(120px,25svh,280px)] w-[clamp(160px,22vw,376px)] shrink-0 rounded-2xl bg-neutral-100 object-cover" />
-        <div className="flex min-h-[clamp(120px,25svh,280px)] min-w-0 flex-1 flex-col justify-between gap-[clamp(12px,2svh,24px)]">
-          <p className="text-title-lg text-neutral-700">{DRAFT_DESCRIPTION}</p>
-          {editingFinal && (
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap items-end justify-between gap-2">
-                <h2 className="text-title-lg font-semibold text-green-900">1차 피드백</h2>
-                <FeedbackRemainingBadge remaining={remaining} />
-              </div>
-              <p className="bg-green-200 px-3 py-6 text-body-lg whitespace-pre-line text-neutral-700">{limitSampleAttached ? FEEDBACK_PASS : FEEDBACK_FAIL}</p>
-            </div>
-          )}
+    <WorkPanel coach="task" className="flex shrink-0 gap-[clamp(24px,3.7vw,64px)]">
+      <div className="flex min-w-0 flex-1 flex-col gap-[clamp(12px,2svh,24px)]">
+        <h1 className="text-title-lg font-semibold text-neutral-700">시방서 초안 작성하기</h1>
+        <div className="flex gap-6">
+          <img src={seniorAvatar} alt="선배 디자이너 고프로" width={96} height={96} className="size-[clamp(64px,8.6svh,96px)] shrink-0 rounded-full bg-neutral-50 object-cover" />
+          <p className="min-w-0 flex-1 text-title-lg text-neutral-700">{DRAFT_DESCRIPTION}</p>
         </div>
+        {editingFinal && (
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <h2 className="text-title-lg font-semibold text-green-900">1차 피드백</h2>
+              <FeedbackRemainingBadge remaining={remaining} />
+            </div>
+            <p className="bg-green-200 px-3 py-6 text-body-lg whitespace-pre-line text-neutral-700">{limitSampleAttached ? FEEDBACK_PASS : FEEDBACK_FAIL}</p>
+          </div>
+        )}
       </div>
+      <img
+        src={productPhoto}
+        alt="탁상용 공기청정기 디자인 확정안"
+        width={880}
+        height={660}
+        className="aspect-[440/328] h-[clamp(140px,29svh,328px)] w-auto shrink-0 self-start rounded-2xl bg-neutral-100 object-cover"
+      />
     </WorkPanel>
   )
 }
 
 const FIELD_BOX = 'flex h-14 min-w-14 items-center rounded-[4px] bg-green-50 px-[15px] shadow-[inset_0_0_4px_2px_rgba(0,0,0,0.04)]'
-const FIELD_INPUT = 'min-w-0 flex-1 bg-transparent text-title-lg font-semibold text-neutral-700 placeholder:font-normal placeholder:text-neutral-500 focus:outline-none'
+const FIELD_INPUT = 'min-w-0 flex-1 bg-transparent text-title-lg text-neutral-700 placeholder:text-neutral-400 focus:outline-none'
 
 function FieldRow({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -155,21 +161,6 @@ function PartChips({ activeIndex, onSelect }: { activeIndex: number; onSelect?: 
   )
 }
 
-function SubmitButton({ busy, disabled, onClick, children }: { busy: boolean; disabled: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled || busy}
-      className={`flex h-[82px] w-[280px] shrink-0 items-center justify-center rounded-xl px-3 text-headline-md font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
-        busy ? 'cursor-wait bg-[#9fbf80] text-green-50' : 'bg-green-500 text-neutral-900 hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50'
-      }`}
-    >
-      {busy ? '로딩 중...' : children}
-    </button>
-  )
-}
-
 const INSTRUCTION = '업무 결정 사항과 주어진 리소스를 고려해서 부품별 시방서 초안을 작성해주세요.'
 
 // 1차 피드백 이후 최종본 수정. 부품 칩은 탭이 아니라 표시(첫 번째 강조), 필드는 초안과 같다.
@@ -207,32 +198,34 @@ function FinalSpecCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boolea
   }
 
   return (
-    <WorkPanel className="flex flex-col gap-8">
-      <div className="flex items-start justify-between gap-6">
+    <WorkPanel coach="work-area" className="flex flex-col gap-[clamp(20px,4svh,48px)]">
+      <div className="flex items-end justify-between gap-6">
         <div className="flex min-w-0 flex-col gap-4">
           <h2 className="text-title-lg font-semibold text-neutral-700">{finalApproved ? '최종적인 시방서 사양을 인계 전 확인하세요.' : INSTRUCTION}</h2>
           <PartChips activeIndex={0} />
         </div>
-        <SubmitButton busy={isSubmitting} disabled={!finalApproved && requiredMissing} onClick={handleClick}>
-          {finalApproved ? '시방서 인계' : '수정안 제출'}
-        </SubmitButton>
+        <div className="flex shrink-0 items-center gap-2">
+          <ModelAnswerChip />
+          <SendRoundButton label={finalApproved ? '시방서 인계' : '수정안 제출'} disabled={(!finalApproved && requiredMissing) || isSubmitting} onClick={handleClick} />
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
         <FieldRow label="소재">
-          <TextField label="소재" value={final.material} onChange={(v) => updateFinal({ material: v })} placeholder="예: 화이트 오크 원목" />
+          <TextField label="소재" value={final.material} onChange={(v) => updateFinal({ material: v })} placeholder="ex) 자작나무 합판" />
         </FieldRow>
         <FieldRow label="컬러">
           <div className="flex flex-1 items-center gap-3">
             {/* 첨부된 파일명은 컬러 입력창 안에 컬러값과 나란히 표시한다(Figma "Panton 0000" 자리) */}
             <div className={`${FIELD_BOX} flex-1 gap-2.5`}>
-              <input value={final.color} onChange={(e) => updateFinal({ color: e.target.value })} placeholder="예: 오크 내추럴" aria-label="컬러" className={FIELD_INPUT} />
+              <input value={final.color} onChange={(e) => updateFinal({ color: e.target.value })} placeholder="ex) 729티크" aria-label="컬러" className={FIELD_INPUT} />
+              {!final.limitSampleAttached && <span aria-hidden className="w-1/2 shrink-0 truncate text-title-lg text-neutral-400">ex) 한도 견본 판정표.docs</span>}
               {final.limitSampleAttached && (
                 <button
                   type="button"
                   onClick={() => updateFinal({ limitSampleAttached: false, limitSampleFileName: null })}
                   title="클릭하면 첨부 제거"
-                  className="max-w-[50%] shrink-0 truncate text-title-lg font-semibold text-neutral-500 underline hover:text-neutral-600"
+                  className="w-1/2 shrink-0 truncate text-left text-title-lg text-neutral-700 underline hover:text-neutral-900"
                 >
                   {final.limitSampleFileName ?? '한도 견본 판정표.docs'}
                 </button>
@@ -250,13 +243,13 @@ function FinalSpecCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boolea
           </div>
         </FieldRow>
         <FieldRow label="마감">
-          <TextField label="마감" value={final.finish} onChange={(v) => updateFinal({ finish: v })} placeholder="예: 오일 마감" />
+          <TextField label="마감" value={final.finish} onChange={(v) => updateFinal({ finish: v })} placeholder="ex) 유성 스테인 코팅" />
         </FieldRow>
         <FieldRow label="사이즈">
           <SizeFields size={final.size} onChange={(size) => updateFinal({ size })} />
         </FieldRow>
-        <FieldRow label="제작 방식">
-          <TextField label="제작 방식" value={final.method} onChange={(v) => updateFinal({ method: v })} placeholder="예: 오크 원목 스테이브 접합" />
+        <FieldRow label="생산 방식">
+          <TextField label="생산 방식" value={final.method} onChange={(v) => updateFinal({ method: v })} placeholder="ex) CNC 가공" />
         </FieldRow>
       </div>
     </WorkPanel>
@@ -307,31 +300,33 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
   }
 
   return (
-    <WorkPanel className="flex flex-col gap-8">
-      <div className="flex items-start justify-between gap-6">
+    <WorkPanel coach="work-area" className="flex flex-col gap-[clamp(20px,4svh,48px)]">
+      <div className="flex items-end justify-between gap-6">
         <div className="flex min-w-0 flex-col gap-4">
           <h2 className="text-title-lg font-semibold text-neutral-700">{INSTRUCTION}</h2>
           <PartChips activeIndex={activeIndex} onSelect={selectTab} />
         </div>
-        <SubmitButton busy={isSubmitting} disabled={requiredMissing} onClick={handleSubmit}>
-          초안 제출
-        </SubmitButton>
+        <div className="flex shrink-0 items-center gap-2">
+          <ModelAnswerChip />
+          <SendRoundButton label="초안 제출" disabled={requiredMissing || isSubmitting} onClick={handleSubmit} />
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
         <FieldRow label="소재">
-          <TextField label="소재" value={part.material} onChange={(v) => updateDraftPart(activeIndex, { material: v })} placeholder="예: 화이트 오크 원목" />
+          <TextField label="소재" value={part.material} onChange={(v) => updateDraftPart(activeIndex, { material: v })} placeholder="ex) 자작나무 합판" />
         </FieldRow>
         <FieldRow label="컬러">
           <div className="flex flex-1 items-center gap-3">
             <div className={`${FIELD_BOX} flex-1 gap-2.5`}>
-              <input value={part.color} onChange={(e) => updateDraftPart(activeIndex, { color: e.target.value })} placeholder="예: 오크 내추럴" aria-label="컬러" className={FIELD_INPUT} />
+              <input value={part.color} onChange={(e) => updateDraftPart(activeIndex, { color: e.target.value })} placeholder="ex) 729티크" aria-label="컬러" className={FIELD_INPUT} />
+              {!part.attachment && <span aria-hidden className="w-1/2 shrink-0 truncate text-title-lg text-neutral-400">ex) 한도 견본 판정표.docs</span>}
               {part.attachment && (
                 <button
                   type="button"
                   onClick={() => setPartAttachment(activeIndex, null)}
                   title="클릭하면 첨부 제거"
-                  className="max-w-[50%] shrink-0 truncate text-title-lg font-semibold text-neutral-500 underline hover:text-neutral-600"
+                  className="w-1/2 shrink-0 truncate text-left text-title-lg text-neutral-700 underline hover:text-neutral-900"
                 >
                   {part.attachmentFileName ?? (part.attachment === 'colorChip' ? '컬러칩.jpg' : '마루 한도 견본 판정표.docs')}
                 </button>
@@ -363,14 +358,14 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
           </div>
         </FieldRow>
         <FieldRow label="마감">
-          <TextField label="마감" value={part.finish} onChange={(v) => updateDraftPart(activeIndex, { finish: v })} placeholder="예: 오일 마감" />
+          <TextField label="마감" value={part.finish} onChange={(v) => updateDraftPart(activeIndex, { finish: v })} placeholder="ex) 유성 스테인 코팅" />
         </FieldRow>
         <FieldRow label="사이즈">
           <SizeFields size={part.size} onChange={(size) => updateDraftPart(activeIndex, { size })} />
         </FieldRow>
-        {/* Figma 새 디자인은 이 줄 라벨이 "외주업체"지만, 저장·평가 항목은 제작 방식이라 라벨을 유지했다(확인 필요). */}
-        <FieldRow label="제작 방식">
-          <TextField label="제작 방식" value={part.method} onChange={(v) => updateDraftPart(activeIndex, { method: v })} placeholder="예: CNC 가공" />
+        {/* 라벨은 디자인 시스템(2026-10-31)대로 "생산 방식" — 저장·평가 항목은 그대로 제작 방식(method) */}
+        <FieldRow label="생산 방식">
+          <TextField label="생산 방식" value={part.method} onChange={(v) => updateDraftPart(activeIndex, { method: v })} placeholder="ex) CNC 가공" />
         </FieldRow>
         {/* 새 디자인에는 없지만 직무 리포트의 "이해도"가 부품별 선택 근거 작성 여부로 계산돼 남겨 둔다 */}
         <FieldRow label="선택 근거">
@@ -395,6 +390,10 @@ export function Workspace() {
   const remaining = feedbackSessionsRemaining(currentStage, editingFinal)
   // 제출 버튼 로딩 상태 — 버튼뿐 아니라 헤더 로딩 표시도 같이 반응해야 해서 여기(부모)에 둔다.
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // 오른쪽 칸(업무 노트/메신저) — 바깥에서 펼칠 칸·탭을 정할 수 있게 여기서 들고 있다
+  const [sideMode, setSideMode] = useState<SidePanelMode>('messenger')
+  const [notesTab, setNotesTab] = useState<NotesTab>('tasks')
+
 
   return (
     <WorkFrame step="관계자 협업" sidebar="work" loading={isSubmitting} exitStep="workspace" flushRight>
@@ -408,16 +407,7 @@ export function Workspace() {
       </div>
 
       <aside className={`flex min-h-0 ${SIDE_WIDTH} shrink-0 flex-col gap-4`}>
-        <WorkNotesCard
-          groups={[
-            { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-            { label: '제조 제약', tags: NOTE_TAGS.constraints },
-            { label: 'CMF 결정 사항', tags: editingFinal ? CMF_NOTES_FINAL : CMF_NOTES_DRAFT },
-          ]}
-        />
-        <div className="min-h-0 flex-1">
-          <Messenger defaultActive="senior" intro={{ persona: 'senior', text: SENIOR_INTRO }} />
-        </div>
+        <WorkSidePanel messenger={{ defaultActive: 'senior', intro: { persona: 'senior', text: SENIOR_INTRO } }} mode={sideMode} onModeChange={setSideMode} tab={notesTab} onTabChange={setNotesTab} />
       </aside>
     </WorkFrame>
   )

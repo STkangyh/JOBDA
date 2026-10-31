@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { WarningIcon } from '../../components/icons'
 import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
-import { Messenger, WorkNotesCard } from '../../components/NegotiationPanels'
+import { ModelAnswerChip, SendRoundButton } from '../../components/WorkControls'
+import { WorkSidePanel } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
-import { SESSION2_NOTE_TAGS } from '../../data/session2Scenario'
 import type { Branch } from '../../types'
 
 // 업무 페이지 새 디자인 2217:10722(2026-10-13): 위 카드(최종본 파일 + 2차 피드백), 아래 카드(수정 방향 3지선다 + 근거 + 제출 버튼).
@@ -14,10 +14,6 @@ import type { Branch } from '../../types'
 // (1184:12112 "image 244" 참고) — branch_select 화면(BranchSelect.tsx)은 이제 이 화면을 거치지
 // 않고는 도달하지 않지만, Stage enum(types.ts)은 다른 에이전트들이 동시에 건드릴 수 있어 그대로
 // 두고 SCREENS 매핑도 남겨둠(직접 URL/StageJumper로는 여전히 열람 가능).
-const NOTE_TAGS = {
-  ...SESSION2_NOTE_TAGS,
-  cmf: ['화이트 오크 재질의 흡기구', '목재 접합', '한도 견본 판정표'],
-}
 
 interface ChoiceOption {
   branch: Branch
@@ -130,18 +126,13 @@ export function FinalFeedback() {
         </WorkPanel>
 
         <WorkPanel className="flex flex-col gap-8">
-          <div className="flex items-start justify-between gap-6">
+          {/* 새 디자인(2266:14344): 제목 아래 모범답안 칩 + 보내기 버튼. 보내기 동작 이름은 고른 방향에 맞춘다. */}
+          <div className="flex flex-col gap-4">
             <h2 className="text-title-lg font-semibold text-neutral-700">수정 방향성을 선택하세요.</h2>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!canSubmit || isSubmitting}
-              className={`flex h-[82px] w-[280px] shrink-0 items-center justify-center rounded-xl px-3 text-headline-md font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
-                isSubmitting ? 'cursor-wait bg-[#9fbf80] text-green-50' : 'bg-green-500 text-neutral-900 hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50'
-              }`}
-            >
-              {isSubmitting ? '로딩 중...' : submitLabel}
-            </button>
+            <div className="flex items-center gap-2">
+              <ModelAnswerChip />
+              <SendRoundButton label={submitLabel} disabled={!canSubmit || isSubmitting} onClick={handleSubmit} />
+            </div>
           </div>
 
           <div className="flex flex-col gap-2.5">
@@ -192,16 +183,7 @@ export function FinalFeedback() {
       </div>
 
       <aside className="flex min-h-0 w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
-        <WorkNotesCard
-          groups={[
-            { label: '사용자 요구', tags: NOTE_TAGS.userNeeds },
-            { label: '제조 제약', tags: NOTE_TAGS.constraints },
-            { label: 'CMF 결정 사항', tags: NOTE_TAGS.cmf },
-          ]}
-        />
-        <div className="min-h-0 flex-1">
-          <Messenger defaultActive="engineering" />
-        </div>
+        <WorkSidePanel messenger={{ defaultActive: 'engineering' }} />
       </aside>
     </WorkFrame>
   )
