@@ -191,12 +191,19 @@ function computeFindings(state: SessionState): Finding[] {
   const add = (code: FindingCode, evidence: Record<string, unknown> = {}) => findings.push({ code, evidence })
 
   if (!specComplete(state.final)) add('spec_field_missing')
-  if (!state.draft.limitSampleAttached) add('limit_sample_missing_in_draft')
+
+  // 기획 확정(2026-11-01): 잘한 행동과 아쉬운 행동을 짝으로 둔다. 한도 견본·사내 생산 가능
+  // 여부·생산 단가·발주 일정 네 가지는 챙겼으면 강점, 안 챙겼으면 주의점/놓친 요소로 간다.
+  if (state.draft.limitSampleAttached) add('limit_sample_attached_in_draft')
+  else add('limit_sample_missing_in_draft')
 
   if (state.askedCapability) add('asked_capability_before_final')
   else add('capability_never_asked')
 
-  if (!state.askedBudget) add('budget_never_asked')
+  // budget_never_asked 는 code 이름만 유지하고 뜻이 바뀌었다 — 예산 상한값을 두지 않기로 해서
+  // "상한을 지켰는가"가 아니라 "구매팀에 생산 단가 영향을 확인했는가"로 본다.
+  if (state.askedBudget) add('cost_impact_checked')
+  else add('budget_never_asked')
 
   if (state.branch === 'outsourcing') {
     const validVendors = state.vendors.filter(
@@ -211,12 +218,14 @@ function computeFindings(state: SessionState): Finding[] {
         v.unitPrice &&
         v.capacity,
     )
-    if (validVendors.length >= 3) add('vendor_compared_three')
-    else if (state.vendorSubmitted) add('vendor_criteria_incomplete')
+    // 업체 3사 비교는 온보딩 요구사항 화면에서 "선택사항"이라 해낸 것 자체를 강점으로 세지
+    // 않는다(기획 확정). 제출했는데 비교 항목이 덜 채워졌을 때만 주의점으로 본다.
+    if (validVendors.length < 3 && state.vendorSubmitted) add('vendor_criteria_incomplete')
   }
 
-  if (state.revisitCount > 0) add('revisited_after_branch')
-  if (state.branch === 'wood_dropped') add('concept_abandoned')
+  // 분기 후 재작성(revisited_after_branch)과 목재 포기(concept_abandoned)는 평가에서 뺐다.
+  // 재작성 자체보다 1차 피드백에서 무엇이 걸렸는지가 중요하고, 목재 포기는 화면상 정상
+  // 선택지라 그 자체로 아쉬운 점이 아니라는 기획 판단.
 
   // vendorNotes 같은 전용 자유 입력 필드가 UI에 없으므로(Figma 823:54925엔 그런 필드가 없음),
   // askedCapability/askedBudget과 같은 패턴으로 실제 대화 로그에서 사용자가 보낸 메시지 중
@@ -224,7 +233,8 @@ function computeFindings(state: SessionState): Finding[] {
   const deadlineMentioned = Object.values(state.chatHistory).some((messages) =>
     messages.some((m) => m.role === 'user' && /12일|일정|납기/.test(m.content)),
   )
-  if (!deadlineMentioned) add('deadline_margin_ignored')
+  if (deadlineMentioned) add('deadline_margin_considered')
+  else add('deadline_margin_ignored')
 
   return findings
 }
