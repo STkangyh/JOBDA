@@ -1,4 +1,6 @@
 import { useSession } from '../store/session'
+import { useToast } from '../components/Toast'
+import { track } from '../lib/analytics'
 import { useSession1 } from '../store/session1'
 import { Sidebar } from '../components/Sidebar'
 import { Text } from '../components/Text'
@@ -120,21 +122,26 @@ function ProcessFlow({ active }: { active: number[] }) {
   )
 }
 
-function NextSuggestion({ label }: { label: string }) {
+// 연결할 화면이 아직 없어 누르면 준비 중 안내를 띄운다(2026-11-02 결정)
+function NextSuggestion({ label, onSelect }: { label: string; onSelect: () => void }) {
   return (
-    <div className="flex h-[92px] items-center justify-between gap-3 rounded-xl bg-neutral-900 p-6">
-      <p className="text-title-lg font-semibold text-neutral-200">{label}</p>
-      {/* 연결할 화면이 아직 없어 표시만 한다 */}
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex h-[92px] items-center justify-between gap-3 rounded-xl bg-neutral-900 p-6 text-left transition-colors hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+    >
+      <span className="text-title-lg font-semibold text-neutral-200">{label}</span>
       <span className="flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[rgba(179,179,179,0.25)] bg-[rgba(142,142,142,0.5)]" aria-hidden>
         <img src={arrowIcon} alt="" width={24} height={24} className="size-6 rotate-180" />
       </span>
-    </div>
+    </button>
   )
 }
 
 export function ComprehensiveReport() {
   const s1Report = useSession1((s) => s.report)
   const s2Report = useSession((s) => s.report)
+  const { show: showToast, toast } = useToast()
 
   if (!s2Report) {
     return <ComprehensiveReportPending />
@@ -149,7 +156,6 @@ export function ComprehensiveReport() {
   ].filter((g) => g.length > 0)
 
   const profile = s1Report ? averageProfile(s1Report.profile, s2Report.profile) : s2Report.profile
-  const burdenNotes = [s1Report?.burdenNote, s2Report.burdenNote].filter(Boolean)
   const activeSteps = s1Report ? [SESSION1_STEP_INDEX, SESSION2_STEP_INDEX] : [SESSION2_STEP_INDEX]
 
   return (
@@ -214,29 +220,25 @@ export function ComprehensiveReport() {
           </div>
         </section>
 
-        {/* 부담 기록은 새 디자인에 자리가 없지만 기록된 경우에만 나오는 내용이라 진행 과정 아래에 남긴다 */}
-        {burdenNotes.length > 0 && (
-          <section className="flex flex-col gap-3 rounded-lg bg-neutral-900 p-6">
-            <SectionHeading>부담 기록</SectionHeading>
-            {burdenNotes.map((note, i) => (
-              <p key={i} className="text-title-lg text-green-500">
-                “{note}”
-              </p>
-            ))}
-          </section>
-        )}
-
         <section className="flex flex-col gap-3">
           <div className="px-6">
             <SectionHeading>다음 탐색 제안</SectionHeading>
           </div>
           <div className="grid grid-cols-4 gap-[18px]">
             {NEXT_EXPLORATIONS.map((label) => (
-              <NextSuggestion key={label} label={label} />
+              <NextSuggestion
+                key={label}
+                label={label}
+                onSelect={() => {
+                  track('next_exploration', { target: label })
+                  showToast('준비 중인 기능이에요.')
+                }}
+              />
             ))}
           </div>
         </section>
       </main>
+      {toast}
     </div>
   )
 }
