@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import sceneWelcome from '../../assets/illustrations/session2-brief-1-welcome.png'
 import sceneProduct from '../../assets/illustrations/session2-brief-2-product.png'
@@ -8,6 +8,7 @@ import sceneFlow from '../../assets/illustrations/session2-brief-6-flow.png'
 import sceneCollaborators from '../../assets/illustrations/session2-brief-7-collaborators.png'
 import { ChapterProgress, DialogueBox, GlassChipButton, RoundArrowButton } from '../../components/StoryControls'
 import { useSession } from '../../store/session'
+import { ExitConfirm } from '../../components/ExitConfirm'
 import { track, useTrackView } from '../../lib/analytics'
 
 // Figma 라벨 원문은 "Misson" — 오타라 Mission으로 고침(2026-10-12 확인).
@@ -65,10 +66,16 @@ export function Brief() {
     return () => window.clearTimeout(id)
   }, [skipping, goTo])
 
-  // UT의 "명시적 종료" — 관리자 페이지에서 세션 상태가 '명시적 종료'로 집계된다. 확인 창 여부는 팀 논의 후 결정(보류).
+  // UT의 "명시적 종료" — 관리자 페이지에서 세션 상태가 '명시적 종료'로 집계된다.
+  // 업무 화면 ✕와 같이 확인 창에서 "나가기"를 눌렀을 때만 기록한다(2026-11-02).
+  const [confirmExit, setConfirmExit] = useState(false)
+  const stay = useCallback(() => {
+    track('exit_confirm', { step: 'brief', action: 'stay' })
+    setConfirmExit(false)
+  }, [])
   const exit = () => {
     track('session_exit', { step: 'brief', scene: index + 1 })
-    navigate('/')
+    navigate('/explore')
   }
 
   useEffect(() => {
@@ -104,7 +111,13 @@ export function Brief() {
 
       <div className="absolute top-0 right-0 flex items-center gap-3 px-8 pt-[54px]">
         {!skipping && (
-          <GlassChipButton tone="exit" onClick={exit}>
+          <GlassChipButton
+            tone="exit"
+            onClick={() => {
+              track('exit_confirm', { step: 'brief', action: 'open' })
+              setConfirmExit(true)
+            }}
+          >
             Exit
           </GlassChipButton>
         )}
@@ -131,6 +144,7 @@ export function Brief() {
           {index + 1} / {SCENES.length}
         </p>
       </div>
+      <ExitConfirm open={confirmExit} onStay={stay} onLeave={exit} />
     </div>
   )
 }

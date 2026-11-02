@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { CoachTour } from './CoachTour'
 import { WorkSidePanel } from './NegotiationPanels'
-import { ExpandableArea } from './WorkFrame'
+import { ExpandableArea, WorkFrame } from './WorkFrame'
 import { signOut } from '../lib/auth'
 import { ProfileMenu } from './ProfileMenu'
 import { maskEmail } from '../lib/auth'
@@ -183,6 +183,25 @@ describe('job understanding profile', () => {
 })
 
 describe('leaving and logging out', () => {
+  it('asks before leaving a task screen and only leaves on 나가기', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/session2']}>
+        <Routes>
+          <Route path="/session2" element={<WorkFrame step="관계자 협업" sidebar="work" exitStep="workspace"><p>업무 화면</p></WorkFrame>} />
+          <Route path="/explore" element={<p>탐색 홈</p>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await user.click(screen.getByRole('button', { name: '업무 나가기' }))
+    await user.click(screen.getByRole('button', { name: '계속하기' }))
+    expect(screen.getByText('업무 화면')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '업무 나가기' }))
+    await user.click(screen.getByRole('button', { name: '나가기' }))
+    expect(screen.getByText('탐색 홈')).toBeInTheDocument()
+  })
+
   it('logging out clears this browser\'s progress and first-visit tips so the next person starts fresh', async () => {
     useSession.getState().goTo('final_feedback')
     localStorage.setItem('jobda-coach-workspace', '1')

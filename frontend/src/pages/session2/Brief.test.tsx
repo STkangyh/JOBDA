@@ -14,7 +14,7 @@ function renderBrief() {
     <MemoryRouter initialEntries={['/session2']}>
       <Routes>
         <Route path="/session2" element={<Brief />} />
-        <Route path="/" element={<p>홈 화면</p>} />
+        <Route path="/explore" element={<p>홈 화면</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -79,11 +79,18 @@ describe('session2 story brief', () => {
     expect(useSession.getState().currentStage).toBe('materials')
   })
 
-  it('Exit records an explicit session exit and goes home', async () => {
+  it('Exit asks first: 계속하기 stays without recording an exit, 나가기 records it and goes home', async () => {
     const user = userEvent.setup()
     renderBrief()
     await user.keyboard('{ArrowRight}{ArrowRight}')
     await user.click(screen.getByRole('button', { name: 'Exit' }))
+    expect(screen.getByRole('alertdialog', { name: '체험을 그만둘까요?' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '계속하기' }))
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(calls('session_exit')).toEqual([])
+
+    await user.click(screen.getByRole('button', { name: 'Exit' }))
+    await user.click(screen.getByRole('button', { name: '나가기' }))
     expect(calls('session_exit')).toEqual([{ step: 'brief', scene: 3 }])
     expect(screen.getByText('홈 화면')).toBeInTheDocument()
   })

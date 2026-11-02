@@ -1,10 +1,11 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import closeIcon from '../assets/work/close.svg'
 import { Indicator } from './Indicator'
 import { WorkSidebar, type WorkSidebarItem } from './WorkSidebar'
 import { ArrowBackIosIcon } from './icons'
 import { LoadingSpinner } from './LoadingSpinner'
+import { ExitConfirm } from './ExitConfirm'
 import { stageNeighbors, useSession } from '../store/session'
 import { track } from '../lib/analytics'
 
@@ -32,9 +33,19 @@ export function WorkFrame({ step, sidebar, onSidebarSelect, loading = false, exi
   const navigate = useNavigate()
 
   // 브리프 Exit와 같은 "명시적 종료" — 관리자 페이지에서 세션 상태가 '명시적 종료'로 집계된다.
+  // 실수로 누른 것까지 종료로 잡히지 않게 확인 창에서 "나가기"를 눌렀을 때만 기록한다(2026-11-02).
+  const [confirmExit, setConfirmExit] = useState(false)
+  const askExit = () => {
+    track('exit_confirm', { step: exitStep, action: 'open' })
+    setConfirmExit(true)
+  }
+  const stay = useCallback(() => {
+    track('exit_confirm', { step: exitStep, action: 'stay' })
+    setConfirmExit(false)
+  }, [exitStep])
   const exit = () => {
     track('session_exit', { step: exitStep })
-    navigate('/')
+    navigate('/explore')
   }
 
   return (
@@ -52,7 +63,7 @@ export function WorkFrame({ step, sidebar, onSidebarSelect, loading = false, exi
           {loading && <LoadingSpinner />}
           <div data-coach="stage-nav" className="flex items-center gap-3">
             {stageNav && <StageNav disabled={loading} />}
-            <button type="button" onClick={exit} aria-label="업무 나가기" className="size-14 shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-green-700">
+            <button type="button" onClick={askExit} aria-label="업무 나가기" className="size-14 shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-green-700">
               <img src={closeIcon} alt="" width={56} height={56} className="size-14" />
             </button>
           </div>
@@ -60,6 +71,7 @@ export function WorkFrame({ step, sidebar, onSidebarSelect, loading = false, exi
 
         <div className={`flex min-h-0 flex-1 gap-4 pt-[clamp(16px,4svh,44px)] pb-[clamp(16px,3svh,32px)] ${flushRight ? '' : 'pr-8'}`}>{children}</div>
       </div>
+      <ExitConfirm open={confirmExit} onStay={stay} onLeave={exit} />
     </div>
   )
 }
