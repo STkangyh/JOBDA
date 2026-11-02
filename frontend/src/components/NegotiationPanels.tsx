@@ -273,33 +273,46 @@ interface WorkTask {
   body: string
 }
 
-// Figma 업무 일정 카드 원문
-const WORK_TASKS: WorkTask[] = [
-  { id: 'write_spec', title: '시방서 작성하기', priority: 1, body: '마루의 CMF 선정 작업이 완료되었어요.\n설계팀 이관을 위한 시방서를 작성해요.' },
-  {
-    id: 'team_meeting',
-    title: '업무 회의',
-    priority: 2,
-    body: '설계팀에 문서를 이관하기 전 디자인팀 안에서 작성한 시방서를 가지고 수정사항을 다같이 확인해요. 2번 미팅룸으로 모이세요.',
-  },
-]
+// 업무 일정은 지금 할 일을 알려주도록 단계마다 바뀐다(2026-11-02 결정). 초안 단계 카드만 Figma 원문이고,
+// 나머지 단계 문구는 초안이라 팀 확인이 필요하다. id가 단계마다 달라 완료·지움 상태도 단계별로 따로 남는다.
+type TaskPhase = 'draft' | 'revise' | 'direction' | 'vendor'
+
+const WORK_TASKS: Record<TaskPhase, WorkTask[]> = {
+  draft: [
+    { id: 'write_spec', title: '시방서 작성하기', priority: 1, body: '마루의 CMF 선정 작업이 완료되었어요.\n설계팀 이관을 위한 시방서를 작성해요.' },
+    {
+      id: 'team_meeting',
+      title: '업무 회의',
+      priority: 2,
+      body: '설계팀에 문서를 이관하기 전 디자인팀 안에서 작성한 시방서를 가지고 수정사항을 다같이 확인해요. 2번 미팅룸으로 모이세요.',
+    },
+  ],
+  revise: [
+    { id: 'revise_spec', title: '시방서 수정하기', priority: 1, body: '고프로의 피드백이 도착했어요.\n피드백을 반영해 시방서를 고친 뒤 수정안을 제출해요.' },
+    { id: 'revise_ask', title: '관계부서 의견 듣기', priority: 2, body: '고치다가 막히는 부분은 메신저로 설계팀·구매팀에 물어봐요.' },
+  ],
+  direction: [
+    { id: 'pick_direction', title: '수정 방향 정하기', priority: 1, body: '시방서를 넘긴 뒤 생산 문제가 생겼어요.\n세 가지 방향 중 하나를 골라요.' },
+    { id: 'direction_ask', title: '관계부서 의견 듣기', priority: 2, body: '방향을 고르기 전에 필요한 정보를 메신저로 확인해요.' },
+  ],
+  vendor: [
+    { id: 'research_vendors', title: '외주업체 조사하기', priority: 1, body: '외부 업체를 찾기로 했어요.\n후보 업체를 조사해 비교표를 채워요.' },
+    { id: 'pick_vendor', title: '업체 선정하기', priority: 2, body: '비교표를 바탕으로 함께할 업체를 골라 구매팀에 제안해요.' },
+  ],
+}
+
+function taskPhase(s: { currentStage: string; draftSubmitted: boolean; finalSubmitted: boolean }): TaskPhase {
+  if (s.currentStage === 'vendor_compare') return 'vendor'
+  if (s.currentStage === 'final_feedback') return 'direction'
+  if (s.draftSubmitted && !s.finalSubmitted) return 'revise'
+  return 'draft'
+}
 
 // Figma 메모장 카드 원문 — 체험 전에 있었던 회의 대화 요약(시나리오 자료)
 const SCENARIO_MEMOS = [
   { title: '고프로와의 대화', time: '10.12.23:11', body: '상하부 하우징은 5000번대 알루미늄,\n스트랩은 가죽으로. 컬러는 미정\n토출구 커버는 목재로. 이것도 아직 미정' },
   { title: '이프로와의 대화', time: '10.13.23:11', body: '목재는 화이트 오크 원목으로 결정\n부식 방지를 위해 유성 스테인 마감으로' },
 ]
-
-type TaskStatus = 'done' | 'removed'
-const TASKS_KEY = 'jobda-work-tasks'
-
-function loadTaskStatus(): Record<string, TaskStatus> {
-  try {
-    return JSON.parse(localStorage.getItem(TASKS_KEY) ?? '{}')
-  } catch {
-    return {}
-  }
-}
 
 function Badge({ count, label }: { count: number; label: string }) {
   if (count <= 0) return null
@@ -342,18 +355,14 @@ export function WorkSidePanel({ messenger, mode: modeProp, onModeChange, tab: ta
     onTabChange?.(t)
   }
 
-  const [taskStatus, setTaskStatus] = useState<Record<string, TaskStatus>>(loadTaskStatus)
-  const updateTask = (id: string, status: TaskStatus) => {
-    const next = { ...taskStatus, [id]: status }
-    setTaskStatus(next)
+  const phase = useSession(taskPhase)
+  const taskStatus = useSession((s) => s.workTaskStatus)
+  const setWorkTaskStatus = useSession((s) => s.setWorkTaskStatus)
+  const updateTask = (id: string, status: 'done' | 'removed') => {
+    setWorkTaskStatus(id, status)
     track('work_task', { task: id, status })
-    try {
-      localStorage.setItem(TASKS_KEY, JSON.stringify(next))
-    } catch {
-      // 저장소가 막히면 이번 화면에서만 유지
-    }
   }
-  const visibleTasks = WORK_TASKS.filter((t) => taskStatus[t.id] !== 'removed')
+  const visibleTasks = WORK_TASKS[phase].filter((t) => taskStatus[t.id] !== 'removed')
   const pendingTasks = visibleTasks.filter((t) => taskStatus[t.id] !== 'done').length
 
   // 메신저가 접혀 있는 동안 도착한 답장 수

@@ -217,6 +217,8 @@ export interface SessionState {
   savedNotes: string[]
   /** 저장한 답변을 누가·언제 보냈는지 — 업무 노트 메모장 카드 제목("고프로와의 대화")과 시각에 쓴다 */
   savedNoteMeta: Record<string, { persona: Persona; t: number }>
+  /** 업무 노트 "업무 일정" 카드별 상태 — 완료(흐리게)·지움(목록에서 빠짐). 없으면 할 일로 남아 있음 */
+  workTaskStatus: Record<string, 'done' | 'removed'>
   draft: SpecDraft
   draftParts: PartSpec[]
   draftSubmitted: boolean

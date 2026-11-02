@@ -67,6 +67,19 @@ describe('work notes panel', () => {
     expect(screen.getByLabelText('남은 할 일 1개')).toBeInTheDocument()
   })
 
+  it('shows tasks for the current stage and keeps each stage\'s done/removed state separately', async () => {
+    const user = userEvent.setup()
+    useSession.setState({ draftSubmitted: true })
+    renderPanel()
+    await user.click(screen.getByRole('button', { name: /업무노트/ }))
+    expect(screen.getByRole('heading', { name: '시방서 수정하기' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '시방서 작성하기' })).not.toBeInTheDocument()
+
+    await user.click(screen.getAllByRole('button', { name: 'Remove' })[0])
+    expect(screen.queryByRole('heading', { name: '시방서 수정하기' })).not.toBeInTheDocument()
+    expect(useSession.getState().workTaskStatus).toEqual({ revise_spec: 'removed' })
+  })
+
   it('lists conversation memos and saved answers under 메모장', async () => {
     const user = userEvent.setup()
     useSession.getState().saveNote('저장한 내용', 'engineering')

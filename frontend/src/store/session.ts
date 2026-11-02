@@ -88,6 +88,7 @@ const initialState = (): SessionState => ({
   disclosedInfo: {},
   savedNotes: [],
   savedNoteMeta: {},
+  workTaskStatus: {},
   draft: emptyDraft(),
   draftParts: Array.from({ length: PART_COUNT }, emptyPartSpec),
   draftSubmitted: false,
@@ -111,6 +112,7 @@ interface SessionActions {
   viewDoc: (key: string) => void
   sendMessage: (persona: Persona, message: string) => Promise<string>
   saveNote: (text: string, persona?: Persona) => void
+  setWorkTaskStatus: (id: string, status: 'done' | 'removed') => void
   updateDraftPart: (index: number, fields: Partial<PartSpec>) => void
   setPartAttachment: (index: number, attachment: PartAttachment, fileName?: string | null) => void
   updateDraft: (fields: Partial<SpecDraft>) => void
@@ -261,6 +263,8 @@ export const useSession = create<SessionState & SessionActions>()(
         set((s) => ({ viewedDocs: { ...s.viewedDocs, [key]: true } }))
         pushLog(set, get, 'doc_view', { target: key })
       },
+
+      setWorkTaskStatus: (id, status) => set((s) => ({ workTaskStatus: { ...s.workTaskStatus, [id]: status } })),
 
       saveNote: (text, persona) =>
         set((s) =>
