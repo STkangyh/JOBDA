@@ -125,7 +125,7 @@ export default withApi(cfg.allowedOrigins, async (req, res) => {
   }
 
   return sendJSON(res, 200, parseReply(reqBody.scenario, reqBody.persona, raw));
-});
+}, { requireAccount: true });
 
 // Rejects a history whose shape or size would let a caller pad an
 // unbounded/expensive payload into the paid LLM call before MAX_HISTORY's

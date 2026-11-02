@@ -11,12 +11,24 @@ const API_BASE: string | undefined = ENV_API_BASE || (import.meta.env.PROD ? '' 
 const USE_MOCK = API_BASE === undefined
 const SCENARIO = 'cmf_outsourcing'
 
+/** API가 로그인을 요구했다(이메일 계정으로 로그인하지 않았거나 로그인이 끝남). 화면은 로그인 안내를 띄운다. */
+export class LoginRequiredError extends Error {
+  constructor() {
+    super('login_required')
+    this.name = 'LoginRequiredError'
+  }
+}
+
 async function postJson<TReq, TRes>(path: string, body: TReq): Promise<TRes> {
+  // LLM을 쓰는 API는 로그인한 계정만 부를 수 있다(2026-11-02) — 로그인 토큰을 붙인다
+  const { accessToken } = await import('../lib/auth')
+  const token = await accessToken()
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify(body),
   })
+  if (res.status === 401) throw new LoginRequiredError()
   if (!res.ok) {
     throw new Error(`${path} failed: ${res.status}`)
   }

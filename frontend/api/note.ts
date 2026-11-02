@@ -86,4 +86,4 @@ export default withApi(cfg.allowedOrigins, async (req, res) => {
   const problem = validateNote(body)
   if (problem || !body) return sendJSON(res, 400, errBody(problem ?? 'bad_request'))
   return sendJSON(res, 200, await summarizeNote(llmClient, body))
-})
+}, { requireAccount: true })

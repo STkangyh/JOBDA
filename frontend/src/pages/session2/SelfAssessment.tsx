@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LoginRequiredError } from '../../api/client'
 import { useSession } from '../../store/session'
 import { RatingRow } from '../../components/RatingRow'
 import { ReportSkeleton } from '../../components/ReportSkeleton'
@@ -23,7 +24,8 @@ export function SelfAssessment() {
   const setSelfAssessment = useSession((s) => s.setSelfAssessment)
   const finishAssessment = useSession((s) => s.finishAssessment)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState(false)
+  // 'login': API가 로그인을 요구함(로그인이 끝났거나 이메일 계정이 아님) — 다시 시도해도 안 되므로 로그인 안내를 띄운다
+  const [error, setError] = useState<false | 'retry' | 'login'>(false)
 
   // finishAssessment는 실제 백엔드(/api/report)를 호출한다 — 이게 실패해도(네트워크 오류,
   // 5xx 등) catch가 없으면 버튼만 조용히 "제출하기"로 돌아가고 왜 안 넘어갔는지 사용자는
@@ -34,8 +36,8 @@ export function SelfAssessment() {
     setError(false)
     try {
       await finishAssessment()
-    } catch {
-      setError(true)
+    } catch (err) {
+      setError(err instanceof LoginRequiredError ? 'login' : 'retry')
     } finally {
       setSubmitting(false)
     }
@@ -80,9 +82,17 @@ export function SelfAssessment() {
         </div>
 
         <div className="mt-auto flex flex-col items-end gap-3">
-          {error && (
+          {error === 'retry' && (
             <p role="alert" className="text-body-md text-error-300">
               리포트를 생성하지 못했어요. 잠시 후 다시 시도해주세요.
+            </p>
+          )}
+          {error === 'login' && (
+            <p role="alert" className="text-body-md text-error-300">
+              로그인이 끝나 리포트를 만들 수 없어요.{' '}
+              <a href="/login" className="font-medium underline">
+                다시 로그인하기
+              </a>
             </p>
           )}
           <button

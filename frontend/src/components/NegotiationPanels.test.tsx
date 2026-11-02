@@ -161,3 +161,17 @@ describe('Messenger — saving an answer to the notes', () => {
     expect(useSession.getState().savedNoteMeta[reply].lines).toEqual([reply])
   })
 })
+
+describe('Messenger — login required', () => {
+  it('asks to log in instead of offering a retry when the API wants a signed-in account', async () => {
+    mockedChat.mockRejectedValueOnce(new client.LoginRequiredError())
+    const user = userEvent.setup()
+    render(<Messenger defaultActive="engineering" />)
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '목재 되나요?')
+    await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
+
+    expect(await screen.findByText('로그인해야 관계자와 대화할 수 있어요.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '로그인하기' })).toHaveAttribute('href', '/login')
+    expect(screen.queryByRole('button', { name: '재시도' })).not.toBeInTheDocument()
+  })
+})

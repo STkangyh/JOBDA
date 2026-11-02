@@ -133,6 +133,17 @@ export async function hasAccountSession(): Promise<boolean> {
   }
 }
 
+/** API 호출에 붙일 로그인 토큰. 서버(api/_lib/auth.ts)는 이메일 계정의 토큰만 받는다. 없으면 null. */
+export async function accessToken(): Promise<string | null> {
+  if (!authConfigured) return null
+  try {
+    const { data } = await (await supabase()).auth.getSession()
+    return data.session?.access_token ?? null
+  } catch {
+    return null
+  }
+}
+
 /** 로그인한 이메일을 가려서 돌려준다(예: ab***@gmail.com). 로그인하지 않았으면 null. 화면 표시용이며 이벤트에는 넣지 않는다. */
 export async function accountEmailHint(): Promise<string | null> {
   if (!authConfigured || sessionEndedByChoice()) return null

@@ -1,3 +1,5 @@
+import { requireAccount } from './auth.js'
+
 // JSON response helper + CORS handling for Vercel Node functions.
 // Ported from girugi internal/httpx/httpx.go (via the Vercel port), with two changes for JOBDA:
 // - the API now ships in the same Vercel project as the frontend, so calls are same-origin and
@@ -36,7 +38,7 @@ export function setCors(res: ApiResponse, allowedOrigins: string[], requestOrigi
   res.setHeader('Access-Control-Allow-Origin', origin)
   res.setHeader('Vary', 'Origin')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 }
 
 export function sendJSON(res: ApiResponse, status: number, body: unknown) {
@@ -62,7 +64,8 @@ export function readBody<T>(req: ApiRequest): T | null {
 // withApi wraps a POST-only JSON handler with CORS preflight + error recovery + request logging
 // (girugi main.go's Recover/Logger/CORS middleware). Body size is capped by Vercel's request limit
 // and by each handler's MAX_BODY_CHARS.
-export function withApi(allowedOrigins: string[], handler: Handler): Handler {
+// requireAccount: only signed-in email accounts get through (the LLM endpoints) — see auth.ts.
+export function withApi(allowedOrigins: string[], handler: Handler, opts: { requireAccount?: boolean } = {}): Handler {
   return async (req, res) => {
     const origin = req.headers.origin
     setCors(res, allowedOrigins, Array.isArray(origin) ? origin[0] : origin)
@@ -77,6 +80,14 @@ export function withApi(allowedOrigins: string[], handler: Handler): Handler {
     const start = Date.now()
     let status = 200
     try {
+      if (opts.requireAccount) {
+        const auth = await requireAccount(req)
+        if (!auth.ok) {
+          sendJSON(res, auth.status, errBody(auth.error))
+          status = auth.status
+          return
+        }
+      }
       await handler(req, res)
       status = res.statusCode
     } catch (err) {

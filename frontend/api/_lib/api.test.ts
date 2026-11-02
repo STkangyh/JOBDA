@@ -1,13 +1,14 @@
 // @vitest-environment node
 // API server tests. Lives under api/_lib/ because Vercel ignores underscore folders, so this file never
 // becomes a function. No LLM key is set in tests, so every LLM call fails and the fallbacks are exercised.
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ApiRequest, ApiResponse } from './http.js'
 import { loadFallback, normalizeJourney } from './reportFallback.js'
 import { parseLines, summarizeNote, validateNote, type NoteRequest } from '../note.js'
 import reportHandler from '../report.js'
 import chatHandler from '../chat.js'
 import type { LLMClient } from './llm.js'
+import { clearAuthCache } from './auth.js'
 
 // Runs before the imports above are evaluated: a key in the developer's shell must never make tests call a paid LLM.
 vi.hoisted(() => {
@@ -15,6 +16,22 @@ vi.hoisted(() => {
   delete process.env.ANTHROPIC_API_KEY
   delete process.env.ALLOWED_ORIGIN
 })
+
+// Supabase Auth stand-in: "good" is an email account, "anon" an anonymous user, anything else is rejected.
+// The LLM never gets as far as fetch (no key), so this is the only network call the handlers make.
+const SUPABASE = 'https://sb.test'
+const realFetch = globalThis.fetch
+function stubSupabaseAuth() {
+  process.env.SUPABASE_URL = SUPABASE
+  process.env.SUPABASE_ANON_KEY = 'anon-key'
+  globalThis.fetch = (async (url: string, init?: RequestInit) => {
+    if (String(url) !== `${SUPABASE}/auth/v1/user`) throw new Error(`unexpected fetch ${url}`)
+    const auth = new Headers(init?.headers).get('Authorization')
+    if (auth === 'Bearer good') return new Response(JSON.stringify({ id: 'u1', is_anonymous: false }), { status: 200 })
+    if (auth === 'Bearer anon') return new Response(JSON.stringify({ id: 'u2', is_anonymous: true }), { status: 200 })
+    return new Response('{}', { status: 401 })
+  }) as typeof fetch
+}
 
 function fakeRes() {
   const res = {
@@ -40,15 +57,49 @@ function fakeRes() {
   return res
 }
 
-async function call(handler: (req: ApiRequest, res: ApiResponse) => Promise<void>, body: unknown, method = 'POST') {
+async function call(handler: (req: ApiRequest, res: ApiResponse) => Promise<void>, body: unknown, method = 'POST', token: string | null = 'good') {
   const res = fakeRes()
-  await handler({ method, url: '/api/x', headers: { origin: 'https://evil.example' }, body }, res)
+  const headers: ApiRequest['headers'] = { origin: 'https://evil.example' }
+  if (token) headers.authorization = `Bearer ${token}`
+  await handler({ method, url: '/api/x', headers, body }, res)
   return res
 }
 
 beforeAll(() => {
   vi.spyOn(console, 'log').mockImplementation(() => {})
   vi.spyOn(console, 'warn').mockImplementation(() => {})
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+})
+
+beforeEach(() => {
+  clearAuthCache()
+  stubSupabaseAuth()
+})
+
+afterAll(() => {
+  globalThis.fetch = realFetch
+})
+
+describe('only signed-in email accounts reach the LLM endpoints', () => {
+  const body = { scenario: 'cmf_outsourcing', persona: 'engineering', message: '목재 되나요?' }
+
+  it('rejects a missing token, an unknown token and an anonymous user with 401', async () => {
+    for (const token of [null, 'bogus', 'anon']) {
+      const res = await call(chatHandler, body, 'POST', token)
+      expect(res.statusCode).toBe(401)
+      expect(res.body).toEqual({ error: 'login_required' })
+    }
+  })
+
+  it('fails closed with 503 when the server has no Supabase settings', async () => {
+    delete process.env.SUPABASE_URL
+    delete process.env.SUPABASE_ANON_KEY
+    delete process.env.VITE_SUPABASE_URL
+    delete process.env.VITE_SUPABASE_ANON_KEY
+    const res = await call(reportHandler, { scenario: 'cmf_outsourcing' })
+    expect(res.statusCode).toBe(503)
+    expect(res.body).toEqual({ error: 'auth_unavailable' })
+  })
 })
 
 describe('report journey', () => {

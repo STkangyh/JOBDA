@@ -1,6 +1,12 @@
 # API 스펙
 
-Base URL: 프론트와 같은 출처 (`/api/...`). 인증 없음. 모든 요청/응답 `application/json`.
+Base URL: 프론트와 같은 출처 (`/api/...`). 모든 요청/응답 `application/json`.
+
+**로그인 필요 (2026-11-02)** — `/api/chat`, `/api/report`, `/api/note`는 이메일 계정으로 로그인한 사람만 부를 수 있습니다.
+요청 헤더에 Supabase 로그인 토큰을 붙입니다: `Authorization: Bearer <access_token>`. 서버가 Supabase Auth(`/auth/v1/user`)로
+토큰을 확인하고, 없거나 틀리거나 익명 사용자면 `401 {"error":"login_required"}`, 서버에 Supabase 설정이 없으면
+`503 {"error":"auth_unavailable"}`입니다. 서버는 `SUPABASE_URL`/`SUPABASE_ANON_KEY`(없으면 `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`)를 씁니다.
+`/api/session-log`는 LLM을 쓰지 않아 로그인 없이 받습니다.
 
 > **JOBDA로 이전 (2026-11-02)** — API 서버가 girugi(Go)에서 이 저장소의 `frontend/api/`(Vercel Node 함수)로
 > 옮겨졌고, girugi 서버는 종료했습니다. 이제 백엔드는 Vercel(이 API)과 Supabase(로그인·활동 기록)뿐입니다.

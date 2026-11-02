@@ -4,7 +4,7 @@ import { ArrowUpwardIcon, WarningIcon } from './icons'
 import { useSession } from '../store/session'
 import { PERSONA_LABEL, PERSONA_SENDER_NAME, type Persona } from '../types'
 import { track, useTrackView } from '../lib/analytics'
-import { note as apiNote } from '../api/client'
+import { LoginRequiredError, note as apiNote } from '../api/client'
 import { ChatRetentionNotice } from './ChatRetentionNotice'
 import seniorAvatar from '../assets/work/avatars/senior.png'
 import engineeringAvatar from '../assets/work/avatars/engineering.png'
@@ -73,7 +73,8 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   // 해서, 여기서 안 잡으면 사용자는 입력만 사라지고 답장도 에러도 못 보는 채 멈춘다(백엔드
   // handler 주석의 "frontend shows a retry button" 전제가 실제로는 구현 안 돼 있었음). 실패한
   // 원문을 들고 있다가 재시도 버튼이 같은 텍스트로 다시 보낸다.
-  const [failed, setFailed] = useState<{ persona: Persona; text: string } | null>(null)
+  // login: API가 로그인을 요구해서 실패함 — 재시도 대신 로그인 안내를 띄운다
+  const [failed, setFailed] = useState<{ persona: Persona; text: string; login?: boolean } | null>(null)
   const chatHistory = useSession((s) => s.chatHistory)
   const sendMessage = useSession((s) => s.sendMessage)
   const savedNotes = useSession((s) => s.savedNotes)
@@ -115,9 +116,9 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
     try {
       await sendMessage(active, text)
       setPending(null)
-    } catch {
-      // 실패해도 보낸 말풍선은 남겨 두고 그 아래에 재시도를 띄운다
-      setFailed({ persona: active, text })
+    } catch (err) {
+      // 실패해도 보낸 말풍선은 남겨 두고 그 아래에 재시도(또는 로그인 안내)를 띄운다
+      setFailed({ persona: active, text, login: err instanceof LoginRequiredError })
     } finally {
       setSending(false)
     }
@@ -268,7 +269,18 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
               </div>
             </div>
           )}
-          {failed && failed.persona === active && (
+          {failed && failed.persona === active && failed.login && (
+            <div className="flex items-center gap-2 self-start rounded-md border border-error-100 bg-error-100/20 px-3 py-2">
+              <WarningIcon className="size-4 shrink-0 text-error-200" />
+              <Text variant="body-sm" className="text-error-300">
+                로그인해야 관계자와 대화할 수 있어요.
+              </Text>
+              <a href="/login" className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-error-300 transition-colors hover:bg-error-100/40">
+                로그인하기
+              </a>
+            </div>
+          )}
+          {failed && failed.persona === active && !failed.login && (
             <div className="flex items-center gap-2 self-start rounded-md border border-error-100 bg-error-100/20 px-3 py-2">
               <WarningIcon className="size-4 shrink-0 text-error-200" />
               <Text variant="body-sm" className="text-error-300">

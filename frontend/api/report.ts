@@ -43,7 +43,7 @@ export default withApi(cfg.allowedOrigins, async (req, res) => {
   out.cautions = capN(out.cautions, MAX_SENTENCES);
   out.missed = capN(out.missed, MAX_SENTENCES);
   return sendJSON(res, 200, out);
-});
+}, { requireAccount: true });
 
 // completeS2 renders the session-2 report, falling back to fixed sentences
 // on any prompt/LLM/parse failure (always 200).
