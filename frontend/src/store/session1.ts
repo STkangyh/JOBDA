@@ -289,10 +289,9 @@ export const useSession1 = create<Session1State & Session1Actions>()(
         }
 
         const altRounds = s.roundAnswers.filter((r) => r.selectedChoice === 1).length
-        const consultedSupport = s.chatHistory.purchasing.length > 0 || s.chatHistory.senior.length > 0
         const questionedEngineering = s.chatHistory.engineering.length > 0
 
-        // "내 직무 이해 프로필" 4축 — 세션2(mock/report.ts computeProfile)와 같은 방식으로
+        // "내 직무 이해 프로필" 3축 — 세션2(mock/report.ts computeProfile)와 같은 축으로 맞추고(이슈 #6),
         // 이미 추적 중인 라운드 선택/채팅 데이터만으로 도출(새 입력 요구 없음).
         const profile: ProfileAxis[] = [
           {
@@ -306,12 +305,6 @@ export const useSession1 = create<Session1State & Session1Actions>()(
             rightLabel: '대안 제시형',
             caption: '이해관계자 설득 선호도',
             value: (altRounds / S1_ROUNDS.length) * 100,
-          },
-          {
-            leftLabel: '수용적',
-            rightLabel: '부담 경험',
-            caption: '반복 수정에 대한 반응',
-            value: consultedSupport ? 70 : 30,
           },
           {
             leftLabel: '수용적',

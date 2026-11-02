@@ -7,6 +7,7 @@ import { WorkSidePanel } from './NegotiationPanels'
 import { ExpandableArea } from './WorkFrame'
 import { ProfileMenu } from './ProfileMenu'
 import { maskEmail } from '../lib/auth'
+import { computeProfile } from '../api/mock/report'
 import { stageNeighbors, understandingPercent, useSession } from '../store/session'
 
 beforeEach(() => {
@@ -160,5 +161,12 @@ describe('profile menu', () => {
   it('hides most of the email address', () => {
     expect(maskEmail('abcdef@gmail.com')).toBe('ab****@gmail.com')
     expect(maskEmail('ab@x.com')).toBe('ab***@x.com')
+  })
+})
+
+describe('job understanding profile', () => {
+  it('has the three axes of the wireframe, without the removed repeated-revision axis', () => {
+    const profile = computeProfile({ findings: [], action_logs: [], scores: { intent_delivery: 3, concept_retention: 3, cost_control: 2 }, branch: 'outsourcing' })
+    expect(profile.map((a) => a.caption)).toEqual(['결과물 완성도 vs 제출 속도', '이해관계자 설득 선호도', '피드백 후 판단 수정 성향'])
   })
 })

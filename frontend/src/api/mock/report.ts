@@ -61,7 +61,8 @@ export const WORK_OVERVIEW: Record<ReportRequest['branch'], string> = {
 export const JOB_MEANING = '제약 속에서 디자인 의도와 현실의 타협점을 찾는 실무 감각을 경험했습니다.'
 
 // "내 직무 이해 프로필" — 새 축을 위해 별도 입력을 새로 받지 않고, 이미 계산된
-// scores/branch/findings(부록 A 판정 근거)만으로 4축을 도출한다. 실제 백엔드(v4) 응답에는
+// scores/branch/findings(부록 A 판정 근거)만으로 3축을 도출한다. 와이어프레임대로 3축이며,
+// "반복 수정에 대한 반응" 축은 근거였던 revisited_after_branch가 평가에서 빠져 지웠다(이슈 #6, 2026-11-02). 실제 백엔드(v4) 응답에는
 // 아직 이 필드가 없어서 client.ts에서도 이 함수로 채워 넣는다(경계에서 갭 흡수).
 export function computeProfile(req: ReportRequest): ProfileAxis[] {
   const hasFinding = (code: FindingCode) => req.findings.some((f) => f.code === code)
@@ -81,17 +82,6 @@ export function computeProfile(req: ReportRequest): ProfileAxis[] {
       rightLabel: '대안 제시형',
       caption: '이해관계자 설득 선호도',
       value: ((req.scores.concept_retention - 1) / 2) * 100,
-    },
-    {
-      // 이 축은 revisited_after_branch finding 하나에만 기대고 있었는데, 기획이 그 항목을
-      // 평가 기준에서 뺐다(분기 후 재작성 자체보다 1차 피드백에서 무엇이 걸렸는지가 중요).
-      // ReportRequest 에는 revisitCount 가 없어 대체 근거를 여기서 만들 수 없으므로, 축을
-      // 지울지 다른 근거로 바꿀지 정해질 때까지 중립값으로 둔다. 와이어프레임의 프로필은
-      // 축이 셋인데 여기는 넷이라 그 정리와 함께 결정해야 한다.
-      leftLabel: '수용적',
-      rightLabel: '부담 경험',
-      caption: '반복 수정에 대한 반응',
-      value: 50,
     },
     {
       leftLabel: '수용적',

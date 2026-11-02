@@ -34,10 +34,13 @@ function QuoteGroup({ items }: { items: string[] }) {
   )
 }
 
-// 두 세션의 프로필 4축은 라벨/캡션이 완전히 동일(둘 다 mock/report.ts의 computeProfile 방식을
-// 그대로 씀)해서, 축별로 값을 평균 내면 "종합" 성향으로 자연스럽게 합쳐진다.
+// 두 세션의 프로필 축은 라벨/캡션이 같아(둘 다 mock/report.ts의 computeProfile 방식) 축별 평균이 "종합" 성향이 된다.
+// 축 개수가 바뀐 예전 저장분이 섞여도 어긋나지 않게 순서가 아니라 캡션으로 짝을 맞춘다.
 function averageProfile(a: ProfileAxis[], b: ProfileAxis[]): ProfileAxis[] {
-  return a.map((axis, i) => ({ ...axis, value: (axis.value + (b[i]?.value ?? axis.value)) / 2 }))
+  return b.map((axis) => {
+    const other = a.find((x) => x.caption === axis.caption)
+    return other ? { ...axis, value: (axis.value + other.value) / 2 } : axis
+  })
 }
 
 // 사이드바 세번째 아이콘(history)이 진행 상태와 무관하게 항상 이 화면으로 연결되므로(사용자
