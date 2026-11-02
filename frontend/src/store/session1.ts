@@ -53,7 +53,7 @@ export const S1_ROUNDS: S1RoundSpec[] = [
     draftImage: draftRound1Image,
     feedbackTitle: '1차 피드백',
     feedbackText:
-      '재현씨가 만들고 있는 목업 잘 봤어요. 근데 이대로 만들려면 예산 못 맞춰요. 금형 하나 파는데 얼마나 드는지 아세요? 아무리 제품이 작아도 천은 우습게 깨집니다. 하우징 파트 나누지 말고 하나로 어떻게 안되나요?',
+      '기럭씨가 만들고 있는 목업 잘 봤어요. 근데 이대로 만들려면 예산 못 맞춰요. 금형 하나 파는데 얼마나 드는지 아세요? 아무리 제품이 작아도 천은 우습게 깨집니다. 하우징 파트 나누지 말고 하나로 어떻게 안되나요?',
     accepted: false,
     choices: [
       { label: '하나로 통합', sublabel: '금형 비용을 줄이기 위해 3파츠를 1피스로 축소' },
@@ -190,7 +190,7 @@ function mockReply(persona: S1Persona, message: string): string {
     if (lower.includes('예산') || lower.includes('비용')) return '목재 파트 예산은 넉넉하지 않아요. 파트가 늘어날수록 금형비가 커지니 참고하세요.'
     return '원가 관련해서는 설계팀이랑 파트 수부터 맞추고 오시면 저희가 단가 검토해드릴게요.'
   }
-  return '재현님 방향 좋아요. 다만 설계팀 말도 일리 있으니 근거를 명확히 남기면서 진행하세요.'
+  return '기럭님 방향 좋아요. 다만 설계팀 말도 일리 있으니 근거를 명확히 남기면서 진행하세요.'
 }
 
 export const useSession1 = create<Session1State & Session1Actions>()(

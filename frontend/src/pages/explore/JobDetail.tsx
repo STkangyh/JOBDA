@@ -23,7 +23,7 @@ export function JobDetail({ onSubmit }: { onSubmit: (stepIndex: number) => void 
         <img src={illustration} alt="" className="pointer-events-none absolute top-0 left-[-9.53%] h-full w-[114.16%] max-w-none object-cover" />
         <div className="relative flex flex-col gap-3">
           <h1 className="text-display-md font-medium tracking-[-0.09px] text-green-400">생활 가전 제품디자이너</h1>
-          <p className="text-title-lg text-neutral-300">C 가전회사에서 초임 디자이너로 근무하고 있는 심재현씨가 되어 인하우스 디자인 업무를 체험해보세요.</p>
+          <p className="text-title-lg text-neutral-300">C 가전회사에서 초임 디자이너로 근무하고 있는 김기럭씨가 되어 인하우스 디자인 업무를 체험해보세요.</p>
         </div>
       </section>
 

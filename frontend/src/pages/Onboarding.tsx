@@ -73,7 +73,7 @@ export function Onboarding() {
                 여기서 시작해 보세요.
               </h2>
               <p className="text-title-lg text-neutral-500">
-                C 가전회사의 초임 디자이너 심재현씨가 되어 보세요.
+                C 가전회사의 초임 디자이너 김기럭씨가 되어 보세요.
                 <br />
                 탁상형 공기청정기의 기획부터 아이데이션, 시각화, 설계,
                 <br />

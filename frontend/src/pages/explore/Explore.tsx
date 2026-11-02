@@ -184,7 +184,7 @@ export function Explore({ onOpenJob }: { onOpenJob: () => void }) {
               </span>
             </div>
             <p className="text-title-lg text-neutral-500">
-              C 가전회사에서 초임 디자이너로 근무하고 있는 심재현씨가 되어 인하우스 디자인 업무를 체험해보세요.
+              C 가전회사에서 초임 디자이너로 근무하고 있는 김기럭씨가 되어 인하우스 디자인 업무를 체험해보세요.
               <br />
               탁상형 공기청정기 제품 기획부터 아이데이션, 시각화, 설계, 양산 프로젝트 사후 관리까지 모두 시뮬레이션할 수 있어요.
             </p>
