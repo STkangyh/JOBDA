@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
-import { Text } from '../../components/Text'
 import { Checkbox } from '../../components/Checkbox'
+import { ModelAnswerChip, SendRoundButton } from '../../components/WorkControls'
+import purchasingAvatar from '../../assets/work/avatars/purchasing.png'
 import { WorkSidePanel } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
@@ -34,7 +35,9 @@ const ROWS: { key: keyof Omit<VendorOption, 'name'>; label: string; unit?: strin
   { key: 'capacity', label: '수용량', unit: 'ea' },
 ]
 
-const VENDOR_GRID_COLS = 'grid-cols-[110px_repeat(4,minmax(110px,1fr))]'
+const VENDOR_GRID_COLS = 'grid-cols-[90px_repeat(4,minmax(120px,1fr))]'
+// 입력칸은 시방서 화면(Workspace FIELD_BOX)과 같은 연두 칸 — 표라 높이만 조금 낮췄다
+const CELL_BOX = 'flex h-12 min-w-0 items-center rounded-[4px] bg-green-50 px-3 text-body-lg shadow-[inset_0_0_4px_2px_rgba(0,0,0,0.04)]'
 
 function VendorTable({
   editable,
@@ -57,10 +60,8 @@ function VendorTable({
     // min-w-0을 그리드 트랙에 직접 주지 않는 이유, overflow-x-auto인 이유는 VendorCompare.tsx의
     // 그리드 wrapper 주석 참고(QA에서 실제로 표가 안 보이는 버그로 이어졌던 자리).
     <div className="flex flex-col gap-4 overflow-x-auto">
-      <div className={`grid ${VENDOR_GRID_COLS} items-center gap-3 px-2 py-1.5`}>
-        <Text variant="title-md" emphasis className="text-green-900">
-          업체 항목
-        </Text>
+      <div className={`grid ${VENDOR_GRID_COLS} items-center gap-2.5`}>
+        <span className="text-body-lg text-neutral-500">업체 항목</span>
         {vendors.map((v, i) =>
           editable ? (
             <input
@@ -68,7 +69,8 @@ function VendorTable({
               value={v.name}
               onChange={(e) => onChange(i, { name: e.target.value })}
               placeholder={`업체 ${i + 1} 이름`}
-              className="min-w-0 rounded-md bg-neutral-75 px-3 py-2 text-body-lg font-semibold text-green-900 outline-none placeholder:font-normal placeholder:text-neutral-400"
+              aria-label={`업체 ${i + 1} 이름`}
+              className={`${CELL_BOX} font-semibold text-neutral-900 placeholder:font-normal placeholder:text-neutral-400 focus:outline-none`}
             />
           ) : selectable ? (
             <Checkbox
@@ -79,9 +81,9 @@ function VendorTable({
               className="min-w-0"
             />
           ) : (
-            <Text key={i} variant="body-lg" emphasis className="truncate text-green-900">
+            <span key={i} className="truncate text-body-lg font-semibold text-neutral-900">
               {v.name || `업체 ${i + 1}`}
-            </Text>
+            </span>
           ),
         )}
       </div>
@@ -89,13 +91,11 @@ function VendorTable({
       <div className="flex flex-col">
         {ROWS.map((row) => (
           <div key={row.key} className="flex flex-col">
-            <div className={`grid ${VENDOR_GRID_COLS} items-center gap-3 px-2 py-2`}>
-              <Text variant="body-lg" className="text-neutral-500">
-                {row.label}
-              </Text>
+            <div className={`grid ${VENDOR_GRID_COLS} items-center gap-2.5 py-1.5`}>
+              <span className="truncate text-body-lg text-neutral-500">{row.label}</span>
               {vendors.map((v, i) =>
                 editable ? (
-                  <div key={i} className="flex min-w-0 items-center gap-1.5 rounded-md bg-neutral-75 px-3 py-2">
+                  <div key={i} className={`${CELL_BOX} gap-1.5`}>
                     <input
                       type={row.unit ? 'number' : 'text'}
                       value={v[row.key]}
@@ -104,30 +104,23 @@ function VendorTable({
                           [row.key]: row.unit ? (e.target.value ? Number(e.target.value) : '') : e.target.value,
                         } as Partial<VendorOption>)
                       }
-                      placeholder={row.unit ? '0' : `예: ${row.label}`}
-                      className="min-w-0 flex-1 bg-transparent text-body-lg text-neutral-700 outline-none"
+                      placeholder={row.unit ? '0' : `ex) ${row.label}`}
+                      aria-label={`업체 ${i + 1} ${row.label}`}
+                      className="min-w-0 flex-1 bg-transparent text-body-lg text-neutral-700 placeholder:text-neutral-400 focus:outline-none"
                     />
-                    {row.unit && (
-                      <Text variant="body-md" className="shrink-0 text-neutral-400">
-                        {row.unit}
-                      </Text>
-                    )}
+                    {row.unit && <span className="shrink-0 text-body-md text-neutral-400">{row.unit}</span>}
                   </div>
                 ) : (
                   // Figma 823:56735(Desktop-139) 실측: 선택된 업체 열 전체에 옅은 초록 배경 띠가
                   // 깔린다 — 정적 nth-child가 아니라 실제 selectedIndex와 비교해야 선택이
                   // 바뀔 때 띠도 같이 움직인다.
-                  <Text
-                    key={i}
-                    variant="body-lg"
-                    className={`rounded-md px-3 py-2 text-neutral-700 ${selectable && i === selectedIndex ? 'bg-green-50' : ''}`}
-                  >
+                  <span key={i} className={`truncate rounded-[4px] px-3 py-2.5 text-body-lg text-neutral-700 ${selectable && i === selectedIndex ? 'bg-green-50' : ''}`}>
                     {v[row.key] === '' ? '-' : `${v[row.key]}${row.unit ?? ''}`}
-                  </Text>
+                  </span>
                 ),
               )}
             </div>
-            <div className="h-px w-full bg-neutral-300" />
+            <div className="h-px w-full bg-neutral-200" />
           </div>
         ))}
       </div>
@@ -144,21 +137,6 @@ function VendorTable({
 // editingFinal/finalApproved와 같은 패턴) — 인디케이터 라벨도 phase에 따라
 // "제안서 작성"→"피드백 수정"으로 바뀐다(823:56790 GNB 실측: 137~140은 "제안서 작성"이 활성,
 // 141은 "피드백 수정"이 활성).
-function CtaButton({ disabled, busy = false, onClick, children }: { disabled: boolean; busy?: boolean; onClick: () => void; children: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`flex h-[82px] w-[280px] items-center justify-center rounded-xl text-headline-md font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
-        busy ? 'cursor-wait bg-[#9fbf80] text-green-50' : 'bg-green-500 text-neutral-900 hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50'
-      }`}
-    >
-      {busy ? '로딩 중...' : children}
-    </button>
-  )
-}
-
 export function VendorCompare() {
   const vendors = useSession((s) => s.vendors)
   const updateVendor = useSession((s) => s.updateVendor)
@@ -195,108 +173,74 @@ export function VendorCompare() {
     }, 1200)
   }
 
-  // 새 업무 페이지 디자인에 이 화면(외주업체 조사)은 아직 없어, 내용은 그대로 두고 업무 화면 틀(2026-10-13)에만 맞췄다.
+  // 외주업체 조사는 새 디자인이 없어 흐름(조사 → 선정·제안 → 3차 피드백 후 수정안)은 그대로 두고,
+  // 디자인 시스템(2026-10-31)의 업무 화면 모양에 맞췄다(2026-11-02 결정): 위 업무 지시 카드(지시한 사람 얼굴),
+  // 아래 작업 카드 오른쪽 위에 모범답안 칩 + 보내기 버튼, 입력칸은 시방서와 같은 연두 칸.
+  const title = phase === 'research' ? '외주 업체 탐색' : '외주 업체 선정'
+  const instruction =
+    phase === 'research'
+      ? '필요한 업체를 찾고 아래 항목에 맞게 리스트에 정리하세요.'
+      : vendorProposed
+        ? '구매팀 의견을 보고 업체를 다시 확인한 뒤 수정안을 제출하세요.'
+        : '가장 적합한 조건의 업체를 하나 골라 구매팀에 제안하세요.'
+  const send =
+    phase === 'research'
+      ? { label: '조사 완료', disabled: !complete, onClick: () => setPhase('select') }
+      : vendorProposed
+        ? { label: '수정안 제출', disabled: isSubmitting, onClick: handleSubmit }
+        : { label: '제안서 전달', disabled: isSubmitting, onClick: handlePropose }
+
   return (
     <WorkFrame step={vendorProposed ? '피드백 수정' : '제안서 작성'} sidebar="work" loading={isSubmitting} exitStep="vendor_compare" flushRight>
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-y-auto">
-              {phase === 'research' ? (
-                <>
-                  <WorkPanel className="flex flex-col gap-3">
-                    <Text variant="title-lg" emphasis className="text-green-900">
-                      외주 업체 탐색
-                    </Text>
-                    <Text variant="body-lg" className="text-neutral-700">
-                      필요한 업체를 찾고 아래 항목에 맞게 리스트에 정리하세요.
-                    </Text>
-                  </WorkPanel>
-
-                  <WorkPanel className="flex flex-col gap-6">
-                    <Text variant="title-lg" emphasis className="text-green-900">
-                      외주 업체 리스트
-                    </Text>
-                    <VendorTable
-                      editable
-                      vendors={vendors}
-                      onChange={updateVendor}
-                      selectable={false}
-                      selectedIndex={selectedVendorIndex}
-                      onSelect={selectVendor}
-                    />
-                  </WorkPanel>
-                </>
-              ) : (
-                <>
-                  <WorkPanel className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
-                      <Text variant="title-lg" emphasis className="text-green-900">
-                        외주 업체 선정
-                      </Text>
-                      <button
-                        type="button"
-                        onClick={() => setPhase('research')}
-                        className="text-body-sm text-neutral-500 underline hover:text-neutral-700"
-                      >
-                        목록 다시 수정하기
-                      </button>
-                    </div>
-                    <Text variant="body-lg" className="text-neutral-700">
-                      {vendorProposed
-                        ? '가장 적합한 조건의 업체가 무엇인지 고민하고 구매팀에게 제안하세요.'
-                        : '필요한 업체를 찾고 아래 항목에 맞게 리스트에 정리하세요.'}
-                    </Text>
-
-                    {vendorProposed && (
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-end justify-between">
-                          <Text variant="title-md" emphasis className="text-green-900">
-                            3차 피드백
-                          </Text>
-                          <FeedbackRemainingBadge remaining={remaining} />
-                        </div>
-                        <div className="rounded-md bg-green-200 px-4 py-4">
-                          <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
-                            {PURCHASING_FEEDBACK}
-                          </Text>
-                        </div>
-                      </div>
-                    )}
-                  </WorkPanel>
-
-                  <WorkPanel className="flex flex-col gap-6">
-                    <Text variant="title-lg" emphasis className="text-green-900">
-                      외주 업체 리스트
-                    </Text>
-                    <VendorTable
-                      editable={false}
-                      vendors={vendors}
-                      onChange={updateVendor}
-                      selectable
-                      selectedIndex={selectedVendorIndex}
-                      onSelect={selectVendor}
-                    />
-                  </WorkPanel>
-                </>
-              )}
-              <div className="flex justify-end">
-              {phase === 'research' ? (
-                <CtaButton disabled={!complete} onClick={() => setPhase('select')}>
-                  조사 완료
-                </CtaButton>
-              ) : vendorProposed ? (
-                <CtaButton disabled={isSubmitting} busy={isSubmitting} onClick={handleSubmit}>
-                  수정안 제출
-                </CtaButton>
-              ) : (
-                <CtaButton disabled={isSubmitting} busy={isSubmitting} onClick={handlePropose}>
-                  제안서 전달
-                </CtaButton>
-              )}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto">
+        <WorkPanel className="flex shrink-0 flex-col gap-[clamp(12px,2svh,24px)]">
+          <h1 className="text-title-lg font-semibold text-neutral-700">{title}</h1>
+          <div className="flex gap-6">
+            <img src={purchasingAvatar} alt="구매팀 김부장" width={96} height={96} className="size-[clamp(64px,8.6svh,96px)] shrink-0 rounded-full bg-neutral-50 object-cover" />
+            <p className="min-w-0 flex-1 text-title-lg text-neutral-700">
+              외부 업체에 목재 하우징 생산을 맡기기로 했어요. 후보 업체를 조사해 비교하고, 조건이 가장 맞는 곳을 구매팀에 제안해 주세요.
+            </p>
+          </div>
+          {vendorProposed && (
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <h2 className="text-title-lg font-semibold text-green-900">3차 피드백</h2>
+                <FeedbackRemainingBadge remaining={remaining} />
               </div>
+              <p className="bg-green-200 px-3 py-6 text-body-lg whitespace-pre-line text-neutral-700">{PURCHASING_FEEDBACK}</p>
             </div>
+          )}
+        </WorkPanel>
 
-            <aside className="flex min-h-0 w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
-              <WorkSidePanel messenger={{ defaultActive: 'purchasing', intro: { persona: 'senior', text: SENIOR_VENDOR_INTRO } }} />
-            </aside>
+        <WorkPanel className="flex flex-col gap-[clamp(20px,4svh,40px)]">
+          <div className="flex items-end justify-between gap-6">
+            <div className="flex min-w-0 flex-col gap-2">
+              <h2 className="text-title-lg font-semibold text-neutral-700">{instruction}</h2>
+              {phase === 'select' && (
+                <button type="button" onClick={() => setPhase('research')} className="w-fit text-body-md text-neutral-500 underline hover:text-neutral-700">
+                  목록 다시 수정하기
+                </button>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <ModelAnswerChip />
+              <SendRoundButton label={send.label} disabled={send.disabled} onClick={send.onClick} />
+            </div>
+          </div>
+          <VendorTable
+            editable={phase === 'research'}
+            vendors={vendors}
+            onChange={updateVendor}
+            selectable={phase === 'select'}
+            selectedIndex={selectedVendorIndex}
+            onSelect={selectVendor}
+          />
+        </WorkPanel>
+      </div>
+
+      <aside className="flex min-h-0 w-[clamp(320px,25vw,433px)] shrink-0 flex-col gap-4">
+        <WorkSidePanel messenger={{ defaultActive: 'purchasing', intro: { persona: 'senior', text: SENIOR_VENDOR_INTRO } }} />
+      </aside>
     </WorkFrame>
   )
 }
