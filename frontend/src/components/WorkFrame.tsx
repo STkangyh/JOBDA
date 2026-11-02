@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import closeIcon from '../assets/work/close.svg'
 import { Indicator } from './Indicator'
 import { WorkSidebar, type WorkSidebarItem } from './WorkSidebar'
-import { ArrowBackIosIcon, AsteriskIcon } from './icons'
+import { ArrowBackIosIcon } from './icons'
+import { LoadingSpinner } from './LoadingSpinner'
 import { stageNeighbors, useSession } from '../store/session'
 import { track } from '../lib/analytics'
 
@@ -48,11 +49,7 @@ export function WorkFrame({ step, sidebar, onSidebarSelect, loading = false, exi
           <div data-coach="progress" className="absolute top-[clamp(28px,5.2svh,58px)] left-1/2 w-[min(855px,calc(100%-420px))] -translate-x-[calc(50%+79.5px)]">
             <Indicator current={step} tone="gray" />
           </div>
-          {loading && (
-            <span className="flex size-14 items-center justify-center rounded-full bg-neutral-900 text-green-500" role="status" aria-label="처리 중">
-              <AsteriskIcon className="size-6 animate-spin" />
-            </span>
-          )}
+          {loading && <LoadingSpinner />}
           <div data-coach="stage-nav" className="flex items-center gap-3">
             {stageNav && <StageNav disabled={loading} />}
             <button type="button" onClick={exit} aria-label="업무 나가기" className="size-14 shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-green-700">
@@ -102,3 +99,4 @@ export function WorkPanel({ className = '', padded = true, coach, children }: { 
     </section>
   )
 }
+

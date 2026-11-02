@@ -5,7 +5,7 @@ import { Explore } from './pages/explore/Explore'
 import { StageJumper } from './components/StageJumper'
 import { MobileNotice } from './components/MobileNotice'
 import { ScreenTracker } from './components/ScreenTracker'
-import { AsteriskIcon } from './components/icons'
+import { LoadingSpinner } from './components/LoadingSpinner'
 import type { Stage } from './types'
 import { hasSeenWelcome } from './lib/welcome'
 import { resolveEntry } from './lib/auth'
@@ -63,10 +63,11 @@ const AdminPage = lazy(() => import('./pages/admin/AdminPage').then((m) => ({ de
 
 // Suspense가 청크 다운로드 중에 보여주는 전체 화면 자리표시자. 어느 라우트든 잠깐 걸치는
 // 화면이라 특정 페이지 배경색에 맞추지 않고 앱 셸의 기본 다크 배경(Explore와 동일)만 깐다.
+// 로딩 표시는 다른 화면과 같이 오른쪽 위 스피너(2026-11-02 결정).
 function RouteFallback() {
   return (
-    <div className="flex min-h-svh items-center justify-center bg-neutral-950">
-      <AsteriskIcon className="size-8 animate-spin text-neutral-500" />
+    <div className="relative min-h-svh bg-neutral-950">
+      <LoadingSpinner label="화면을 불러오는 중" className="absolute top-[clamp(24px,5svh,54px)] right-8" />
     </div>
   )
 }

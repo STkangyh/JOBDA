@@ -1,5 +1,6 @@
 import { Indicator } from './Indicator'
-import { AsteriskIcon, CloudSavedIcon, ProfileIcon } from './icons'
+import { CloudSavedIcon, ProfileIcon } from './icons'
+import { LoadingSpinner } from './LoadingSpinner'
 
 interface IndicatorHeaderProps {
   current: string
@@ -43,11 +44,7 @@ export function IndicatorHeader({
       <Indicator current={current} steps={steps} />
       {icons || loading ? (
         <div className="hidden items-center justify-end gap-[18px] lg:flex">
-          {loading && (
-            <div className={`flex size-[50px] shrink-0 items-center justify-center rounded-full ${iconBg} text-green-500`}>
-              <AsteriskIcon className="size-6 animate-spin" />
-            </div>
-          )}
+          {loading && <LoadingSpinner className="size-[50px]" />}
           {icons && (
             <>
               <div className={`flex size-[50px] shrink-0 items-center justify-center rounded-full ${iconBg} text-neutral-50`}>
