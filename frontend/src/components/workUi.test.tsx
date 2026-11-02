@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { CoachTour } from './CoachTour'
 import { WorkSidePanel } from './NegotiationPanels'
 import { ExpandableArea } from './WorkFrame'
+import { signOut } from '../lib/auth'
 import { ProfileMenu } from './ProfileMenu'
 import { maskEmail } from '../lib/auth'
 import { computeProfile } from '../api/mock/report'
@@ -178,5 +179,15 @@ describe('job understanding profile', () => {
   it('has the three axes of the wireframe, without the removed repeated-revision axis', () => {
     const profile = computeProfile({ findings: [], action_logs: [], scores: { intent_delivery: 3, concept_retention: 3, cost_control: 2 }, branch: 'outsourcing' })
     expect(profile.map((a) => a.caption)).toEqual(['결과물 완성도 vs 제출 속도', '이해관계자 설득 선호도', '피드백 후 판단 수정 성향'])
+  })
+})
+
+describe('leaving and logging out', () => {
+  it('logging out clears this browser\'s progress and first-visit tips so the next person starts fresh', async () => {
+    useSession.getState().goTo('final_feedback')
+    localStorage.setItem('jobda-coach-workspace', '1')
+    await signOut()
+    expect(useSession.getState().currentStage).toBe('brief')
+    expect(localStorage.getItem('jobda-coach-workspace')).toBeNull()
   })
 })

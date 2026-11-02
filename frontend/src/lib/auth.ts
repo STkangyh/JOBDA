@@ -12,6 +12,11 @@ export const authConfigured = Boolean(import.meta.env.VITE_SUPABASE_URL && impor
 // 로그인·가입 인증 뒤 이동할 곳 — 온보딩(Figma 2217:9726)
 export const AFTER_AUTH_PATH = '/onboarding'
 
+// 계정 진행 기록(lib/progress.ts) — 로그인하면 불러오고, 로그아웃하면 저장 후 지운다. 스토어가 인증 청크에 끼지 않게 동적 import.
+async function progress() {
+  return import('./progress')
+}
+
 // supabase-js가 인증 화면 청크에만 들어가도록 동적 import 한다.
 async function supabase() {
   const { getSupabase } = await import('./supabaseClient')
@@ -163,7 +168,7 @@ export function maskEmail(email: string): string {
   return `${name.slice(0, 2)}${'*'.repeat(Math.max(name.length - 2, 3))}@${domain}`
 }
 
-/** 로그아웃. 이 브라우저의 로그인만 끝낸다 — 다시 오면 로그인 화면으로 간다(jobda-has-account는 남긴다). */
+/** 로그아웃. 진행을 계정에 저장하고 이 브라우저에서는 지운 뒤 로그인을 끝낸다 — 다시 오면 로그인 화면으로 간다(jobda-has-account는 남긴다). */
 export async function signOut(): Promise<void> {
   try {
     localStorage.removeItem(EPHEMERAL_KEY)
@@ -171,6 +176,8 @@ export async function signOut(): Promise<void> {
     // 저장소가 막혀도 로그아웃은 진행
   }
   track('logout')
+  // 공용 노트북에서 다음 사람이 이어받지 않게 진행을 지운다 — 지우기 전에 계정에 저장해 다시 로그인하면 이어진다
+  await (await progress()).saveAndClearForLogout()
   if (!authConfigured) return
   await (await supabase()).auth.signOut({ scope: 'local' }).catch(() => {})
 }
@@ -197,6 +204,7 @@ export async function signIn(email: string, password: string, remember: boolean)
   }
   markSignedIn(remember)
   track('login_success', { remember })
+  await (await progress()).restoreProgress()
   return ok
 }
 
@@ -217,6 +225,7 @@ export async function signUp(email: string, password: string): Promise<SignUpRes
   if (data.session) {
     markSignedIn(true)
     track('signup_complete')
+    await (await progress()).restoreProgress()
     return { ok: true, signedIn: true }
   }
   track('signup_email_sent')
@@ -257,6 +266,7 @@ export async function confirmFromLink(tokenHash: string, type: LinkType): Promis
   if (error) return failWith(error)
   markSignedIn(true)
   if (type === 'signup') track('signup_complete')
+  await (await progress()).restoreProgress()
   return ok
 }
 

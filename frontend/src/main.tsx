@@ -12,6 +12,8 @@ captureParticipant()
 
 if (ANALYTICS_ENABLED) {
   void import('./lib/analytics/supabase').then((m) => m.startSupabaseAnalytics())
+  // 로그인한 계정의 진행을 계정에 계속 저장한다(lib/progress.ts)
+  void import('./lib/progress').then((m) => m.startProgressSync())
 }
 
 createRoot(document.getElementById('root')!).render(
