@@ -111,7 +111,7 @@ interface SessionActions {
   goTo: (stage: Stage) => void
   viewDoc: (key: string) => void
   sendMessage: (persona: Persona, message: string) => Promise<string>
-  saveNote: (text: string, persona?: Persona) => void
+  saveNote: (text: string, persona?: Persona, lines?: string[]) => void
   setWorkTaskStatus: (id: string, status: 'done' | 'removed') => void
   updateDraftPart: (index: number, fields: Partial<PartSpec>) => void
   setPartAttachment: (index: number, attachment: PartAttachment, fileName?: string | null) => void
@@ -276,13 +276,13 @@ export const useSession = create<SessionState & SessionActions>()(
 
       setWorkTaskStatus: (id, status) => set((s) => ({ workTaskStatus: { ...s.workTaskStatus, [id]: status } })),
 
-      saveNote: (text, persona) =>
+      saveNote: (text, persona, lines) =>
         set((s) =>
           s.savedNotes.includes(text)
             ? s
             : {
                 savedNotes: [...s.savedNotes, text],
-                savedNoteMeta: persona ? { ...s.savedNoteMeta, [text]: { persona, t: Date.now() } } : s.savedNoteMeta,
+                savedNoteMeta: persona ? { ...s.savedNoteMeta, [text]: { persona, t: Date.now(), lines } } : s.savedNoteMeta,
               },
         ),
 

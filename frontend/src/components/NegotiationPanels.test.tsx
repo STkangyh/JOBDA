@@ -116,3 +116,48 @@ describe('Messenger — what I sent shows up right away', () => {
     expect(screen.getByText('언제 끝나요?')).toBeInTheDocument()
   })
 })
+
+describe('Messenger — saving an answer to the notes', () => {
+  const mockedNote = vi.mocked(client.note)
+  const reply = '우리 공장 목재는 취급 안 합니다. 확인했어요?'
+
+  async function askAndGetReply() {
+    mockedChat.mockResolvedValueOnce({ reply, intent: 'manufacturing_capability', disclose: [] })
+    const user = userEvent.setup()
+    render(<Messenger defaultActive="engineering" />)
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '목재 되나요?')
+    await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
+    await screen.findByText(reply)
+    return user
+  }
+
+  beforeEach(() => mockedNote.mockReset())
+
+  it('saves the summarized lines, sending who said it and what was asked', async () => {
+    mockedNote.mockResolvedValueOnce(['목재는 자사 공장에서 취급하지 않음'])
+    const user = await askAndGetReply()
+    await user.click(screen.getByRole('button', { name: '답변 내용 노트에 저장' }))
+
+    expect(await screen.findByRole('button', { name: '노트에 저장됨' })).toBeDisabled()
+    expect(mockedNote).toHaveBeenCalledWith({ speaker: '박책임', team: '설계팀', question: '목재 되나요?', reply, existing: [] })
+    expect(useSession.getState().savedNoteMeta[reply]).toMatchObject({ persona: 'engineering', lines: ['목재는 자사 공장에서 취급하지 않음'] })
+  })
+
+  it('does not save when there is nothing to note, and says so', async () => {
+    mockedNote.mockResolvedValueOnce([])
+    const user = await askAndGetReply()
+    await user.click(screen.getByRole('button', { name: '답변 내용 노트에 저장' }))
+
+    expect(await screen.findByRole('button', { name: '저장할 내용이 없어요' })).toBeDisabled()
+    expect(useSession.getState().savedNotes).toEqual([])
+  })
+
+  it('still saves the reply as it is when the note API cannot be reached', async () => {
+    mockedNote.mockRejectedValueOnce(new Error('offline'))
+    const user = await askAndGetReply()
+    await user.click(screen.getByRole('button', { name: '답변 내용 노트에 저장' }))
+
+    await screen.findByRole('button', { name: '노트에 저장됨' })
+    expect(useSession.getState().savedNoteMeta[reply].lines).toEqual([reply])
+  })
+})

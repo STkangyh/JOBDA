@@ -227,7 +227,8 @@ export interface SessionState {
   // 세션1(store/session1.ts)의 savedNotes/saveNote와 같은 발상.
   savedNotes: string[]
   /** 저장한 답변을 누가·언제 보냈는지 — 업무 노트 메모장 카드 제목("고프로와의 대화")과 시각에 쓴다 */
-  savedNoteMeta: Record<string, { persona: Persona; t: number }>
+  // lines: /api/note가 답변을 줄인 메모 줄(2026-11-02). 예전 저장분처럼 없으면 답변 원문을 그대로 보여준다.
+  savedNoteMeta: Record<string, { persona: Persona; t: number; lines?: string[] }>
   /** 업무 노트 "업무 일정" 카드별 상태 — 완료(흐리게)·지움(목록에서 빠짐). 없으면 할 일로 남아 있음 */
   workTaskStatus: Record<string, 'done' | 'removed'>
   draft: SpecDraft

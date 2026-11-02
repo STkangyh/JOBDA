@@ -76,6 +76,24 @@ export async function report(req: ReportRequest): Promise<ReportResponse> {
   }
 }
 
+export interface NoteInput {
+  speaker: string
+  team: string
+  question?: string
+  reply: string
+  existing?: string[]
+}
+
+/**
+ * 관계자 답변을 업무 노트 메모 줄로 줄인다(api/note.ts). 빈 배열이면 메모할 내용이 없다는 뜻이다.
+ * 목데이터로 돌 때는 서버의 실패 폴백과 같이 답변 원문을 한 줄로 돌려준다.
+ */
+export async function note(req: NoteInput): Promise<string[]> {
+  if (USE_MOCK) return [req.reply.trim()]
+  const res = await postJson<unknown, { lines?: unknown }>('/api/note', { scenario: SCENARIO, ...req })
+  return Array.isArray(res.lines) ? res.lines.filter((l): l is string => typeof l === 'string') : [req.reply.trim()]
+}
+
 export async function sessionLog(req: SessionLogRequest): Promise<void> {
   if (USE_MOCK) return
   await postJson('/api/session-log', { scenario: SCENARIO, ...req })

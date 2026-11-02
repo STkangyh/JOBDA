@@ -84,6 +84,16 @@ describe('work notes panel', () => {
     expect(useSession.getState().workTaskStatus).toEqual({ revise_spec: 'removed' })
   })
 
+  it('shows the summarized memo lines instead of the whole answer', async () => {
+    const user = userEvent.setup()
+    useSession.getState().saveNote('시방서 잘 봤어요. 우리 공장 목재는 취급 안 합니다.', 'engineering', ['목재는 자사 공장에서 취급하지 않음'])
+    renderPanel()
+    await user.click(screen.getByRole('button', { name: /업무노트/ }))
+    await user.click(screen.getByRole('tab', { name: '메모장' }))
+    expect(screen.getByText('목재는 자사 공장에서 취급하지 않음')).toBeInTheDocument()
+    expect(screen.queryByText(/시방서 잘 봤어요/)).not.toBeInTheDocument()
+  })
+
   it('lists conversation memos and saved answers under 메모장', async () => {
     const user = userEvent.setup()
     useSession.getState().saveNote('저장한 내용', 'engineering')

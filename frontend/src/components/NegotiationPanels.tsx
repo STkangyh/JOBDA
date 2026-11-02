@@ -4,6 +4,7 @@ import { ArrowUpwardIcon, WarningIcon } from './icons'
 import { useSession } from '../store/session'
 import { PERSONA_LABEL, PERSONA_SENDER_NAME, type Persona } from '../types'
 import { track, useTrackView } from '../lib/analytics'
+import { note as apiNote } from '../api/client'
 import { ChatRetentionNotice } from './ChatRetentionNotice'
 import seniorAvatar from '../assets/work/avatars/senior.png'
 import engineeringAvatar from '../assets/work/avatars/engineering.png'
@@ -14,6 +15,30 @@ const AVATAR: Record<Persona, string> = { senior: seniorAvatar, engineering: eng
 
 function Avatar({ persona, size = 32 }: { persona: Persona; size?: number }) {
   return <img src={AVATAR[persona]} alt="" width={size} height={size} className="shrink-0 rounded-full bg-neutral-50 object-cover" style={{ width: size, height: size }} />
+}
+
+// "답변 내용 노트에 저장" — 누르면 /api/note가 답변을 짧은 메모 줄로 줄여 메모장에 저장한다(2026-11-02).
+// 메모할 사실이 없는 답변(되묻기 등)이면 저장하지 않고 그렇게 알려준다.
+type NoteStatus = 'idle' | 'saving' | 'saved' | 'empty'
+const NOTE_LABEL: Record<NoteStatus, string> = {
+  idle: '답변 내용 노트에 저장',
+  saving: '노트에 정리하는 중…',
+  saved: '노트에 저장됨',
+  empty: '저장할 내용이 없어요',
+}
+
+function NoteButton({ status, onSave }: { status: NoteStatus; onSave: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onSave}
+      disabled={status !== 'idle'}
+      aria-busy={status === 'saving' || undefined}
+      className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
+    >
+      {NOTE_LABEL[status]}
+    </button>
+  )
 }
 
 function formatTime(t: number): string {
@@ -52,7 +77,10 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   const chatHistory = useSession((s) => s.chatHistory)
   const sendMessage = useSession((s) => s.sendMessage)
   const savedNotes = useSession((s) => s.savedNotes)
+  const savedNoteMeta = useSession((s) => s.savedNoteMeta)
   const saveNote = useSession((s) => s.saveNote)
+  // 저장 중·저장할 내용 없음은 화면에서만 들고 있는다(저장된 것만 store에 남는다). 키는 답변 원문.
+  const [noteStatus, setNoteStatus] = useState<Record<string, 'saving' | 'empty'>>({})
   // 보낸 메시지는 답장이 올 때까지 store에 안 들어가서(답장과 한 쌍으로 저장) 그동안 화면에서 먼저 보여준다.
   const [pending, setPending] = useState<{ persona: Persona; text: string; t: number } | null>(null)
 
@@ -93,6 +121,34 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
     } finally {
       setSending(false)
     }
+  }
+
+  const statusOf = (text: string): NoteStatus => (savedNotes.includes(text) ? 'saved' : (noteStatus[text] ?? 'idle'))
+
+  const saveAnswer = async (text: string, persona: Persona, question?: string) => {
+    if (statusOf(text) !== 'idle') return
+    setNoteStatus((prev) => ({ ...prev, [text]: 'saving' }))
+    // 같은 관계자 메모에 이미 있는 줄은 빼고 정리하도록 넘긴다
+    const existing = savedNotes.filter((n) => savedNoteMeta[n]?.persona === persona).flatMap((n) => savedNoteMeta[n]?.lines ?? [n])
+    let lines: string[]
+    try {
+      lines = await apiNote({ speaker: PERSONA_SENDER_NAME[persona], team: PERSONA_LABEL[persona], question, reply: text, existing })
+    } catch {
+      // 서버에 닿지 못했을 때도 저장은 되게 — 관계자가 한 말 그대로라 틀린 메모가 되지 않는다
+      lines = [text.trim()]
+    }
+    if (lines.length === 0) {
+      setNoteStatus((prev) => ({ ...prev, [text]: 'empty' }))
+      track('note_save', { actor: persona, status: 'empty' })
+      return
+    }
+    saveNote(text, persona, lines)
+    setNoteStatus((prev) => {
+      const next = { ...prev }
+      delete next[text]
+      return next
+    })
+    track('note_save', { actor: persona, status: 'saved', lines: lines.length })
   }
 
   // store에 실제 대화가 들어온 순간 보낸 말풍선은 거기서 보여주므로 화면용 말풍선은 숨긴다(한 프레임 겹침 방지)
@@ -149,14 +205,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
                   <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700">
                     {PERSONA_SENDER_NAME[intro!.persona]}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => saveNote(intro!.text, intro!.persona)}
-                    disabled={savedNotes.includes(intro!.text)}
-                    className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
-                  >
-                    {savedNotes.includes(intro!.text) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
-                  </button>
+                  <NoteButton status={statusOf(intro!.text)} onSave={() => saveAnswer(intro!.text, intro!.persona)} />
                 </div>
               </div>
             </div>
@@ -182,14 +231,10 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
                     <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700">
                       {PERSONA_SENDER_NAME[active]}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => saveNote(m.content, active)}
-                      disabled={savedNotes.includes(m.content)}
-                      className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
-                    >
-                      {savedNotes.includes(m.content) ? '노트에 저장됨' : '답변 내용 노트에 저장'}
-                    </button>
+                    <NoteButton
+                      status={statusOf(m.content)}
+                      onSave={() => saveAnswer(m.content, active, history[i - 1]?.role === 'user' ? history[i - 1].content : undefined)}
+                    />
                   </div>
                 )}
               </div>
@@ -481,7 +526,7 @@ export function WorkSidePanel({ messenger, mode: modeProp, onModeChange, tab: ta
                         <h3 className="text-title-lg font-semibold text-neutral-900">{meta ? `${PERSONA_SENDER_NAME[meta.persona]}와의 대화` : '저장한 답변'}</h3>
                         {meta && <span className="text-caption-lg text-neutral-500">{formatMemoTime(meta.t)}</span>}
                       </div>
-                      <p className="text-body-md whitespace-pre-line text-neutral-600">{note}</p>
+                      <p className="text-body-md whitespace-pre-line text-neutral-600">{meta?.lines?.length ? meta.lines.join('\n') : note}</p>
                     </article>
                   )
                 })}
