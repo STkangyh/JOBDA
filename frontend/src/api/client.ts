@@ -28,12 +28,12 @@ export async function chat(req: ChatRequest): Promise<ChatResponse> {
 // SENTENCE 버킷과 동일하게 맞춰둠 — 실제 API와 오프라인 목데이터가 같은 분류를 쓰게).
 const FINDING_BUCKET: Record<FindingCode, 'strengths' | 'cautions' | 'missed'> = {
   asked_capability_before_final: 'strengths',
-  vendor_compared_three: 'strengths',
+  limit_sample_attached_in_draft: 'strengths',
+  cost_impact_checked: 'strengths',
+  deadline_margin_considered: 'strengths',
   limit_sample_missing_in_draft: 'cautions',
   spec_field_missing: 'cautions',
   vendor_criteria_incomplete: 'cautions',
-  revisited_after_branch: 'cautions',
-  concept_abandoned: 'cautions',
   capability_never_asked: 'missed',
   budget_never_asked: 'missed',
   deadline_margin_ignored: 'missed',

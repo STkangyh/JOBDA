@@ -57,16 +57,25 @@ export interface ActionLog {
   intent?: string
 }
 
+// 기획 확정(2026-11-01)으로 세션2 평가 기준이 10개로 바뀌었다. 잘한 행동과 아쉬운 행동이
+// 짝을 이루도록 강점 쪽 code 셋(limit_sample_attached_in_draft / cost_impact_checked /
+// deadline_margin_considered)이 새로 생겼고, vendor_compared_three · revisited_after_branch ·
+// concept_abandoned 는 빠졌다. budget_never_asked 는 이름은 그대로 두되 뜻이 "예산 상한 미확인"
+// 에서 "생산 단가·비용 영향 미확인"으로 바뀌었다(예산 상한값을 두지 않기로 함).
+// 백엔드 prompts/report.md · fallback.json 의 code 표와 1:1 로 맞춰야 문장이 나온다.
 export type FindingCode =
+  // strengths
+  | 'asked_capability_before_final'
+  | 'limit_sample_attached_in_draft'
+  | 'cost_impact_checked'
+  | 'deadline_margin_considered'
+  // cautions
   | 'limit_sample_missing_in_draft'
   | 'spec_field_missing'
-  | 'asked_capability_before_final'
+  | 'vendor_criteria_incomplete'
+  // missed
   | 'capability_never_asked'
   | 'budget_never_asked'
-  | 'vendor_compared_three'
-  | 'vendor_criteria_incomplete'
-  | 'revisited_after_branch'
-  | 'concept_abandoned'
   | 'deadline_margin_ignored'
 
 export interface Finding {

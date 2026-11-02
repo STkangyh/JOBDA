@@ -9,9 +9,17 @@ const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed
     bucket: 'strengths',
     text: '사내 생산 가능 여부를 최종본 제출 전에 확인해 재작업을 줄였습니다.',
   },
-  vendor_compared_three: {
+  limit_sample_attached_in_draft: {
     bucket: 'strengths',
-    text: '외주 업체 3개사를 납기·수량·단가 기준으로 비교했습니다.',
+    text: '초안부터 한도 견본 판정표를 별첨해 기준을 함께 전달했습니다.',
+  },
+  cost_impact_checked: {
+    bucket: 'strengths',
+    text: '구매팀에 생산 단가 영향을 확인한 뒤 방향을 정했습니다.',
+  },
+  deadline_margin_considered: {
+    bucket: 'strengths',
+    text: '발주까지 남은 일정을 고려해 실현 가능한 방향을 골랐습니다.',
   },
   limit_sample_missing_in_draft: {
     bucket: 'cautions',
@@ -21,13 +29,9 @@ const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed
     bucket: 'cautions',
     text: '업체 비교 시 납기·수량·단가 중 일부만 검토했습니다.',
   },
-  revisited_after_branch: {
-    bucket: 'cautions',
-    text: '목재를 포기한 뒤 시방서를 다시 작성하며 일정이 지연되었습니다.',
-  },
   spec_field_missing: {
     bucket: 'cautions',
-    text: '시방서 필수 항목 중 일부(사이즈/제작 방식/CMF/컬러칩)가 비어 있었습니다.',
+    text: '시방서 입력 항목(소재·컬러·마감·사이즈·생산 방식) 중 일부가 비어 있었습니다.',
   },
   capability_never_asked: {
     bucket: 'missed',
@@ -35,11 +39,7 @@ const SENTENCE: Record<FindingCode, { bucket: 'strengths' | 'cautions' | 'missed
   },
   budget_never_asked: {
     bucket: 'missed',
-    text: '구매팀에 목재 파트 예산을 확인하지 않았습니다.',
-  },
-  concept_abandoned: {
-    bucket: 'cautions',
-    text: '목재 하우징 콘셉트를 유지할 다른 방법을 더 탐색하지 않고 포기했습니다.',
+    text: '구매팀에 생산 단가 영향을 확인하지 않았습니다.',
   },
   deadline_margin_ignored: {
     bucket: 'missed',
@@ -66,7 +66,6 @@ export const JOB_MEANING = '제약 속에서 디자인 의도와 현실의 타�
 export function computeProfile(req: ReportRequest): ProfileAxis[] {
   const hasFinding = (code: FindingCode) => req.findings.some((f) => f.code === code)
 
-  const revisited = hasFinding('revisited_after_branch')
   const askedCapability = !hasFinding('capability_never_asked')
   const askedBudget = !hasFinding('budget_never_asked')
 
@@ -84,10 +83,15 @@ export function computeProfile(req: ReportRequest): ProfileAxis[] {
       value: ((req.scores.concept_retention - 1) / 2) * 100,
     },
     {
+      // 이 축은 revisited_after_branch finding 하나에만 기대고 있었는데, 기획이 그 항목을
+      // 평가 기준에서 뺐다(분기 후 재작성 자체보다 1차 피드백에서 무엇이 걸렸는지가 중요).
+      // ReportRequest 에는 revisitCount 가 없어 대체 근거를 여기서 만들 수 없으므로, 축을
+      // 지울지 다른 근거로 바꿀지 정해질 때까지 중립값으로 둔다. 와이어프레임의 프로필은
+      // 축이 셋인데 여기는 넷이라 그 정리와 함께 결정해야 한다.
       leftLabel: '수용적',
       rightLabel: '부담 경험',
       caption: '반복 수정에 대한 반응',
-      value: revisited ? 80 : 20,
+      value: 50,
     },
     {
       leftLabel: '수용적',
