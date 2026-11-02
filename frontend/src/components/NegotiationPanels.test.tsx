@@ -93,3 +93,26 @@ describe('Messenger', () => {
     expect(mockedChat).not.toHaveBeenCalled()
   })
 })
+
+describe('Messenger — what I sent shows up right away', () => {
+  it('shows my message before the reply arrives, once, and keeps it when sending fails', async () => {
+    let resolveChat!: (v: ChatResponse) => void
+    mockedChat.mockImplementationOnce(() => new Promise((resolve) => (resolveChat = resolve)))
+    const user = userEvent.setup()
+    render(<Messenger defaultActive="engineering" />)
+
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '목재 가공 가능한가요?')
+    await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
+    expect(screen.getByText('목재 가공 가능한가요?')).toBeInTheDocument()
+
+    resolveChat({ reply: '사내에서는 불가능해요.', intent: 'manufacturing_capability', disclose: [] })
+    expect(await screen.findByText('사내에서는 불가능해요.')).toBeInTheDocument()
+    expect(screen.getAllByText('목재 가공 가능한가요?')).toHaveLength(1)
+
+    mockedChat.mockRejectedValueOnce(new Error('503'))
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '언제 끝나요?')
+    await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
+    expect(await screen.findByText('메시지 전송에 실패했어요.')).toBeInTheDocument()
+    expect(screen.getByText('언제 끝나요?')).toBeInTheDocument()
+  })
+})

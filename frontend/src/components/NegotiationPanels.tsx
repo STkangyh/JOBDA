@@ -53,6 +53,8 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   const sendMessage = useSession((s) => s.sendMessage)
   const savedNotes = useSession((s) => s.savedNotes)
   const saveNote = useSession((s) => s.saveNote)
+  // 보낸 메시지는 답장이 올 때까지 store에 안 들어가서(답장과 한 쌍으로 저장) 그동안 화면에서 먼저 보여준다.
+  const [pending, setPending] = useState<{ persona: Persona; text: string; t: number } | null>(null)
 
   // Figma 823:56235("Frame 2147227201") 주석 원문: "현재 활성화된 메신저창이 아닌 다른 상대로부터
   // 메시지가 올 경우 상태 표시등 점등". intro가 defaultActive와 다른 사람 몫이면(예: 823:56196
@@ -81,14 +83,22 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
     setSending(true)
     setInput('')
     setFailed(null)
+    setPending({ persona: active, text, t: Date.now() })
     try {
       await sendMessage(active, text)
+      setPending(null)
     } catch {
+      // 실패해도 보낸 말풍선은 남겨 두고 그 아래에 재시도를 띄운다
       setFailed({ persona: active, text })
     } finally {
       setSending(false)
     }
   }
+
+  // store에 실제 대화가 들어온 순간 보낸 말풍선은 거기서 보여주므로 화면용 말풍선은 숨긴다(한 프레임 겹침 방지)
+  const lastUser = [...history].reverse().find((m) => m.role === 'user')
+  const showPending =
+    pending !== null && pending.persona === active && !(lastUser && lastUser.content === pending.text && (lastUser.t ?? 0) >= pending.t)
 
   // Figma 823:53612 — 메신저 메시지 영역은 justify-end라 메시지가 적을 땐 위쪽이 비고 아래쪽에
   // 붙어 있다(우리가 처음엔 위에서부터 채워서 어긋났었음). overflow가 생겨도 항상 최신 메시지가
@@ -96,7 +106,7 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
   useEffect(() => {
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [history.length, sending, showIntro, failed])
+  }, [history.length, sending, showIntro, failed, pending])
 
   return (
     // 업무 페이지 새 디자인(2342:15295 등, 2026-10-31): 화면 오른쪽 끝에 붙은 회색 반투명 패널, 관계자 칩에 얼굴.
@@ -193,6 +203,16 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
           {/* 이전엔 작은 회색 텍스트 한 줄("답변 작성 중...")뿐이라 실제 응답 대기(2~4초
               실측)를 잘 놓쳤다는 피드백 — 다른 관계자 말풍선과 같은 모양(rounded-br-xl 등)의
               점 3개 바운스 애니메이션으로 바꿔서 "지금 뭔가 진행 중"이 시각적으로 분명하게 함. */}
+          {showPending && (
+            <div className="flex flex-row-reverse items-end gap-2 self-end" data-pending>
+              <div className="flex max-w-[260px] flex-col gap-2 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl bg-green-300 px-[18px] py-3 text-green-900">
+                <Text variant="body-md">{pending.text}</Text>
+              </div>
+              <Text variant="caption-sm" className="shrink-0 text-[12px] text-neutral-700">
+                {formatTime(pending.t)}
+              </Text>
+            </div>
+          )}
           {sending && (
             <div className="flex items-end gap-2 self-start" role="status" aria-label={`${PERSONA_LABEL[active]} 답변 작성 중`}>
               <Avatar persona={active} />
