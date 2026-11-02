@@ -133,6 +133,37 @@ export async function hasAccountSession(): Promise<boolean> {
   }
 }
 
+/** 로그인한 이메일을 가려서 돌려준다(예: ab***@gmail.com). 로그인하지 않았으면 null. 화면 표시용이며 이벤트에는 넣지 않는다. */
+export async function accountEmailHint(): Promise<string | null> {
+  if (!authConfigured || sessionEndedByChoice()) return null
+  try {
+    const { data } = await (await supabase()).auth.getSession()
+    const user = data.session?.user
+    if (!user || user.is_anonymous || !user.email) return null
+    return maskEmail(user.email)
+  } catch {
+    return null
+  }
+}
+
+export function maskEmail(email: string): string {
+  const [name, domain] = email.split('@')
+  if (!domain) return email
+  return `${name.slice(0, 2)}${'*'.repeat(Math.max(name.length - 2, 3))}@${domain}`
+}
+
+/** 로그아웃. 이 브라우저의 로그인만 끝낸다 — 다시 오면 로그인 화면으로 간다(jobda-has-account는 남긴다). */
+export async function signOut(): Promise<void> {
+  try {
+    localStorage.removeItem(EPHEMERAL_KEY)
+  } catch {
+    // 저장소가 막혀도 로그아웃은 진행
+  }
+  track('logout')
+  if (!authConfigured) return
+  await (await supabase()).auth.signOut({ scope: 'local' }).catch(() => {})
+}
+
 /**
  * 루트(/)로 들어온 사람을 보낼 곳 (2026-10-13 결정). null이면 원래 화면(시작 화면 또는 탐색 홈).
  * - 로그인이 살아 있는 사람(로그인 상태 유지를 체크했거나 아직 브라우저를 닫지 않은 사람) → 온보딩

@@ -4,7 +4,7 @@ import brandLogo from '../assets/brand-logo.png'
 import homeIcon from '../assets/gnb/home.svg'
 import workIcon from '../assets/gnb/work.svg'
 import reportIcon from '../assets/gnb/report.svg'
-import profileIcon from '../assets/gnb/profile.svg'
+import { ProfileMenu } from './ProfileMenu'
 
 export type SidebarItem = 'home' | 'work' | 'report'
 
@@ -48,7 +48,7 @@ export function Sidebar({ active = 'home', onSelect, className = '' }: SidebarPr
   return (
     <nav
       aria-label="주 메뉴"
-      className={`relative flex w-24 shrink-0 flex-col items-center justify-center overflow-clip rounded-lg bg-[rgba(44,44,44,0.75)] p-5 shadow-gnb backdrop-blur-gnb ${className}`}
+      className={`relative z-30 flex w-24 shrink-0 flex-col items-center justify-center rounded-lg bg-[rgba(44,44,44,0.75)] p-5 shadow-gnb backdrop-blur-gnb ${className}`}
     >
       <div className="absolute top-[22px] left-[22px] flex w-[54px] flex-col gap-6">
         <button
@@ -59,10 +59,7 @@ export function Sidebar({ active = 'home', onSelect, className = '' }: SidebarPr
         >
           <img src={brandLogo} alt="" className="size-[54px] rounded-full bg-neutral-800 object-cover" />
         </button>
-        {/* 프로필: 로그인 화면이 나오기 전까지는 모양만 둔다(2026-10-13 결정) */}
-        <span className="flex size-[54px] items-center justify-center rounded-full bg-green-400 backdrop-blur-panel" aria-hidden>
-          <img src={profileIcon} alt="" width={20} height={20} className="size-5" />
-        </span>
+        <ProfileMenu />
       </div>
       <ul className="flex flex-col gap-2">
         {ITEMS.map((item) => {

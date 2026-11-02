@@ -5,6 +5,8 @@ import { MemoryRouter } from 'react-router-dom'
 import { CoachTour } from './CoachTour'
 import { WorkSidePanel } from './NegotiationPanels'
 import { ExpandableArea } from './WorkFrame'
+import { ProfileMenu } from './ProfileMenu'
+import { maskEmail } from '../lib/auth'
 import { stageNeighbors, understandingPercent, useSession } from '../store/session'
 
 beforeEach(() => {
@@ -139,5 +141,24 @@ describe('work area fullscreen', () => {
     await user.click(screen.getByText('빈 곳'))
     await user.keyboard('{Escape}')
     expect(area).not.toHaveAttribute('data-expanded')
+  })
+})
+
+describe('profile menu', () => {
+  it('offers login when no account is signed in', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <ProfileMenu />
+      </MemoryRouter>,
+    )
+    await user.click(screen.getByRole('button', { name: '내 계정' }))
+    expect(await screen.findByText('로그인하지 않았어요')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '로그인' })).toBeInTheDocument()
+  })
+
+  it('hides most of the email address', () => {
+    expect(maskEmail('abcdef@gmail.com')).toBe('ab****@gmail.com')
+    expect(maskEmail('ab@x.com')).toBe('ab***@x.com')
   })
 })
