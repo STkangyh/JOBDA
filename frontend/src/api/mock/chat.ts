@@ -40,11 +40,11 @@ const RULES: Record<Persona, Rule[]> = {
       reply: '시트지 래핑으로 진행하면 이번 주 안에 마무리됩니다.',
     },
     {
-      keywords: ['가능', '제작', '밴딩', '오일', '목재', '사내', '생산', '마감'],
+      keywords: ['가능', '제작', '접합', '밴딩', '오일', '목재', '사내', '생산', '마감'],
       intent: 'manufacturing_capability',
       disclose: ['inhouse_capability'],
       reply:
-        '우리 공장은 목재 취급 안 합니다. 시트지 래핑은 몰라도 목재 밴딩이나 오일 마감은 불가예요. 어떻게 할지는 디자이너님이 정하세요.',
+        '우리 공장은 목재 취급 안 합니다. 시트지 래핑은 몰라도 목재 접합이나 오일 마감은 불가예요. 어떻게 할지는 디자이너님이 정하세요.',
     },
   ],
   purchasing: [
@@ -59,7 +59,7 @@ const RULES: Record<Persona, Rule[]> = {
       intent: 'cost_constraint',
       disclose: ['cost_impact'],
       reply:
-        '목재 밴딩으로 가면 예산 초과 가능성이 있어요. 시트지로 가거나 목재와 비슷한 느낌 내는 대체 재질을 찾는 방법도 있어요.',
+        '목재 접합으로 가면 예산 초과 가능성이 있어요. 시트지로 가거나 목재와 비슷한 느낌 내는 대체 재질을 찾는 방법도 있어요.',
     },
     {
       keywords: ['전체', '다른 파트', '총'],
@@ -96,7 +96,7 @@ export function mockChat(req: ChatRequest): ChatResponse {
   }
 
   // 다른 관계자 담당으로 보이는 키워드가 섞여 있으면 안내만 하고 정보는 공개하지 않는다.
-  const otherPersonaKeywords = ['예산', '단가', '비용', '가격', '밴딩', '가능', '서식', '한도', '업체']
+  const otherPersonaKeywords = ['예산', '단가', '비용', '가격', '접합', '밴딩', '가능', '서식', '한도', '업체']
   if (otherPersonaKeywords.some((k) => lower.includes(k))) {
     return { reply: OUT_OF_SCOPE_REDIRECT[req.persona], intent: 'out_of_scope', disclose: [] }
   }
