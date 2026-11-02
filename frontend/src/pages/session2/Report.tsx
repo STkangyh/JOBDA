@@ -2,10 +2,10 @@ import { useNavigate } from 'react-router-dom'
 import { understandingPercent, useSession } from '../../store/session'
 import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { Text } from '../../components/Text'
-import { Button } from '../../components/Button'
 import { DotMatrix } from '../../components/DotMatrix'
 import { RATING_SCALE } from '../../types'
 import { track } from '../../lib/analytics'
+import { DEFAULT_JOURNEY } from '../../api/mock/report'
 
 // Figma "Desktop - 121"(823:52946, 파일 x6feHLgVMyg8sh8C2jVPE1) 전면 재실측 — 예전 구현은
 // 실제로는 이 프레임이 아니라 종합 리포트(ComprehensiveReport.tsx, Desktop-101)의 다크 테마를
@@ -19,16 +19,9 @@ import { track } from '../../lib/analytics'
 const WORK_EXPERIENCED_TITLE = '디자인 의도를 시방서로 정확히 전달, 제품 구현'
 const WORK_MEANING_TITLE = '디자인 확정안에 따른 양산 방식 고려'
 
-const PROGRESS_STAGES = [
-  { tag: '시방서 초안 작성', label: '한도 견본 표기 누락에 따른 시방서 수정' },
-  { tag: '2차 협상', label: '목재 파트 제작 불가 확인, 대안 탐색' },
-  { tag: '3차 협상', label: '외주 업체 탐색 및 보고' },
-]
-
-const BURDEN_TAG_GROUPS = [
-  { label: '커뮤니케이션', tags: ['의도 전달의 어려움', '관리 용이', '제작 방식 조율'] },
-  { label: '제약 상황', tags: ['빡빡한 업무 일정', '반복되는 수정', '생산 단가 고려', '업체 컨택 및 일정 조율'] },
-]
+// 업무 진행 과정의 단계 이름(Figma 2262:13057 원문). 단계마다 한 줄 설명은 리포트의 journey(백엔드 LLM, 없으면 기본값).
+// 세 번째 단계는 고른 방향에 따라 외주를 안 거칠 수도 있어, 분기와 무관한 "N차 협상" 이름을 쓴다.
+const JOURNEY_STAGES = ['시방서 초안 작성', '2차 협상', '3차 협상']
 
 function SectionTag({ children }: { children: string }) {
   return (
@@ -68,18 +61,20 @@ export function Report() {
   // 이해도: 업무에서 챙겨야 할 다섯 가지를 챙긴 비율(store/session.ts understandingChecks).
   const interestPercent = (RATING_SCALE.indexOf(selfAssessment.interestScore) / (RATING_SCALE.length - 1)) * 100
 
-  // 업무 페이지 새 디자인 2217:10860(2026-10-13): 같은 3칸 구성을 업무 화면 틀(회색 배경·라벨형 GNB) 안에 둔다.
+  const journey = report.journey?.length === 3 ? report.journey : DEFAULT_JOURNEY
+
+  // 새 직무 리포트 디자인(Figma 2262:13057, 2026-11-02): 왼쪽 업무 소개 칸 + 오른쪽 행동 분석·흥미도·이해도,
+  // 그 아래 오른쪽에 버튼 두 개. 예전 오른쪽 셋째 칸(부담 기록)은 새 디자인에 없어 뺐다.
+  // 창 높이에 맞추고, 내용이 넘치면 그 칸만 안에서 스크롤한다.
   return (
     <WorkFrame step="직무 리포트" sidebar="work" exitStep="report">
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-        <div className="grid min-h-full grid-cols-1 items-stretch gap-[19px] lg:grid-cols-[442fr_855fr_340fr]">
-          <WorkPanel padded={false} className="flex flex-col gap-[48px] px-6 py-8">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-[18px]">
+        <div className="grid min-h-0 flex-1 grid-cols-[442fr_1078fr] gap-4">
+          <WorkPanel padded={false} className="flex min-h-0 flex-col gap-[clamp(24px,4.3svh,48px)] overflow-y-auto px-6 py-8">
             <div className="flex flex-col gap-3">
               <SectionTag>체험한 업무</SectionTag>
               <div className="flex flex-col gap-2 pt-2">
-                <Text variant="title-lg" emphasis>
-                  {WORK_EXPERIENCED_TITLE}
-                </Text>
+                <p className="text-title-lg font-semibold text-neutral-900">{WORK_EXPERIENCED_TITLE}</p>
                 <Text variant="body-lg" className="text-neutral-600">
                   {report.work_overview}
                 </Text>
@@ -89,109 +84,95 @@ export function Report() {
             <div className="flex flex-col gap-3">
               <SectionTag>업무 의미</SectionTag>
               <div className="flex flex-col gap-2 pt-2">
-                <Text variant="title-lg" emphasis>
-                  {WORK_MEANING_TITLE}
-                </Text>
+                <p className="text-title-lg font-semibold text-neutral-900">{WORK_MEANING_TITLE}</p>
                 <Text variant="body-lg" className="text-neutral-600">
                   {report.job_meaning}
                 </Text>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <section aria-label="업무 진행 과정" className="flex flex-col gap-3">
               <SectionTag>업무 진행 과정</SectionTag>
-              <div className="flex flex-col gap-2">
-                {PROGRESS_STAGES.map((stage) => (
-                  <div key={stage.tag} className="flex flex-col items-start gap-2 rounded-tl-xl rounded-tr-xl rounded-br-xl bg-neutral-100 px-[18px] py-3">
-                    <span className="rounded-md bg-neutral-50 px-2.5 py-2 text-caption-lg text-neutral-700">{stage.tag}</span>
-                    <Text variant="body-lg" emphasis className="w-full text-center text-neutral-900">
-                      {stage.label}
+              <ol className="flex flex-col gap-3">
+                {JOURNEY_STAGES.map((stage, i) => (
+                  <li key={stage} className="flex flex-col items-start gap-2 rounded-tl-xl rounded-tr-xl rounded-br-xl bg-neutral-100 px-[18px] py-3">
+                    <span className="rounded-md bg-neutral-50 px-2.5 py-2 text-caption-lg text-neutral-700">{stage}</span>
+                    <Text variant="body-lg" emphasis className="text-neutral-900">
+                      {journey[i]}
                     </Text>
-                  </div>
+                  </li>
                 ))}
-              </div>
-            </div>
+              </ol>
+            </section>
           </WorkPanel>
 
-          <div className="flex min-w-0 flex-col gap-[18px]">
-            <WorkPanel padded={false} className="flex flex-col gap-6 px-6 py-8">
+          <div className="flex min-h-0 min-w-0 flex-col gap-[18px]">
+            <WorkPanel padded={false} className="flex min-h-0 flex-[457_1_0] flex-col gap-6 px-6 py-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <SectionTag>나의 업무 행동 분석</SectionTag>
-                <Text variant="headline-md" emphasis>
-                  {report.personaHeadline}
-                </Text>
+                <p className="text-headline-md font-semibold text-neutral-900">{report.personaHeadline}</p>
               </div>
-              <div className="flex flex-col gap-3">
-                <BehaviorRow label="강점" quotes={report.strengths} className="bg-green-50" />
-                <BehaviorRow label="주의점" quotes={report.cautions} className="bg-green-100" />
-                <BehaviorRow label="놓친 업무 요소" quotes={report.missed} className="bg-green-300" />
+              {/* 항목 수에 상한이 없어(이슈 #6) 넘치면 이 목록만 스크롤한다. 적을 때는 디자인처럼 칸 아래쪽에 붙는다 */}
+              <div data-testid="behavior-list" className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                <div className="mt-auto flex flex-col gap-3">
+                  <BehaviorRow label="강점" quotes={report.strengths} className="bg-green-75" />
+                  <BehaviorRow label="주의점" quotes={report.cautions} className="bg-green-100" />
+                  <BehaviorRow label="놓친 업무 요소" quotes={report.missed} className="bg-green-300" />
+                </div>
               </div>
             </WorkPanel>
 
-            <div className="flex flex-col gap-[19px] sm:flex-row">
-              <WorkPanel padded={false} className="flex flex-1 flex-col justify-between gap-6 p-6">
-                <div className="flex items-start justify-between">
-                  <Text variant="title-lg" emphasis className="text-green-900">
-                    흥미도
-                  </Text>
-                  <span className="text-display-md font-medium leading-none tracking-tight text-[#b1dc88]">{Math.round(interestPercent)}%</span>
-                </div>
-                <DotMatrix percent={interestPercent} />
-              </WorkPanel>
-              <WorkPanel padded={false} className="flex flex-1 flex-col justify-between gap-6 p-6">
-                <div className="flex items-start justify-between">
-                  <Text variant="title-lg" emphasis className="text-green-900">
-                    이해도
-                  </Text>
-                  <span className="text-display-md font-medium leading-none tracking-tight text-[#b1dc88]">{Math.round(understanding)}%</span>
-                </div>
-                <DotMatrix percent={understanding} />
-              </WorkPanel>
+            <div className="flex min-h-0 flex-[370_1_0] gap-[19px]">
+              <MetricCard label="흥미도" percent={interestPercent} />
+              <MetricCard label="이해도" percent={understanding} />
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col justify-end gap-[18px]">
-            {report.burdenNote && (
-              <WorkPanel padded={false} className="flex flex-col gap-[48px] p-6">
-                <SectionTag>부담 기록</SectionTag>
-                {BURDEN_TAG_GROUPS.map((group) => (
-                  <div key={group.label} className="flex flex-col gap-3">
-                    <Text variant="body-lg" className="text-neutral-700">
-                      {group.label}
-                    </Text>
-                    <div className="flex flex-wrap gap-2.5">
-                      {group.tags.map((tag) => (
-                        <span key={tag} className="rounded-full border-2 border-neutral-200 bg-neutral-100 px-3 py-2 text-body-lg text-neutral-600">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </WorkPanel>
-            )}
-            <div className="flex flex-col gap-3">
-              <Button
-                variant="secondary"
-                className="h-[72px] w-full !rounded-xl !border-0 !bg-neutral-200 !text-2xl !text-neutral-600"
-                onClick={() => {
-                  track('cta', { name: 'go_home' })
-                  navigate('/')
-                }}
-              >
-                홈으로 가기
-              </Button>
-              <Button className="h-[72px] w-full !rounded-xl !text-2xl" onClick={() => {
-                  track('cta', { name: 'next_session' })
-                  navigate('/journey-map')
-                }}
-              >
-                다음 세션으로 이동
-              </Button>
-            </div>
+        <div className="grid shrink-0 grid-cols-[442fr_1078fr] gap-4">
+          <div className="col-start-2 flex justify-end gap-[18px]">
+            <button
+              type="button"
+              onClick={() => {
+                track('cta', { name: 'go_home' })
+                navigate('/explore')
+              }}
+              className="h-[clamp(56px,6.4svh,72px)] w-[min(340px,50%)] rounded-xl bg-neutral-200 text-headline-md font-semibold text-neutral-700 transition-colors hover:bg-neutral-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+            >
+              홈으로 가기
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                track('cta', { name: 'next_session' })
+                navigate('/journey-map')
+              }}
+              className="h-[clamp(56px,6.4svh,72px)] w-[min(340px,50%)] rounded-xl bg-green-300 text-headline-md font-semibold text-neutral-900 transition-colors hover:bg-green-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+            >
+              다음 세션으로 이동
+            </button>
           </div>
         </div>
       </div>
     </WorkFrame>
+  )
+}
+
+function MetricCard({ label, percent }: { label: string; percent: number }) {
+  return (
+    <WorkPanel padded={false} className="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-between gap-4 overflow-hidden p-6">
+      <div className="flex w-full items-start justify-between">
+        <Text variant="title-lg" emphasis className="text-green-900">
+          {label}
+        </Text>
+        <span className="text-display-md font-medium text-green-600">{Math.round(percent)}%</span>
+      </div>
+      {/* 도트 판은 칸 높이에 맞춰 줄어든다(디자인 360×280) */}
+      <div className="flex min-h-0 w-full flex-1 items-end justify-center">
+        <div className="aspect-[3/2] h-full max-h-[280px] max-w-full">
+          <DotMatrix percent={percent} />
+        </div>
+      </div>
+    </WorkPanel>
   )
 }

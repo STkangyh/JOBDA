@@ -81,7 +81,7 @@ describe('session store: computeFindings (기획 확정 평가 기준 10개)', (
   const codesAfterFinish = async (): Promise<string[]> => {
     mockedReport.mockResolvedValueOnce({
       work_overview: '', strengths: [], cautions: [], missed: [], job_meaning: '',
-      profile: [], personaHeadline: '', burdenNote: '',
+      journey: [], profile: [], personaHeadline: '', burdenNote: '',
     })
     mockedSessionLog.mockResolvedValueOnce(undefined)
     await useSession.getState().finishAssessment()

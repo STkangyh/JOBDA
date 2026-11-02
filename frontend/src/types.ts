@@ -110,6 +110,8 @@ export interface ReportResponse {
   cautions: string[]
   missed: string[]
   job_meaning: string
+  /** 업무 진행 과정 — 단계(시방서 초안 작성 → 2차 협상 → 3차 협상)마다 한 줄씩, 항상 3개. 단계 이름은 화면이 붙인다 */
+  journey: string[]
   profile: ProfileAxis[]
   // v4 백엔드 응답에 아직 없는 필드라 store(session.ts)의 finishAssessment에서 채워 넣는다
   // (profile을 client.ts에서 backfill하는 것과 같은 갭 흡수 패턴). session1의 S1ReportResponse와

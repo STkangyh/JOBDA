@@ -92,6 +92,25 @@ export function computeProfile(req: ReportRequest): ProfileAxis[] {
   ]
 }
 
+// 업무 진행 과정(journey) — API(prompts/report.md)가 LLM으로 쓰는 세 줄과 같은 규칙의 기본값.
+// 목데이터로 돌 때와, 응답에 journey가 어긋났을 때 쓴다(이슈 #6). 단계 이름은 붙이지 않는다(화면이 붙임).
+export const DEFAULT_JOURNEY = ['부품별 디자인 시방서 초안 작성', '피드백 반영 후 최종본 인계', '목재 파트 양산 방법 검토']
+
+const JOURNEY_BY_BRANCH: Record<string, string> = {
+  outsourcing: '외주 업체 후보 비교 후 보고',
+  sheet_wrap: '시트지 래핑으로 결정, 외주 없이 마무리',
+  wood_dropped: '목재 대신 다른 소재로 시방서 재작성',
+}
+
+export function computeJourney(req: ReportRequest): string[] {
+  const limitMissing = req.findings.some((f) => f.code === 'limit_sample_missing_in_draft')
+  return [
+    limitMissing ? '한도 견본 판정표 누락으로 보완 요청' : DEFAULT_JOURNEY[0],
+    '목재 파트 제작 불가 확인, 대안 탐색',
+    JOURNEY_BY_BRANCH[req.branch] ?? DEFAULT_JOURNEY[2],
+  ]
+}
+
 export function mockReport(req: ReportRequest): ReportResponse {
   const strengths: string[] = []
   const cautions: string[] = []
@@ -100,9 +119,10 @@ export function mockReport(req: ReportRequest): ReportResponse {
   const push = (f: Finding) => {
     const s = SENTENCE[f.code]
     if (!s) return
-    if (s.bucket === 'strengths' && strengths.length < 2) strengths.push(s.text)
-    if (s.bucket === 'cautions' && cautions.length < 2) cautions.push(s.text)
-    if (s.bucket === 'missed' && missed.length < 3) missed.push(s.text)
+    // 기획 확정: 개수 상한 없이 해당하는 만큼 다 보여준다(이슈 #6). 넘치면 화면에서 그 칸만 스크롤한다.
+    if (s.bucket === 'strengths') strengths.push(s.text)
+    if (s.bucket === 'cautions') cautions.push(s.text)
+    if (s.bucket === 'missed') missed.push(s.text)
   }
 
   req.findings.forEach(push)
@@ -115,6 +135,7 @@ export function mockReport(req: ReportRequest): ReportResponse {
     cautions,
     missed,
     job_meaning: JOB_MEANING,
+    journey: computeJourney(req),
     profile: computeProfile(req),
     // ReportRequest에 selfAssessment가 없어 burdenNote는 여기서 알 수 없다 — store(session.ts)의
     // finishAssessment가 실제 자기평가 텍스트로 덮어쓴다. personaHeadline은 고정 문구라 여기서도

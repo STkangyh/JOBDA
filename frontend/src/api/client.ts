@@ -1,6 +1,6 @@
 import type { ChatRequest, ChatResponse, Finding, FindingCode, ReportRequest, ReportResponse, SessionLogRequest } from '../types'
 import { mockChat } from './mock/chat'
-import { mockReport, computeProfile, WORK_OVERVIEW, JOB_MEANING } from './mock/report'
+import { mockReport, computeJourney, computeProfile, WORK_OVERVIEW, JOB_MEANING } from './mock/report'
 
 // 백엔드가 BACKEND_SPEC_v4로 배포됨 (GitHub 이슈 #1). v2와의 갭은 이 파일 경계에서만
 // 흡수한다 — 호출부(store)와 내부 타입은 v2 모델 그대로 유지.
@@ -66,6 +66,8 @@ export async function report(req: ReportRequest): Promise<ReportResponse> {
     missed: res.missed ?? [],
     work_overview: res.work_overview ?? WORK_OVERVIEW[req.branch],
     job_meaning: res.job_meaning ?? JOB_MEANING,
+    // 백엔드가 journey를 안 주거나 형태가 어긋나면 같은 규칙의 기본값으로 채운다.
+    journey: Array.isArray(res.journey) && res.journey.length === 3 ? res.journey : computeJourney(req),
     profile: res.profile ?? computeProfile(req),
   }
 }
