@@ -221,12 +221,33 @@ function computeFindings(state: SessionState): Finding[] {
   // vendorNotes 같은 전용 자유 입력 필드가 UI에 없으므로(Figma 823:54925엔 그런 필드가 없음),
   // askedCapability/askedBudget과 같은 패턴으로 실제 대화 로그에서 사용자가 보낸 메시지 중
   // 발주 일정을 언급했는지를 본다.
-  const deadlineMentioned = Object.values(state.chatHistory).some((messages) =>
-    messages.some((m) => m.role === 'user' && /12일|일정|납기/.test(m.content)),
-  )
-  if (!deadlineMentioned) add('deadline_margin_ignored')
+  if (!mentionedDeadline(state)) add('deadline_margin_ignored')
 
   return findings
+}
+
+function mentionedDeadline(state: Pick<SessionState, 'chatHistory'>): boolean {
+  return Object.values(state.chatHistory).some((messages) => messages.some((m) => m.role === 'user' && /12일|일정|납기/.test(m.content)))
+}
+
+/**
+ * 세션2 이해도(0~100) — 업무에서 꼭 챙겨야 할 다섯 가지를 실제로 챙겼는지의 비율(2026-11-02 결정).
+ * 예전에는 부품별 "선택 근거"를 쓴 비율이었지만 새 디자인에서 그 칸이 빠져 행동 기준으로 바꿨다.
+ * 백엔드 응답에는 이해도 값이 없어 프론트에서 계산한다.
+ */
+export function understandingChecks(state: Pick<SessionState, 'askedCapability' | 'askedBudget' | 'final' | 'chatHistory'>) {
+  return [
+    { label: '생산 가능 여부를 미리 확인했다', done: state.askedCapability },
+    { label: '예산을 확인했다', done: state.askedBudget },
+    { label: '발주 일정을 챙겼다', done: mentionedDeadline(state) },
+    { label: '최종 시방서를 빠짐없이 채웠다', done: specComplete(state.final) },
+    { label: '한도 견본 판정표를 첨부했다', done: state.final.limitSampleAttached },
+  ]
+}
+
+export function understandingPercent(state: Parameters<typeof understandingChecks>[0]): number {
+  const checks = understandingChecks(state)
+  return (checks.filter((c) => c.done).length / checks.length) * 100
 }
 
 export const useSession = create<SessionState & SessionActions>()(

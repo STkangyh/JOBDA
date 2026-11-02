@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { CoachTour } from './CoachTour'
 import { WorkSidePanel } from './NegotiationPanels'
-import { stageNeighbors, useSession } from '../store/session'
+import { stageNeighbors, understandingPercent, useSession } from '../store/session'
 
 beforeEach(() => {
   localStorage.clear()
@@ -92,5 +92,14 @@ describe('stage arrows', () => {
     useSession.getState().goTo('final_feedback')
     useSession.getState().goTo('workspace')
     expect(useSession.getState().furthestStage).toBe('final_feedback')
+  })
+})
+
+describe('understanding', () => {
+  it('is the share of the five things to take care of, not the reasoning fields', () => {
+    const s = useSession.getState()
+    expect(understandingPercent(s)).toBe(0)
+    useSession.setState({ askedCapability: true, askedBudget: true, final: { ...s.final, limitSampleAttached: true } })
+    expect(understandingPercent(useSession.getState())).toBe(60)
   })
 })

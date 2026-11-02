@@ -368,15 +368,6 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
         <FieldRow label="생산 방식">
           <TextField label="생산 방식" value={part.method} onChange={(v) => updateDraftPart(activeIndex, { method: v })} placeholder="ex) CNC 가공" />
         </FieldRow>
-        {/* 새 디자인에는 없지만 직무 리포트의 "이해도"가 부품별 선택 근거 작성 여부로 계산돼 남겨 둔다 */}
-        <FieldRow label="선택 근거">
-          <TextField
-            label="선택 근거"
-            value={part.reasoning}
-            onChange={(v) => updateDraftPart(activeIndex, { reasoning: v })}
-            placeholder="이 부품에 이 소재·컬러·마감을 고른 이유"
-          />
-        </FieldRow>
       </div>
     </WorkPanel>
   )

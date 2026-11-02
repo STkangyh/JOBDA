@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { WorkFrame, WorkPanel } from '../components/WorkFrame'
 import { PROCESS_STEPS, SESSION1_STEP_INDEX, SESSION2_STEP_INDEX } from '../data/processSteps'
 import { S1_RATING_SCALE, S1_ROUNDS, useSession1 } from '../store/session1'
-import { useSession } from '../store/session'
+import { understandingPercent, useSession } from '../store/session'
 import { RATING_SCALE } from '../types'
 
 const COLUMNS = ['업무 영역', '체험 여부', '흥미도', '이해도']
@@ -22,20 +22,19 @@ export function JourneyMap() {
   // 뜨는 버그가 있었음(SESSION2_STEP_INDEX를 import만 해두고 실제로는 안 씀).
   const session2Stage = useSession((s) => s.currentStage)
   const s2SelfAssessment = useSession((s) => s.selfAssessment)
-  const draftParts = useSession((s) => s.draftParts)
+  const s2Understanding = useSession(understandingPercent)
 
   const session1Done = session1Stage === 'report'
   const session2Done = session2Stage === 'report'
 
   // 흥미도·이해도는 직무 리포트와 같은 방식의 백분율로 보여준다(업무 페이지 새 디자인 2217:11438, 2026-10-13).
-  // 흥미도 = 자기평가 "흥미로웠나요" 5단계 위치, 이해도 = 라운드(세션1)/부품(세션2)마다 선택 근거를 남긴 비율.
+  // 흥미도 = 자기평가 "흥미로웠나요" 5단계 위치.
+  // 이해도 = 세션1은 라운드마다 선택 근거를 남긴 비율, 세션2는 업무에서 챙겨야 할 다섯 가지를 챙긴 비율.
   const reasonedRounds = roundAnswers.filter((r) => r.reasoning.trim().length > 0).length
-  const reasonedParts = draftParts.filter((p) => p.reasoning.trim().length > 0).length
   const percent = (n: number) => `${Math.round(n)}%`
   const s1Interest = (S1_RATING_SCALE.indexOf(s1SelfAssessment.interestScore) / (S1_RATING_SCALE.length - 1)) * 100
   const s2Interest = (RATING_SCALE.indexOf(s2SelfAssessment.interestScore) / (RATING_SCALE.length - 1)) * 100
   const s1Understanding = (reasonedRounds / S1_ROUNDS.length) * 100
-  const s2Understanding = draftParts.length > 0 ? (reasonedParts / draftParts.length) * 100 : 0
 
   // 둘 다 안 끝났으면 세션1부터, 세션1만 끝났으면 세션2로, 둘 다 끝났으면 종합 리포트로.
   const nextHref = !session1Done ? '/session1' : !session2Done ? '/session2' : '/comprehensive-report'

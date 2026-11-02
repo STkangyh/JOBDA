@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useSession } from '../../store/session'
+import { understandingPercent, useSession } from '../../store/session'
 import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { Text } from '../../components/Text'
 import { Button } from '../../components/Button'
@@ -60,17 +60,13 @@ export function Report() {
   const navigate = useNavigate()
   const report = useSession((s) => s.report)
   const selfAssessment = useSession((s) => s.selfAssessment)
-  const draftParts = useSession((s) => s.draftParts)
+  const understanding = useSession(understandingPercent)
 
   if (!report) return null
 
   // 흥미도: 자기평가의 5단계 응답을 0~100%로 환산(전혀 아니다=0% ~ 매우 그렇다=100%).
-  // 이해도: Figma에 산출 근거가 없어, JourneyMap.tsx와 같은 대리 지표(부품별 선택 근거를
-  // 남긴 비율)를 재사용 — 5단계로 뭉개지 않고 연속값 그대로 써서 39%/26% 같은 실측 예시와
-  // 비슷한 결의 퍼센트가 나오게 했다.
+  // 이해도: 업무에서 챙겨야 할 다섯 가지를 챙긴 비율(store/session.ts understandingChecks).
   const interestPercent = (RATING_SCALE.indexOf(selfAssessment.interestScore) / (RATING_SCALE.length - 1)) * 100
-  const reasonedParts = draftParts.filter((p) => p.reasoning.trim().length > 0).length
-  const understandingPercent = draftParts.length > 0 ? (reasonedParts / draftParts.length) * 100 : 0
 
   // 업무 페이지 새 디자인 2217:10860(2026-10-13): 같은 3칸 구성을 업무 화면 틀(회색 배경·라벨형 GNB) 안에 둔다.
   return (
@@ -147,9 +143,9 @@ export function Report() {
                   <Text variant="title-lg" emphasis className="text-green-900">
                     이해도
                   </Text>
-                  <span className="text-display-md font-medium leading-none tracking-tight text-[#b1dc88]">{Math.round(understandingPercent)}%</span>
+                  <span className="text-display-md font-medium leading-none tracking-tight text-[#b1dc88]">{Math.round(understanding)}%</span>
                 </div>
-                <DotMatrix percent={understandingPercent} />
+                <DotMatrix percent={understanding} />
               </WorkPanel>
             </div>
           </div>
