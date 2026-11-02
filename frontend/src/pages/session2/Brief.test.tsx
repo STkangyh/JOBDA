@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
@@ -53,13 +53,15 @@ describe('session2 story brief', () => {
     expect(screen.getByText(/목재 접합 설비가 없어서/)).toBeInTheDocument()
   })
 
-  it('Skip goes straight to materials and records it as a skipped brief', async () => {
+  it('Skip fills every chapter, hides Exit and the arrows, then moves to materials as a skipped brief', async () => {
     const user = userEvent.setup()
     renderBrief()
     await user.click(screen.getByRole('button', { name: '다음' }))
     await user.click(screen.getByRole('button', { name: 'Skip' }))
     expect(calls('step_complete')).toEqual([{ step: 'brief', via: 'skip', scene: 2 }])
-    expect(useSession.getState().currentStage).toBe('materials')
+    expect(screen.queryByRole('button', { name: 'Exit' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '다음' })).not.toBeInTheDocument()
+    await waitFor(() => expect(useSession.getState().currentStage).toBe('materials'))
   })
 
   it('the last scene hides the forward arrow, keeps back, fills every chapter and turns Skip into Next', async () => {

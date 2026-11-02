@@ -33,6 +33,8 @@ const SCENES: Scene[] = [
 ]
 
 const LAST = SCENES.length - 1
+// Skip 뒤 막대가 다 찬 모습을 보여주는 시간
+const SKIP_HOLD_MS = 600
 
 // 배경: Figma 프레임의 방사형 그라데이션(중심 #CACACA → 가장자리 #E1E1E1, 반지름 = 화면의 63%)
 const BACKGROUND = 'radial-gradient(63.1% 63.1% at 50% 50%, #cacaca 0%, #e1e1e1 100%)'
@@ -41,6 +43,9 @@ export function Brief() {
   const goTo = useSession((s) => s.goTo)
   const navigate = useNavigate()
   const [index, setIndex] = useState(0)
+  // 장면 중간에 Skip을 누르면 진행 막대를 끝까지 채운 뒤 업무 화면으로 넘어간다 —
+  // Figma Desktop-239·240(브리프 재생 중간에 메인 화면으로 나가려는 경우, 2026-11-02 확인): Skip만 남고 막대가 모두 찬 모습.
+  const [skipping, setSkipping] = useState(false)
   const scene = SCENES[index]
   const isLast = index === LAST
   useTrackView({ kind: 'panel', name: `brief_scene:${index + 1}` })
@@ -51,8 +56,14 @@ export function Brief() {
   // Skip(장면 중간) · Next(마지막 장면) 모두 자료탐색으로 — 끝까지 봤는지는 via로 구분한다.
   const finish = (via: 'skip' | 'next') => {
     track('step_complete', { step: 'brief', via, scene: index + 1 })
-    goTo('materials')
+    if (via === 'next') return goTo('materials')
+    setSkipping(true)
   }
+  useEffect(() => {
+    if (!skipping) return
+    const id = window.setTimeout(() => goTo('materials'), SKIP_HOLD_MS)
+    return () => window.clearTimeout(id)
+  }, [skipping, goTo])
 
   // UT의 "명시적 종료" — 관리자 페이지에서 세션 상태가 '명시적 종료'로 집계된다. 확인 창 여부는 팀 논의 후 결정(보류).
   const exit = () => {
@@ -92,24 +103,26 @@ export function Brief() {
       )}
 
       <div className="absolute top-0 right-0 flex items-center gap-3 px-8 pt-[54px]">
-        <GlassChipButton tone="exit" onClick={exit}>
-          Exit
-        </GlassChipButton>
-        {isLast ? (
+        {!skipping && (
+          <GlassChipButton tone="exit" onClick={exit}>
+            Exit
+          </GlassChipButton>
+        )}
+        {isLast && !skipping ? (
           <GlassChipButton tone="next" onClick={() => finish('next')}>
             Next
           </GlassChipButton>
         ) : (
-          <GlassChipButton onClick={() => finish('skip')}>Skip</GlassChipButton>
+          <GlassChipButton onClick={() => !skipping && finish('skip')}>Skip</GlassChipButton>
         )}
       </div>
 
       {/* 첫 장면에는 ← 이전, 마지막 장면에는 → 다음을 숨긴다(2026-10-13 결정). 마지막 장면의 진행은 Next 버튼으로. */}
-      {index > 0 && <RoundArrowButton direction="prev" onClick={prev} className="absolute top-[calc(50%-10.5px)] left-8 -translate-y-1/2" />}
-      {!isLast && <RoundArrowButton direction="next" onClick={next} className="absolute top-[calc(50%-10.5px)] right-8 -translate-y-1/2" />}
+      {index > 0 && !skipping && <RoundArrowButton direction="prev" onClick={prev} className="absolute top-[calc(50%-10.5px)] left-8 -translate-y-1/2" />}
+      {!isLast && !skipping && <RoundArrowButton direction="next" onClick={next} className="absolute top-[calc(50%-10.5px)] right-8 -translate-y-1/2" />}
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 px-[clamp(32px,7.58vw,131px)] pb-8">
-        <ChapterProgress chapters={CHAPTERS} current={scene.chapter} />
+        <ChapterProgress chapters={CHAPTERS} current={skipping ? CHAPTERS.length : scene.chapter} />
         <DialogueBox>
           <p>{scene.lines[0]}</p>
           <p>{scene.lines[1]}</p>
