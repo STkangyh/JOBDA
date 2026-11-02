@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { CoachTour } from './CoachTour'
 import { WorkSidePanel } from './NegotiationPanels'
+import { ExpandableArea } from './WorkFrame'
 import { stageNeighbors, understandingPercent, useSession } from '../store/session'
 
 beforeEach(() => {
@@ -114,5 +115,29 @@ describe('understanding', () => {
     expect(understandingPercent(s)).toBe(0)
     useSession.setState({ askedCapability: true, askedBudget: true, final: { ...s.final, limitSampleAttached: true } })
     expect(understandingPercent(useSession.getState())).toBe(60)
+  })
+})
+
+describe('work area fullscreen', () => {
+  it('opens from an empty spot, ignores clicks on inputs, and closes from the blurred surroundings or Escape', async () => {
+    const user = userEvent.setup()
+    const { container } = render(
+      <ExpandableArea>
+        <p>빈 곳</p>
+        <input aria-label="소재" />
+      </ExpandableArea>,
+    )
+    const area = container.querySelector('[data-coach="fullscreen"]')!
+    await user.click(screen.getByLabelText('소재'))
+    expect(area).not.toHaveAttribute('data-expanded')
+
+    await user.click(screen.getByText('빈 곳'))
+    expect(area).toHaveAttribute('data-expanded')
+    await user.click(screen.getByText(/바깥을 누르거나/))
+    expect(area).not.toHaveAttribute('data-expanded')
+
+    await user.click(screen.getByText('빈 곳'))
+    await user.keyboard('{Escape}')
+    expect(area).not.toHaveAttribute('data-expanded')
   })
 })

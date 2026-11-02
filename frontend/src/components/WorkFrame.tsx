@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import closeIcon from '../assets/work/close.svg'
 import { Indicator } from './Indicator'
@@ -100,3 +100,50 @@ export function WorkPanel({ className = '', padded = true, coach, children }: { 
   )
 }
 
+// 업무 영역 전체화면 — Figma 2263:16262(2026-10-31)를 바탕으로 2026-11-02 결정대로 바꿨다:
+// 영역의 빈 곳(입력칸·버튼이 아닌 곳)을 누르면 화면 가장자리만 조금 남기고 넓게 펼쳐지고,
+// 주변은 코치 마크처럼 흐리게 덮인다. 그 흐린 주변을 누르거나 Esc를 누르면 원래대로 돌아온다.
+// 같은 요소의 클래스만 바꿔 펼치므로 입력 중이던 내용·선택한 부품 탭이 그대로 남는다.
+const INTERACTIVE = 'input, textarea, select, button, a, label, [role="tab"], [role="dialog"], [contenteditable="true"]'
+
+export function ExpandableArea({ className = '', children }: { className?: string; children: ReactNode }) {
+  const [expanded, setExpanded] = useState(false)
+
+  const toggle = (open: boolean) => {
+    setExpanded(open)
+    track('fullscreen', { open })
+  }
+
+  useEffect(() => {
+    if (!expanded) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setExpanded(false)
+        track('fullscreen', { open: false })
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [expanded])
+
+  return (
+    <>
+      {expanded && (
+        <div className="fixed inset-0 z-40 bg-[rgba(160,160,160,0.35)] backdrop-blur-[6px]" onClick={() => toggle(false)} aria-hidden>
+          <p className="absolute inset-x-0 bottom-[clamp(4px,1svh,12px)] text-center text-body-md text-neutral-800">바깥을 누르거나 Esc를 누르면 돌아가요</p>
+        </div>
+      )}
+      <div
+        data-coach="fullscreen"
+        data-expanded={expanded || undefined}
+        onClick={(e) => {
+          if (expanded || (e.target as HTMLElement).closest(INTERACTIVE)) return
+          toggle(true)
+        }}
+        className={`${className} ${expanded ? 'fixed inset-x-[clamp(32px,4vw,80px)] inset-y-[clamp(24px,5svh,56px)] z-40' : 'cursor-zoom-in'}`}
+      >
+        {children}
+      </div>
+    </>
+  )
+}

@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react'
-import { WorkFrame, WorkPanel } from '../../components/WorkFrame'
+import { ExpandableArea, WorkFrame, WorkPanel } from '../../components/WorkFrame'
 import { WorkSidePanel, type NotesTab, type SidePanelMode } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { PlusIcon } from '../../components/icons'
@@ -386,10 +386,11 @@ export function Workspace() {
   const [sideMode, setSideMode] = useState<SidePanelMode>('messenger')
   const [notesTab, setNotesTab] = useState<NotesTab>('tasks')
 
-  // Figma 시방서 초안 작성 코치 마크(2349:31979~2350:20643) 문구 원문. "전체화면" 단계는 기능이 아직 없어 뺐다.
+  // Figma 시방서 초안 작성 코치 마크(2349:31979~2350:20643) 문구 원문. "전체화면" 단계 문구만 초안(2026-11-02).
   const tour: CoachStep[] = [
     { target: 'task', side: 'bottom', title: '업무 지시', body: '지금 해야할 업무와 피드백을 확인할 수 있어요.' },
     { target: 'work-area', side: 'top', title: '업무 영역', body: '현재 작업 상황을 확인할 수 있어요.' },
+    { target: 'fullscreen', side: 'right', title: '전체화면', body: '업무 영역의 빈 곳을 누르면 넓게 볼 수 있어요. 바깥을 누르면 원래대로 돌아와요.' },
     { target: 'messenger', side: 'left', title: '메신저', body: '업무 관계자와 업무 관련 대화를 나눌 수 있어요.', onEnter: () => setSideMode('messenger') },
     {
       target: 'notes',
@@ -408,14 +409,14 @@ export function Workspace() {
   return (
     <WorkFrame step="관계자 협업" sidebar="work" loading={isSubmitting} exitStep="workspace" flushRight>
       {!draftSubmitted && <CoachTour id="workspace" steps={tour} />}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto">
+      <ExpandableArea className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto">
         <TaskCard editingFinal={editingFinal} remaining={remaining} />
         {editingFinal ? (
           <FinalSpecCard isSubmitting={isSubmitting} setIsSubmitting={setIsSubmitting} />
         ) : (
           <DraftPartsCard isSubmitting={isSubmitting} setIsSubmitting={setIsSubmitting} />
         )}
-      </div>
+      </ExpandableArea>
 
       <aside className={`flex min-h-0 ${SIDE_WIDTH} shrink-0 flex-col gap-4`}>
         <WorkSidePanel messenger={{ defaultActive: 'senior', intro: { persona: 'senior', text: SENIOR_INTRO } }} mode={sideMode} onModeChange={setSideMode} tab={notesTab} onTabChange={setNotesTab} />
