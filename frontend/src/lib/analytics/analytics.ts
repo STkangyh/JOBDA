@@ -17,8 +17,8 @@ export interface AnalyticsEvent {
   env: 'prod' | 'dev'
 }
 
-// 채팅 원문 — 백엔드 레포는 DB를 쓰지 않는 규칙이라(girugi CLAUDE.md 규칙 2) 프론트가 응답을
-// 받은 뒤 직접 저장한다. events의 ask 이벤트와 message_id로 1:1 연결된다.
+// 채팅 원문 — 예전 백엔드(girugi, 2026-11-02 종료)가 DB를 쓰지 않는 규칙이라 프론트가 응답을
+// 받은 뒤 Supabase에 직접 저장하게 만들었다. 지금도 이 방식 그대로다. events의 ask 이벤트와 message_id로 1:1 연결된다.
 export interface ChatLogInput {
   message_id: string
   persona: string

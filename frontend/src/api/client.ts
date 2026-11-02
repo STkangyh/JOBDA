@@ -4,7 +4,11 @@ import { mockReport, computeJourney, computeProfile, WORK_OVERVIEW, JOB_MEANING 
 
 // 백엔드가 BACKEND_SPEC_v4로 배포됨 (GitHub 이슈 #1). v2와의 갭은 이 파일 경계에서만
 // 흡수한다 — 호출부(store)와 내부 타입은 v2 모델 그대로 유지.
-const API_BASE = import.meta.env.VITE_API_BASE_URL as string | undefined
+// API 서버는 2026-11-02부터 이 저장소의 frontend/api/(같은 Vercel 프로젝트)에 있다. 그래서 배포 빌드는
+// 같은 출처(/api/...)를 부르고, 개발·테스트는 목데이터를 쓴다. VITE_API_BASE_URL을 주면 그 주소가 우선한다.
+const ENV_API_BASE = import.meta.env.VITE_API_BASE_URL as string | undefined
+const API_BASE: string | undefined = ENV_API_BASE || (import.meta.env.PROD ? '' : undefined)
+const USE_MOCK = API_BASE === undefined
 const SCENARIO = 'cmf_outsourcing'
 
 async function postJson<TReq, TRes>(path: string, body: TReq): Promise<TRes> {
@@ -20,7 +24,7 @@ async function postJson<TReq, TRes>(path: string, body: TReq): Promise<TRes> {
 }
 
 export async function chat(req: ChatRequest): Promise<ChatResponse> {
-  if (!API_BASE) return mockChat(req)
+  if (USE_MOCK) return mockChat(req)
   return postJson('/api/chat', { scenario: SCENARIO, context: null, ...req })
 }
 
@@ -40,7 +44,7 @@ const FINDING_BUCKET: Record<FindingCode, 'strengths' | 'cautions' | 'missed'> =
 }
 
 export async function report(req: ReportRequest): Promise<ReportResponse> {
-  if (!API_BASE) return mockReport(req)
+  if (USE_MOCK) return mockReport(req)
   const pick = (bucket: 'strengths' | 'cautions' | 'missed'): Finding[] =>
     req.findings.filter((f) => FINDING_BUCKET[f.code] === bucket)
   const res = await postJson<unknown, ReportResponse>('/api/report', {
@@ -66,13 +70,13 @@ export async function report(req: ReportRequest): Promise<ReportResponse> {
     missed: res.missed ?? [],
     work_overview: res.work_overview ?? WORK_OVERVIEW[req.branch],
     job_meaning: res.job_meaning ?? JOB_MEANING,
-    // 백엔드가 journey를 안 주거나 형태가 어긋나면 같은 규칙의 기본값으로 채운다.
+    // api/report.ts가 항상 3줄을 주지만, 응답 형태가 어긋나면 같은 규칙의 기본값으로 채운다.
     journey: Array.isArray(res.journey) && res.journey.length === 3 ? res.journey : computeJourney(req),
     profile: res.profile ?? computeProfile(req),
   }
 }
 
 export async function sessionLog(req: SessionLogRequest): Promise<void> {
-  if (!API_BASE) return
+  if (USE_MOCK) return
   await postJson('/api/session-log', { scenario: SCENARIO, ...req })
 }

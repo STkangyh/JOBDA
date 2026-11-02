@@ -11,7 +11,8 @@ afterEach(() => {
 
 // jsdom doesn't implement matchMedia at all (App.tsx's mobile-viewport check uses it) — a
 // minimal stub that always reports "not mobile" so tests exercise the desktop app by default.
-window.matchMedia ??= (query: string) => ({
+// API server tests (api/) run in the node environment, where there is no window.
+if (typeof window !== 'undefined') window.matchMedia ??= (query: string) => ({
   matches: false,
   media: query,
   onchange: null,
