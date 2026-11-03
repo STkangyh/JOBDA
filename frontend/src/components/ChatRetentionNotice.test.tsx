@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
-const NOTICE = '대화 내용은 서비스 개선을 위해 저장되며 30일 후 삭제돼요.'
+const NOTICE = '대화 내용은 서비스 개선과 이어 하기를 위해 계정에 저장돼요.'
 
 afterEach(() => {
   vi.unstubAllEnvs()
