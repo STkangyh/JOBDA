@@ -4,7 +4,7 @@ import { WorkSidePanel, type NotesTab, type SidePanelMode } from '../../componen
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { PlusIcon } from '../../components/icons'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
-import { DRAFT_DESCRIPTION, SENIOR_INTRO, FEEDBACK_PASS, FEEDBACK_FAIL } from '../../data/session2Scenario'
+import { DRAFT_DESCRIPTION, SENIOR_INTRO, FEEDBACK_PASS, FEEDBACK_FAIL, MODEL_ANSWERS } from '../../data/session2Scenario'
 import type { PartSpecSize } from '../../types'
 import productPhoto from '../../assets/work/product-photo.jpg'
 import seniorAvatar from '../../assets/work/avatars/senior-large.png'
@@ -162,6 +162,48 @@ function PartChips({ activeIndex, onSelect }: { activeIndex: number; onSelect?: 
   )
 }
 
+// 모범답안 보기(2026-11-03) — Figma 1675:16911~17655의 부품별 값을 입력칸과 같은 자리에 읽기 전용으로 보여준다.
+// 내가 쓴 값은 그대로 두고, 칩을 다시 누르면 내 답안으로 돌아간다.
+const MODEL_ANSWER_HEADING = '모범답안이에요. 모범답안을 다시 누르면 내 답안으로 돌아가요.'
+
+function AnswerValue({ value, className = '' }: { value: string; className?: string }) {
+  return <span className={`${FIELD_BOX} ${className} truncate text-title-lg text-neutral-700`}>{value}</span>
+}
+
+function ModelAnswerFields({ index }: { index: number }) {
+  const answer = MODEL_ANSWERS[index]
+  return (
+    <div role="region" aria-label={`모범답안 · ${PART_TAGS[index]}`} className="flex flex-col gap-3">
+      <FieldRow label="소재">
+        <AnswerValue value={answer.material} className="flex-1" />
+      </FieldRow>
+      <FieldRow label="컬러">
+        <div className={`${FIELD_BOX} flex-1 gap-2.5`}>
+          <span className="min-w-0 flex-1 truncate text-title-lg text-neutral-700">{answer.color}</span>
+          {answer.colorNote && <span className="w-1/2 shrink-0 truncate text-title-lg text-neutral-500">{answer.colorNote}</span>}
+        </div>
+      </FieldRow>
+      <FieldRow label="마감">
+        <AnswerValue value={answer.finish} className="flex-1" />
+      </FieldRow>
+      <FieldRow label="사이즈">
+        <div className="grid flex-1 grid-cols-4 gap-2.5">
+          {SIZE_FIELDS.map(({ key, label, unit }) => (
+            <span key={key} className={`${FIELD_BOX} gap-2.5`}>
+              <span className="w-[74px] shrink-0 truncate text-body-lg text-neutral-500">{label}</span>
+              <span className="min-w-0 flex-1 text-title-lg font-semibold text-neutral-700">{answer.size[key]}</span>
+              <span className="shrink-0 text-body-lg text-neutral-700">{unit}</span>
+            </span>
+          ))}
+        </div>
+      </FieldRow>
+      <FieldRow label="생산 방식">
+        <AnswerValue value={answer.method} className="flex-1" />
+      </FieldRow>
+    </div>
+  )
+}
+
 const INSTRUCTION = '업무 결정 사항과 주어진 리소스를 고려해서 부품별 시방서 초안을 작성해주세요.'
 
 // 1차 피드백 이후 최종본 수정. 부품 칩은 탭이 아니라 표시(첫 번째 강조), 필드는 초안과 같다.
@@ -174,6 +216,12 @@ function FinalSpecCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boolea
   const approveFinal = useSession((s) => s.approveFinal)
   const submitFinal = useSession((s) => s.submitFinal)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // 최종본은 목재 흡기구 커버(첫 번째 부품)를 고치는 단계라 그 부품의 모범답안을 보여준다
+  const [showAnswer, setShowAnswer] = useState(false)
+  const toggleAnswer = () => {
+    if (!showAnswer) track('model_answer_view', { step: 'final', part: PART_TAGS[0] })
+    setShowAnswer((v) => !v)
+  }
 
   // 컬러 옆 Add 버튼: 누르면 OS 파일 탐색기가 열리고 한도 견본 판정표 하나만 첨부한다.
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -202,15 +250,20 @@ function FinalSpecCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boolea
     <WorkPanel coach="work-area" className="flex flex-col gap-[clamp(20px,4svh,48px)]">
       <div className="flex items-end justify-between gap-6">
         <div className="flex min-w-0 flex-col gap-4">
-          <h2 className="text-title-lg font-semibold text-neutral-700">{finalApproved ? '최종적인 시방서 사양을 인계 전 확인하세요.' : INSTRUCTION}</h2>
+          <h2 className="text-title-lg font-semibold text-neutral-700">
+            {showAnswer ? MODEL_ANSWER_HEADING : finalApproved ? '최종적인 시방서 사양을 인계 전 확인하세요.' : INSTRUCTION}
+          </h2>
           <PartChips activeIndex={0} />
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <ModelAnswerChip />
+          <ModelAnswerChip pressed={showAnswer} onToggle={toggleAnswer} />
           <SendRoundButton label={finalApproved ? '시방서 인계' : '수정안 제출'} disabled={(!finalApproved && requiredMissing) || isSubmitting} onClick={handleClick} />
         </div>
       </div>
 
+      {showAnswer ? (
+        <ModelAnswerFields index={0} />
+      ) : (
       <div className="flex flex-col gap-3">
         <FieldRow label="소재">
           <TextField label="소재" value={final.material} onChange={(v) => updateFinal({ material: v })} placeholder="ex) 자작나무 합판" />
@@ -253,6 +306,7 @@ function FinalSpecCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boolea
           <TextField label="생산 방식" value={final.method} onChange={(v) => updateFinal({ method: v })} placeholder="ex) CNC 가공" />
         </FieldRow>
       </div>
+      )}
     </WorkPanel>
   )
 }
@@ -265,6 +319,7 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
   const submitDraft = useSession((s) => s.submitDraft)
   const [activeIndex, setActiveIndex] = useState(0)
   const [attachMenuOpen, setAttachMenuOpen] = useState(false)
+  const [showAnswer, setShowAnswer] = useState(false)
   const part = draftParts[activeIndex]
   const fileInputRef = useRef<HTMLInputElement>(null)
   // OS 파일 탐색기는 비동기(모달)라, 열려있는 동안 탭을 옮길 수 있어 어느 부품의 어떤 첨부였는지를 ref로 들고 있다.
@@ -275,6 +330,14 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
   const selectTab = (i: number) => {
     setActiveIndex(i)
     setAttachMenuOpen(false)
+    if (showAnswer) track('model_answer_view', { step: 'draft', part: PART_TAGS[i] })
+  }
+
+  // 모범답안을 언제 봤는지 UT 기록에 남긴다(제출 전에 봤는지 구분할 수 있게)
+  const toggleAnswer = () => {
+    if (!showAnswer) track('model_answer_view', { step: 'draft', part: PART_TAGS[activeIndex] })
+    setAttachMenuOpen(false)
+    setShowAnswer((v) => !v)
   }
 
   const requestAttachment = (kind: 'colorChip' | 'limitSample') => {
@@ -304,15 +367,18 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
     <WorkPanel coach="work-area" className="flex flex-col gap-[clamp(20px,4svh,48px)]">
       <div className="flex items-end justify-between gap-6">
         <div className="flex min-w-0 flex-col gap-4">
-          <h2 className="text-title-lg font-semibold text-neutral-700">{INSTRUCTION}</h2>
+          <h2 className="text-title-lg font-semibold text-neutral-700">{showAnswer ? MODEL_ANSWER_HEADING : INSTRUCTION}</h2>
           <PartChips activeIndex={activeIndex} onSelect={selectTab} />
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <ModelAnswerChip />
+          <ModelAnswerChip pressed={showAnswer} onToggle={toggleAnswer} />
           <SendRoundButton label="초안 제출" disabled={requiredMissing || isSubmitting} onClick={handleSubmit} />
         </div>
       </div>
 
+      {showAnswer ? (
+        <ModelAnswerFields index={activeIndex} />
+      ) : (
       <div className="flex flex-col gap-3">
         <FieldRow label="소재">
           <TextField label="소재" value={part.material} onChange={(v) => updateDraftPart(activeIndex, { material: v })} placeholder="ex) 자작나무 합판" />
@@ -369,6 +435,7 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
           <TextField label="생산 방식" value={part.method} onChange={(v) => updateDraftPart(activeIndex, { method: v })} placeholder="ex) CNC 가공" />
         </FieldRow>
       </div>
+      )}
     </WorkPanel>
   )
 }

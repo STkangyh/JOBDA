@@ -27,17 +27,33 @@ export function SendRoundButton({ label, disabled, onClick }: { label: string; d
 }
 
 /**
- * 모범답안 — 디자인에만 있고 무엇을 보여줄지(답안 내용·공개 시점)가 아직 정해지지 않아 눌러도 동작하지 않는다.
- * TODO(2026-10-31): 모범답안 내용과 공개 조건이 정해지면 연결.
+ * 모범답안 칩. onToggle이 있으면 누를 때마다 모범답안 보기를 켜고 끈다(시방서 작성, 2026-11-03).
+ * 모범답안 내용이 아직 없는 화면(2차 피드백, 외주 조사)은 onToggle 없이 써서 "준비 중"으로 둔다.
  */
-export function ModelAnswerChip() {
+export function ModelAnswerChip({ pressed = false, onToggle }: { pressed?: boolean; onToggle?: () => void }) {
+  const base = 'h-[42px] shrink-0 rounded-[80px] border-2 px-3 text-body-lg text-neutral-700 drop-shadow-[0_0_8px_rgba(0,0,0,0.04)]'
+  if (!onToggle) {
+    return (
+      <button
+        type="button"
+        aria-disabled="true"
+        title="모범답안은 준비 중이에요"
+        onClick={(e) => e.preventDefault()}
+        className={`${base} cursor-not-allowed border-neutral-100 bg-green-50`}
+      >
+        모범답안
+      </button>
+    )
+  }
   return (
     <button
       type="button"
-      aria-disabled="true"
-      title="모범답안은 준비 중이에요"
-      onClick={(e) => e.preventDefault()}
-      className="h-[42px] shrink-0 cursor-not-allowed rounded-[80px] border-2 border-neutral-100 bg-green-50 px-3 text-body-lg text-neutral-700 drop-shadow-[0_0_8px_rgba(0,0,0,0.04)]"
+      aria-pressed={pressed}
+      onClick={onToggle}
+      title={pressed ? '내 답안으로 돌아가기' : '모범답안 보기'}
+      className={`${base} transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${
+        pressed ? 'border-green-200 bg-green-300' : 'border-neutral-100 bg-green-50 hover:bg-green-100'
+      }`}
     >
       모범답안
     </button>

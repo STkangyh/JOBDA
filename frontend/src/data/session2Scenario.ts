@@ -19,3 +19,24 @@ export const SESSION2_NOTE_TAGS = {
   userNeeds: ['저소음', '공간 효율', '따뜻함', '관리 용이', '인테리어 오브제 느낌'],
   constraints: ['파팅라인 단차 0.5mm 이격할 것', '전면부 하우징은 하나로', '에어케어 제품과 내부 설계 공유'],
 }
+
+// 시방서 모범답안 (2026-11-03 결정) — Figma 1675:16911~1675:17655("Desktop - 123~128")의 부품별 값을 그대로 옮겼다.
+// 순서는 부품 칩(Workspace.tsx PART_TAGS)과 같다. colorNote는 컬러 칸 오른쪽 보조 값(예: Panton 번호).
+// PUI 패널·미끄럼 방지 패드의 소재 칸은 Figma에 부품 이름이 적혀 있어 그대로 둔다(기획 확인 필요).
+export interface ModelAnswer {
+  material: string
+  color: string
+  colorNote?: string
+  finish: string
+  size: { depth: string; width: string; height: string; thickness: string }
+  method: string
+}
+
+export const MODEL_ANSWERS: ModelAnswer[] = [
+  { material: '화이트 오크 원목', color: '오크 내추럴', finish: '오일 마감', size: { depth: '100', width: '100', height: '120', thickness: '3' }, method: 'CNC 가공' },
+  { material: '6000계열 알루미늄', color: '실버', finish: '아노다이징', size: { depth: '100', width: '100', height: '50', thickness: '2' }, method: '프레스 금형' },
+  { material: '6000계열 알루미늄', color: '실버', finish: '아노다이징', size: { depth: '100', width: '100', height: '30', thickness: '2' }, method: '프레스 금형' },
+  { material: '천연 소가죽', color: '카멜색', colorNote: 'Panton 1595', finish: '크롬 태닝', size: { depth: '100', width: '100', height: '30', thickness: '2' }, method: '외주 업체' },
+  { material: 'PUI 패널', color: '실버', finish: '아노다이징', size: { depth: '100', width: '60', height: '30', thickness: '2' }, method: 'CNC 가공' },
+  { material: '미끄럼 방지 패드', color: '블랙', finish: '아노다이징', size: { depth: '100', width: '60', height: '30', thickness: '2' }, method: 'CNC 가공' },
+]
