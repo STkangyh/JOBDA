@@ -5,7 +5,7 @@ import { Indicator } from './Indicator'
 import { WorkSidebar, type WorkSidebarItem } from './WorkSidebar'
 import { ArrowBackIosIcon } from './icons'
 import { LoadingSpinner } from './LoadingSpinner'
-import { ExitConfirm } from './ExitConfirm'
+import { ExitConfirm, type ExitAnswer } from './ExitConfirm'
 import { stageNeighbors, useSession } from '../store/session'
 import { track } from '../lib/analytics'
 
@@ -43,8 +43,8 @@ export function WorkFrame({ step, sidebar, onSidebarSelect, loading = false, exi
     track('exit_confirm', { step: exitStep, action: 'stay' })
     setConfirmExit(false)
   }, [exitStep])
-  const exit = () => {
-    track('session_exit', { step: exitStep })
+  const exit = ({ reasons, note }: ExitAnswer) => {
+    track('session_exit', { step: exitStep, reasons, ...(note && { note }) })
     navigate('/explore')
   }
 

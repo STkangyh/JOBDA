@@ -91,7 +91,37 @@ describe('session2 story brief', () => {
 
     await user.click(screen.getByRole('button', { name: 'Exit' }))
     await user.click(screen.getByRole('button', { name: '나가기' }))
-    expect(calls('session_exit')).toEqual([{ step: 'brief', scene: 3 }])
+    expect(calls('session_exit')).toEqual([{ step: 'brief', scene: 3, reasons: [] }])
     expect(screen.getByText('홈 화면')).toBeInTheDocument()
+  })
+
+  it('records the reasons picked in the exit dialog, with the 기타 text only while 기타 is checked', async () => {
+    const user = userEvent.setup()
+    renderBrief()
+    await user.click(screen.getByRole('button', { name: 'Exit' }))
+    expect(screen.queryByRole('textbox', { name: '기타 이유' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('checkbox', { name: '오류나 응답 지연이 있어요' }))
+    await user.click(screen.getByRole('checkbox', { name: '이용 방법이 어려워요' }))
+    await user.click(screen.getByRole('checkbox', { name: '기타' }))
+    await user.type(screen.getByRole('textbox', { name: '기타 이유' }), '  다른 일이 생겼어요 ')
+    await user.click(screen.getByRole('button', { name: '나가기' }))
+
+    // 목록 순서대로 남는다(누른 순서와 무관)
+    expect(calls('session_exit')).toEqual([
+      { step: 'brief', scene: 1, reasons: ['hard_to_use', 'error_delay', 'other'], note: '다른 일이 생겼어요' },
+    ])
+  })
+
+  it('starts the exit dialog fresh each time it opens', async () => {
+    const user = userEvent.setup()
+    renderBrief()
+    await user.click(screen.getByRole('button', { name: 'Exit' }))
+    await user.click(screen.getByRole('checkbox', { name: '업무 내용이 어려워요' }))
+    expect(screen.getByRole('checkbox', { name: '업무 내용이 어려워요' })).toBeChecked()
+    await user.click(screen.getByRole('button', { name: '계속하기' }))
+
+    await user.click(screen.getByRole('button', { name: 'Exit' }))
+    expect(screen.getByRole('checkbox', { name: '업무 내용이 어려워요' })).not.toBeChecked()
   })
 })

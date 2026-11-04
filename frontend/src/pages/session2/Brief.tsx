@@ -8,7 +8,7 @@ import sceneFlow from '../../assets/illustrations/session2-brief-6-flow.png'
 import sceneCollaborators from '../../assets/illustrations/session2-brief-7-collaborators.png'
 import { ChapterProgress, DialogueBox, GlassChipButton, RoundArrowButton } from '../../components/StoryControls'
 import { useSession } from '../../store/session'
-import { ExitConfirm } from '../../components/ExitConfirm'
+import { ExitConfirm, type ExitAnswer } from '../../components/ExitConfirm'
 import { track, useTrackView } from '../../lib/analytics'
 
 // Figma 라벨 원문은 "Misson" — 오타라 Mission으로 고침(2026-10-12 확인).
@@ -73,8 +73,8 @@ export function Brief() {
     track('exit_confirm', { step: 'brief', action: 'stay' })
     setConfirmExit(false)
   }, [])
-  const exit = () => {
-    track('session_exit', { step: 'brief', scene: index + 1 })
+  const exit = ({ reasons, note }: ExitAnswer) => {
+    track('session_exit', { step: 'brief', scene: index + 1, reasons, ...(note && { note }) })
     navigate('/explore')
   }
 

@@ -1,3 +1,4 @@
+import { EXIT_REASONS } from '../../data/exitReasons'
 import type { Evidence, IssueType, UtReview, UtSession } from './report'
 
 // UT 운영 문서 "관리자 Drop-off 및 Friction 분석" 폼의 선택지
@@ -15,10 +16,11 @@ export const EVIDENCE: { id: Evidence; label: string }[] = [
   { id: 'multiple', label: '복수 근거 확인' },
 ]
 
-// 원인 분류 목록은 팀이 확정해서 전달하기로 함(2026-10-10). 그 전까지는 두 가지만 둔다.
+// 원인 분류 = 참가자가 나가기 확인 창에서 고르는 이유와 같은 목록(src/data/exitReasons.ts, 2026-11-04).
 // 목록을 바꿔도 DB는 문자열로 저장하므로 마이그레이션이 필요 없다.
 export const REASONS: { id: string; label: string }[] = [
   { id: 'unknown', label: '원인 불명' },
+  ...EXIT_REASONS.filter((r) => r.id !== 'other').map((r) => ({ id: r.id, label: r.label })),
   { id: 'other', label: '기타 (메모에 기록)' },
 ]
 
