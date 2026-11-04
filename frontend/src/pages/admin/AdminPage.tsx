@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from
 import { ANALYTICS_ENABLED } from '../../lib/analytics'
 import { getSupabase } from '../../lib/supabaseClient'
 import { AdminDashboard } from './AdminDashboard'
+import { AdminTools, type AdminToolsApi, type DataCounts, type ResetResult } from './AdminTools'
 import { periodSince, type ActivityRow, type AdminReport, type Period, type UtReview } from './report'
 import type { UtApi } from './UserTestSection'
 
@@ -55,6 +56,32 @@ const utApi: UtApi = {
   },
 }
 
+// 데이터 관리 — 함수 안에서 관리자인지 다시 확인한다(20261104000000_admin_tools.sql).
+const toolsApi: AdminToolsApi = {
+  async counts() {
+    const { data, error } = await getSupabase().rpc('admin_data_counts')
+    if (error) throw error
+    return data as DataCounts
+  },
+  async exportData() {
+    const { data, error } = await getSupabase().rpc('admin_export_data')
+    if (error) throw error
+    return data
+  },
+  async reset(scope, confirm, participant) {
+    const { data, error } = await getSupabase().rpc('admin_reset_data', { p_scope: scope, p_confirm: confirm, p_participant: participant ?? null })
+    if (error) throw error
+    return data as ResetResult
+  },
+}
+
+// 데모에서는 건수만 보여주고 아무것도 지우지 않는다
+const demoToolsApi: AdminToolsApi = {
+  counts: async () => ({ events_prod: 4210, events_dev: 380, chat_logs: 96, ut_reviews: 1, user_progress: 12, participants: ['P01', 'P02', 'P03', 'P04', 'P05'] }),
+  exportData: async () => ({ demo: true }),
+  reset: async () => ({ events: 0, chat_logs: 0, ut_reviews: 0, user_progress: 0 }),
+}
+
 // 개발 서버에서 /admin?demo 로 열면 샘플 데이터로 화면만 확인한다(운영 빌드에서는 코드째 빠짐).
 function useDemoReport() {
   const [demo, setDemo] = useState<AdminReport | null>(null)
@@ -78,6 +105,7 @@ export function AdminPage() {
     return (
       <Shell>
         <AdminDashboard report={demo} period={demoPeriod} onPeriod={setDemoPeriod} loading={false} ut={demoUt} />
+        <AdminTools api={demoToolsApi} />
       </Shell>
     )
   }
@@ -184,6 +212,7 @@ function ConnectedAdmin() {
   return (
     <Shell email={email} onSignOut={signOut}>
       <AdminDashboard report={report} period={period} onPeriod={changePeriod} loading={loading} ut={utApi} />
+      <AdminTools api={toolsApi} onChanged={() => void load(period)} />
     </Shell>
   )
 }

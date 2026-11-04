@@ -1,6 +1,6 @@
--- 관리자 페이지: 참가자가 고른 종료 이유 (2026-11-04)
+-- 관리자 페이지: 참가자가 고른 종료 이유 + 데이터 관리 도구 (2026-11-04)
 -- 실행: Supabase 대시보드 → SQL Editor에 붙여넣고 실행 (또는 supabase db push)
--- 이 파일은 뷰만 만든다. 실행해도 데이터는 바뀌지 않는다.
+-- 이 파일은 뷰와 함수만 만든다. 실행해도 데이터는 바뀌지 않는다 — 삭제는 관리자가 페이지에서 직접 실행할 때만.
 
 -- ─────────────────────────────────────────────────────────────
 -- 1. 세션 지표에 종료 이유 추가 (끝에 컬럼 두 개만 더한다 — 나머지는 20261010000000_ut_review.sql과 같다)
@@ -90,3 +90,116 @@ left join stage using (session_id)
 left join act using (session_id)
 left join rev using (session_id)
 left join last_act la using (session_id);
+
+-- ─────────────────────────────────────────────────────────────
+-- 2. 데이터 관리 — 관리자만. 모두 기간 필터와 무관하게 전체를 본다.
+-- ─────────────────────────────────────────────────────────────
+
+-- 테이블별 건수
+create or replace function public.admin_data_counts()
+returns jsonb
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'admin only' using errcode = '42501';
+  end if;
+  return jsonb_build_object(
+    'events_prod',   (select count(*) from public.events where env = 'prod'),
+    'events_dev',    (select count(*) from public.events where env = 'dev'),
+    'chat_logs',     (select count(*) from public.chat_logs),
+    'ut_reviews',    (select count(*) from public.ut_reviews),
+    'user_progress', (select count(*) from public.user_progress),
+    'participants',  coalesce((select jsonb_agg(p order by p)
+                               from (select distinct props ->> 'ut' as p from public.events where props ? 'ut') x), '[]'::jsonb)
+  );
+end;
+$$;
+revoke all on function public.admin_data_counts() from public, anon;
+grant execute on function public.admin_data_counts() to authenticated;
+
+-- 백업: 활동 기록과 관리자 검토. 채팅 원문(chat_logs)과 진행 기록(대화 원문 포함)은 관리자 페이지에
+-- 노출하지 않는다는 원칙대로 빼고, 필요하면 Supabase 대시보드에서 직접 내보낸다.
+create or replace function public.admin_export_data()
+returns jsonb
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'admin only' using errcode = '42501';
+  end if;
+  return jsonb_build_object(
+    'exported_at', now(),
+    'events',      coalesce((select jsonb_agg(e order by e.id) from public.events e), '[]'::jsonb),
+    'ut_reviews',  coalesce((select jsonb_agg(r) from public.ut_reviews r), '[]'::jsonb)
+  );
+end;
+$$;
+revoke all on function public.admin_export_data() from public, anon;
+grant execute on function public.admin_export_data() to authenticated;
+
+-- 삭제. 실수로 불리지 않게 확인 문구를 서버에서도 한 번 더 맞춰 본다.
+--   dev         개발 환경 기록(env = 'dev')의 활동 기록·채팅 원문      확인 문구: 개발 기록 삭제
+--   participant 참가자 코드 하나의 세션 기록·채팅 원문·관리자 검토       확인 문구: 그 참가자 코드
+--   all         활동 기록·채팅 원문·관리자 검토·계정 진행 기록 전부     확인 문구: 전체 초기화
+-- 계정(auth.users)과 관리자 명단은 지우지 않는다.
+create or replace function public.admin_reset_data(p_scope text, p_confirm text, p_participant text default null)
+returns jsonb
+language plpgsql volatile security definer set search_path = ''
+as $$
+declare
+  n_events int := 0;
+  n_chats int := 0;
+  n_reviews int := 0;
+  n_progress int := 0;
+  sessions uuid[];
+begin
+  if not public.is_admin() then
+    raise exception 'admin only' using errcode = '42501';
+  end if;
+
+  if p_scope = 'dev' then
+    if p_confirm is distinct from '개발 기록 삭제' then
+      raise exception 'confirm mismatch' using errcode = '22023';
+    end if;
+    delete from public.events where env = 'dev';
+    get diagnostics n_events = row_count;
+    delete from public.chat_logs where env = 'dev';
+    get diagnostics n_chats = row_count;
+
+  elsif p_scope = 'participant' then
+    if coalesce(p_participant, '') = '' or p_confirm is distinct from p_participant then
+      raise exception 'confirm mismatch' using errcode = '22023';
+    end if;
+    select coalesce(array_agg(distinct session_id), '{}') into sessions
+    from public.events
+    where session_id is not null and props ->> 'ut' = p_participant;
+    delete from public.events where session_id = any (sessions);
+    get diagnostics n_events = row_count;
+    delete from public.chat_logs where session_id = any (sessions);
+    get diagnostics n_chats = row_count;
+    delete from public.ut_reviews where session_id = any (sessions);
+    get diagnostics n_reviews = row_count;
+
+  elsif p_scope = 'all' then
+    if p_confirm is distinct from '전체 초기화' then
+      raise exception 'confirm mismatch' using errcode = '22023';
+    end if;
+    delete from public.events where true;
+    get diagnostics n_events = row_count;
+    delete from public.chat_logs where true;
+    get diagnostics n_chats = row_count;
+    delete from public.ut_reviews where true;
+    get diagnostics n_reviews = row_count;
+    delete from public.user_progress where true;
+    get diagnostics n_progress = row_count;
+
+  else
+    raise exception 'unknown scope' using errcode = '22023';
+  end if;
+
+  return jsonb_build_object('events', n_events, 'chat_logs', n_chats, 'ut_reviews', n_reviews, 'user_progress', n_progress);
+end;
+$$;
+revoke all on function public.admin_reset_data(text, text, text) from public, anon;
+grant execute on function public.admin_reset_data(text, text, text) to authenticated;

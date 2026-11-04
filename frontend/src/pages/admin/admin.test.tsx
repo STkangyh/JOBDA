@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { fillDays, periodSince, screenLabel, viewLabel, formatDuration } from './report'
 import { AdminDashboard } from './AdminDashboard'
+import { AdminTools, type AdminToolsApi } from './AdminTools'
 import type { UtApi } from './UserTestSection'
 import { demoReport, demoTimeline } from './demoReport'
 
@@ -229,5 +230,65 @@ describe('AdminPage', () => {
     await user.click(await screen.findByRole('button', { name: '로그아웃' }))
     await waitFor(() => expect(fake.auth.signOut).toHaveBeenCalled())
     expect(await screen.findByRole('button', { name: '로그인' })).toBeInTheDocument()
+  })
+})
+
+describe('AdminTools', () => {
+  const makeApi = (): AdminToolsApi & { reset: ReturnType<typeof vi.fn> } => ({
+    counts: vi.fn(async () => ({ events_prod: 1200, events_dev: 30, chat_logs: 8, ut_reviews: 2, user_progress: 5, participants: ['P01', 'P02'] })),
+    exportData: vi.fn(async () => ({})),
+    reset: vi.fn(async () => ({ events: 30, chat_logs: 2, ut_reviews: 0, user_progress: 0 })),
+  })
+
+  it('shows how much data there is', async () => {
+    render(<AdminTools api={makeApi()} />)
+    expect(await screen.findByText('1,200')).toBeInTheDocument()
+    expect(within(screen.getByText('활동 기록 (개발)').parentElement!).getByText('30')).toBeInTheDocument()
+  })
+
+  it('only deletes after the exact phrase is typed, then reports what was removed and refreshes', async () => {
+    const user = userEvent.setup()
+    const api = makeApi()
+    const onChanged = vi.fn()
+    render(<AdminTools api={api} onChanged={onChanged} />)
+    const run = screen.getByRole('button', { name: '개발 기록 삭제' })
+    expect(run).toBeDisabled()
+
+    await user.type(screen.getByLabelText('개발 기록 삭제 확인 문구'), '개발 기록')
+    expect(run).toBeDisabled()
+    await user.type(screen.getByLabelText('개발 기록 삭제 확인 문구'), ' 삭제')
+    await user.click(run)
+
+    expect(api.reset).toHaveBeenCalledWith('dev', '개발 기록 삭제')
+    expect(await screen.findByRole('status')).toHaveTextContent('활동 기록 30건, 채팅 원문 2건을 지웠어요.')
+    expect(onChanged).toHaveBeenCalled()
+    expect(api.counts).toHaveBeenCalledTimes(2)
+  })
+
+  it('deletes one participant only after choosing the code and typing it back', async () => {
+    const user = userEvent.setup()
+    const api = makeApi()
+    render(<AdminTools api={api} />)
+    const run = screen.getByRole('button', { name: '참가자 기록 삭제' })
+    await screen.findByRole('option', { name: 'P02' })
+    expect(screen.getByLabelText('참가자 기록 삭제 확인 문구')).toBeDisabled()
+
+    await user.selectOptions(screen.getByLabelText('참가자 코드'), 'P02')
+    await user.type(screen.getByLabelText('참가자 기록 삭제 확인 문구'), 'P01')
+    expect(run).toBeDisabled()
+    await user.clear(screen.getByLabelText('참가자 기록 삭제 확인 문구'))
+    await user.type(screen.getByLabelText('참가자 기록 삭제 확인 문구'), 'P02')
+    await user.click(screen.getByRole('button', { name: '참가자 기록 삭제' }))
+    expect(api.reset).toHaveBeenCalledWith('participant', 'P02', 'P02')
+  })
+
+  it('says so when deleting fails', async () => {
+    const user = userEvent.setup()
+    const api = makeApi()
+    api.reset.mockRejectedValueOnce(new Error('confirm mismatch'))
+    render(<AdminTools api={api} />)
+    await user.type(screen.getByLabelText('전체 초기화 확인 문구'), '전체 초기화')
+    await user.click(screen.getByRole('button', { name: '전체 초기화' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('지우지 못했어요')
   })
 })
