@@ -95,6 +95,7 @@ function demoUtSessions(now: number): UtSession[] {
   })
   return [
     row('P04', 's2', 20, 'in_progress', 840, null, 6, 0),
+    { ...row('P05', 's2', 60, 'exited', 610, 'session2/workspace', 3, 0), exit_reasons: ['hard_task', 'other'], exit_note: '다른 일정이 생겼어요' },
     row('P03', 's2', 90, 'incomplete', 1310, 'session2/workspace', 9, 2),
     row('P02', 's1', 180, 'completed', 1490, null, 7, 0),
     row('P01', 's1', 300, 'completed', 1720, null, 11, 1),

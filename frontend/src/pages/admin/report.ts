@@ -66,6 +66,10 @@ export interface UtSession {
   m_report: boolean
   repeat_opens: number
   review: UtReview | null
+  /** 나가기 확인 창에서 참가자가 고른 이유(src/data/exitReasons.ts의 id). 마이그레이션 20261104 전 데이터는 없음 */
+  exit_reasons?: string[] | null
+  /** "기타"에 직접 쓴 이유 */
+  exit_note?: string | null
 }
 
 export type IssueType = 'dropoff' | 'friction' | 'tech_error' | 'none'

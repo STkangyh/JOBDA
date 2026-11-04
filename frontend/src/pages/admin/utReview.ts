@@ -30,12 +30,23 @@ export function reasonLabel(id: string) {
 
 export const ISSUE_SHORT: Record<IssueType, string> = { dropoff: 'Drop-off', friction: 'Friction', tech_error: '기술 오류', none: '문제 없음' }
 
+// 참가자가 나가기 확인 창에서 고른 이유를 보기 좋은 문구로. 고르지 않았으면 빈 배열.
+export function exitReasonLabels(s: Pick<UtSession, 'exit_reasons' | 'exit_note'>): string[] {
+  return (s.exit_reasons ?? []).map((id) => {
+    const label = EXIT_REASONS.find((r) => r.id === id)?.label ?? id
+    return id === 'other' && s.exit_note ? `${label}: ${s.exit_note}` : label
+  })
+}
+
 // 저장된 검토가 없을 때 폼의 출발점 — 로그로 확인된 사실만 보고 고른 "제안"이며, 관리자가 확인 후 저장한다.
-// 원인은 항상 '원인 불명'에서 시작한다(로그만으로는 원인을 확정할 수 없다).
+// 로그만으로는 원인을 확정할 수 없어 '원인 불명'에서 시작한다. 단, 참가자가 나가면서 이유를 골랐다면
+// 그 첫 번째 이유와 '참가자 응답' 근거로 시작한다(여러 개면 나머지는 메모에 적는다).
 export function suggestReview(s: UtSession): UtReview {
   const issue: IssueType =
     s.status === 'incomplete' || s.status === 'exited' ? 'dropoff' : s.system_errors > 0 ? 'tech_error' : s.repeat_opens >= 2 ? 'friction' : 'none'
-  return { issue_type: issue, reason: 'unknown', evidence: 'log', note: '' }
+  const picked = s.exit_reasons ?? []
+  if (picked.length === 0) return { issue_type: issue, reason: 'unknown', evidence: 'log', note: '' }
+  return { issue_type: issue, reason: picked[0], evidence: 'survey', note: `참가자가 고른 이유: ${exitReasonLabels(s).join(' / ')}` }
 }
 
 // 근거가 로그뿐인데 원인을 특정했다면 확정이 아니라 추정이다.

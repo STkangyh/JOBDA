@@ -15,7 +15,7 @@ import {
   type UtReview,
   type UtSession,
 } from './report'
-import { EVIDENCE, ISSUE_SHORT, ISSUE_TYPES, REASONS, isPresumed, reasonLabel, suggestReview } from './utReview'
+import { EVIDENCE, ISSUE_SHORT, ISSUE_TYPES, REASONS, exitReasonLabels, isPresumed, reasonLabel, suggestReview } from './utReview'
 
 export interface UtApi {
   loadTimeline: (sessionId: string) => Promise<ActivityRow[]>
@@ -332,6 +332,7 @@ function Radio<T extends string>({ name, value, options, onChange }: { name: str
 
 function ReviewPanel({ session, onSave }: { session: UtSession; onSave: (r: UtReview) => Promise<void> }) {
   const saved = session.review
+  const exitReasons = exitReasonLabels(session)
   const [draft, setDraft] = useState<UtReview>(saved ?? suggestReview(session))
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const set = (patch: Partial<UtReview>) => {
@@ -356,6 +357,24 @@ function ReviewPanel({ session, onSave }: { session: UtSession; onSave: (r: UtRe
         <dl className="grid grid-cols-[96px_minmax(0,1fr)] gap-x-3 gap-y-1 text-body-sm">
           <dt className="text-neutral-500">상태</dt>
           <dd className="text-neutral-800">{UT_STATUS_LABELS[session.status]}</dd>
+          {session.status === 'exited' && (
+            <>
+              <dt className="text-neutral-500">종료 이유</dt>
+              <dd className="text-neutral-800">
+                {exitReasons.length ? (
+                  <ul className="flex flex-col gap-0.5" aria-label="참가자가 고른 종료 이유">
+                    {exitReasons.map((r) => (
+                      <li key={r} className="break-words">
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span className="text-neutral-500">고르지 않음</span>
+                )}
+              </dd>
+            </>
+          )}
           <dt className="text-neutral-500">마지막 단계</dt>
           <dd className="text-neutral-800">{session.last_screen ? screenLabel(session.last_screen) : '—'}</dd>
           <dt className="text-neutral-500">마지막 행동</dt>

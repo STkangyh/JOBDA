@@ -62,8 +62,8 @@ describe('UserTestSection', () => {
   it('shows the UT KPIs from the plan — completion counts every started session', () => {
     renderUt()
     const ut = utSection()
-    // 4개 세션 중 완료 2 → 50%, 30일 넘게 멈춘 세션 1개가 미완료
-    expect(within(within(ut).getByText('전체 완주율').parentElement!).getByText('50%')).toBeInTheDocument()
+    // 5개 세션 중 완료 2 → 40%, 30일 넘게 멈춘 세션 1개가 미완료(나가기로 끝낸 세션은 '명시적 종료')
+    expect(within(within(ut).getByText('전체 완주율').parentElement!).getByText('40%')).toBeInTheDocument()
     expect(within(within(ut).getByText('미완료 세션').parentElement!).getByText('1')).toBeInTheDocument()
     expect(within(ut).getByRole('heading', { name: '세션2 업무 마일스톤' })).toBeInTheDocument()
     expect(within(ut).getByText('미완료')).toBeInTheDocument()
@@ -106,6 +106,29 @@ describe('UserTestSection', () => {
     })
     expect(await screen.findByText('저장했어요')).toBeInTheDocument()
     expect(within(utSection()).getByText('Friction')).toBeInTheDocument()
+  })
+
+  it('shows the reasons an exited participant picked and starts the review from them', async () => {
+    const user = userEvent.setup()
+    const saveReview = vi.fn(async () => {})
+    renderUt({ ...noopUt, saveReview })
+    const exited = demoReport().ut_sessions!.findIndex((s) => s.participant === 'P05')
+    await user.click(within(utSection()).getAllByRole('button', { name: '기록·검토' })[exited])
+
+    const reasons = screen.getByRole('list', { name: '참가자가 고른 종료 이유' })
+    expect(within(reasons).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['업무 내용이 어려워요', '기타: 다른 일정이 생겼어요'])
+    // 참가자 응답이 근거라 "추정"이 아니다
+    expect(screen.getByLabelText('원인 분류')).toHaveValue('hard_task')
+    expect(screen.getByLabelText('참가자 설문 응답 확인')).toBeChecked()
+    expect(screen.queryByText(/"추정"으로 표시돼요/)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '검토 저장' }))
+    expect(saveReview).toHaveBeenCalledWith(demoReport().ut_sessions![exited].session_id, {
+      issue_type: 'dropoff',
+      reason: 'hard_task',
+      evidence: 'survey',
+      note: '참가자가 고른 이유: 업무 내용이 어려워요 / 기타: 다른 일정이 생겼어요',
+    })
   })
 
   it('shows how to start when there are no participant sessions yet', () => {
