@@ -8,7 +8,7 @@ import { ExpandableArea, WorkFrame } from './WorkFrame'
 import { signOut } from '../lib/auth'
 import { ProfileMenu } from './ProfileMenu'
 import { maskEmail } from '../lib/auth'
-import { computeProfile } from '../api/mock/report'
+import { PERSONA_HEADLINES, computeProfile, pickHeadline } from '../api/mock/report'
 import { stageNeighbors, understandingPercent, useSession } from '../store/session'
 
 beforeEach(() => {
@@ -120,6 +120,27 @@ describe('work notes panel', () => {
     const card = screen.getByRole('heading', { name: '박책임과의 대화' }).closest('article')!
     expect(card.querySelector('p')!.textContent).toBe('목재는 자사 공장에서 취급하지 않음\n외주 업체 문의 필요')
     expect(screen.getAllByRole('article').filter((a) => a.textContent?.includes('단가 상승 10% 이내'))).toHaveLength(1)
+  })
+})
+
+describe('report headline', () => {
+  const axes = (speed: number, persuasion: number, evidence: number) =>
+    [speed, persuasion, evidence].map((value) => ({ leftLabel: '', rightLabel: '', caption: '', value }))
+
+  it('picks the copy for the axis that leans the most', () => {
+    expect(pickHeadline(axes(50, 100, 0))).toBe(PERSONA_HEADLINES.steadfast)
+    expect(pickHeadline(axes(50, 0, 0))).toBe(PERSONA_HEADLINES.flexible)
+    expect(pickHeadline(axes(100, 50, 0))).toBe(PERSONA_HEADLINES.executor)
+    expect(pickHeadline(axes(0, 50, 0))).toBe(PERSONA_HEADLINES.steadfast)
+    expect(pickHeadline(axes(50, 50, 100))).toBe(PERSONA_HEADLINES.coordinator)
+    expect(pickHeadline(axes(50, 50, 50))).toBe(PERSONA_HEADLINES.explorer)
+  })
+
+  it('breaks ties persuasion → speed → checking, and falls back when nothing leans', () => {
+    expect(pickHeadline(axes(100, 0, 100))).toBe(PERSONA_HEADLINES.flexible)
+    expect(pickHeadline(axes(100, 50, 100))).toBe(PERSONA_HEADLINES.executor)
+    expect(pickHeadline(axes(50, 50, 0))).toBe(PERSONA_HEADLINES.finding)
+    expect(pickHeadline([])).toBe(PERSONA_HEADLINES.finding)
   })
 })
 

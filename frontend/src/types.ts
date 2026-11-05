@@ -201,10 +201,6 @@ export type Stage =
 export const RATING_SCALE = ['전혀 아니다', '아니다', '보통', '그렇다', '매우 그렇다'] as const
 export type RatingScale = (typeof RATING_SCALE)[number]
 
-// Figma 823:52946(Desktop-121)에 세션1(744:15120/Desktop-38)과 동일한 페르소나 한줄평 문구가
-// 재사용되어 있다. Figma에 이 문구 하나만 확인되어 고정 문구로 사용(다른 변형은 근거 없어 생략).
-export const PERSONA_HEADLINE_FIXED = '뚝심 강한 디자이너 DNA가 흐르고 있어요'
-
 export interface SelfAssessment {
   interestScore: RatingScale
   expectationGap: RatingScale

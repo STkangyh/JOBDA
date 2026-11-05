@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { logChat, track } from '../lib/analytics'
 import { chat as apiChat, report as apiReport, sessionLog as apiSessionLog } from '../api/client'
-import { PERSONA_HEADLINE_FIXED } from '../types'
+import { pickHeadline } from '../api/mock/report'
 import type {
   ActionLog,
   ActionLogType,
@@ -485,7 +485,7 @@ export const useSession = create<SessionState & SessionActions>()(
         // 액션에서 무조건 덮어쓴다(백엔드가 뭘 보내든 프론트가 최종 소스).
         const report: ReportResponse = {
           ...res,
-          personaHeadline: PERSONA_HEADLINE_FIXED,
+          personaHeadline: pickHeadline(res.profile),
           burdenNote: s.selfAssessment.burdenNote.trim(),
         }
         set({ report, currentStage: 'report' })

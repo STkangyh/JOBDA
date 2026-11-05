@@ -1,4 +1,4 @@
-import { PERSONA_HEADLINE_FIXED, type Finding, type FindingCode, type ProfileAxis, type ReportRequest, type ReportResponse } from '../../types'
+import { type Finding, type FindingCode, type ProfileAxis, type ReportRequest, type ReportResponse } from '../../types'
 
 // finding code -> 문장 매핑을 프론트 목데이터로 재현. 버킷 분류는 client.ts의 FINDING_BUCKET과
 // 동일하게 맞춰서(이슈 #1 / 백엔드 API.md 기준) 오프라인 목데이터와 실제 API가 같은 카테고리를 쓴다.
@@ -92,6 +92,34 @@ export function computeProfile(req: ReportRequest): ProfileAxis[] {
   ]
 }
 
+// 행동 분석 헤드라인 — 위 프로필 3축 중 가장 한쪽으로 기운 축으로 6개 문구 중 하나를 고른다(이슈 #6, 2026-11-05 확정).
+//   대안 제시형 · 품질 우선 → 뚝심   수용형 → 유연함   일정 우선 → 실행력
+//   근거 요구형(설계·구매 둘 다 확인) → 조율   한 팀만 확인 → 탐색형   어느 쪽으로도 기울지 않음 → 찾아가는 중
+// 기운 정도가 같으면 설득(2축) → 속도(1축) → 확인(3축) 순으로 고른다.
+export const PERSONA_HEADLINES = {
+  steadfast: '뚝심 강한 디자이너 DNA가 흐르고 있어요',
+  coordinator: '관계 팀과 접점을 찾아내는 조율 감각이 있어요',
+  explorer: '질문으로 길을 찾는 탐색형 디자이너예요',
+  executor: '주어진 일정 안에 매듭짓는 실행력이 돋보여요',
+  flexible: '피드백을 빠르게 반영하는 유연함이 보여요',
+  finding: '이번 업무에서 나만의 일하는 방식을 찾아가는 중이에요',
+} as const
+
+export function pickHeadline(profile: ProfileAxis[]): string {
+  const [speed, persuasion, evidence] = profile.map((a) => a.value)
+  const candidates: { strength: number; text: string }[] = []
+  if (persuasion !== undefined && persuasion !== 50)
+    candidates.push({ strength: Math.abs(persuasion - 50), text: persuasion > 50 ? PERSONA_HEADLINES.steadfast : PERSONA_HEADLINES.flexible })
+  if (speed !== undefined && speed !== 50)
+    candidates.push({ strength: Math.abs(speed - 50), text: speed > 50 ? PERSONA_HEADLINES.executor : PERSONA_HEADLINES.steadfast })
+  // 3축은 0·50·100만 나온다: 둘 다 확인 = 강하게, 한 팀만 = 약하게, 아무도 안 물음 = 기울기 없음
+  if (evidence !== undefined && evidence > 0)
+    candidates.push({ strength: evidence >= 100 ? 50 : 25, text: evidence >= 100 ? PERSONA_HEADLINES.coordinator : PERSONA_HEADLINES.explorer })
+  // 같은 세기면 먼저 넣은 쪽(설득 → 속도 → 확인)이 이긴다
+  const best = candidates.reduce<(typeof candidates)[number] | null>((a, c) => (!a || c.strength > a.strength ? c : a), null)
+  return best && best.strength >= 25 ? best.text : PERSONA_HEADLINES.finding
+}
+
 // 업무 진행 과정(journey) — API(prompts/report.md)가 LLM으로 쓰는 세 줄과 같은 규칙의 기본값.
 // 목데이터로 돌 때와, 응답에 journey가 어긋났을 때 쓴다(이슈 #6). 단계 이름은 붙이지 않는다(화면이 붙임).
 export const DEFAULT_JOURNEY = ['부품별 디자인 시방서 초안 작성', '피드백 반영 후 최종본 인계', '목재 파트 양산 방법 검토']
@@ -138,9 +166,9 @@ export function mockReport(req: ReportRequest): ReportResponse {
     journey: computeJourney(req),
     profile: computeProfile(req),
     // ReportRequest에 selfAssessment가 없어 burdenNote는 여기서 알 수 없다 — store(session.ts)의
-    // finishAssessment가 실제 자기평가 텍스트로 덮어쓴다. personaHeadline은 고정 문구라 여기서도
-    // 채워두지만 마찬가지로 finishAssessment에서 다시 덮어쓴다.
-    personaHeadline: PERSONA_HEADLINE_FIXED,
+    // finishAssessment가 실제 자기평가 텍스트로 덮어쓴다. personaHeadline도 finishAssessment가
+    // 실제 응답의 profile로 다시 고른다.
+    personaHeadline: pickHeadline(computeProfile(req)),
     burdenNote: '',
   }
 }
