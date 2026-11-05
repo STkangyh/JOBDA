@@ -6,6 +6,7 @@ import { PERSONA_LABEL, PERSONA_SENDER_NAME, type Persona } from '../types'
 import { track, useTrackView } from '../lib/analytics'
 import { LoginRequiredError, note as apiNote } from '../api/client'
 import { ChatRetentionNotice } from './ChatRetentionNotice'
+import { groupSavedNotes } from '../lib/memoCards'
 import seniorAvatar from '../assets/work/avatars/senior.png'
 import engineeringAvatar from '../assets/work/avatars/engineering.png'
 import purchasingAvatar from '../assets/work/avatars/purchasing.png'
@@ -529,19 +530,16 @@ export function WorkSidePanel({ messenger, mode: modeProp, onModeChange, tab: ta
                     <p className="text-body-md whitespace-pre-line text-neutral-600">{m.body}</p>
                   </article>
                 ))}
-                {/* 메신저에서 "답변 내용 노트에 저장"한 답변 */}
-                {savedNotes.map((note) => {
-                  const meta = savedNoteMeta[note]
-                  return (
-                    <article key={note} className="flex flex-col gap-4 rounded-2xl bg-neutral-100 px-7 py-6">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <h3 className="text-title-lg font-semibold text-neutral-900">{meta ? `${PERSONA_SENDER_NAME[meta.persona]}와의 대화` : '저장한 답변'}</h3>
-                        {meta && <span className="text-caption-lg text-neutral-500">{formatMemoTime(meta.t)}</span>}
-                      </div>
-                      <p className="text-body-md whitespace-pre-line text-neutral-600">{meta?.lines?.length ? meta.lines.join('\n') : note}</p>
-                    </article>
-                  )
-                })}
+                {/* 메신저에서 "답변 내용 노트에 저장"한 답변 — 관계자마다 카드 하나에 줄이 쌓인다(2026-11-05 결정) */}
+                {groupSavedNotes(savedNotes, savedNoteMeta).map((card) => (
+                  <article key={card.key} className="flex flex-col gap-4 rounded-2xl bg-neutral-100 px-7 py-6">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h3 className="text-title-lg font-semibold text-neutral-900">{card.title}</h3>
+                      {card.t !== undefined && <span className="text-caption-lg text-neutral-500">{formatMemoTime(card.t)}</span>}
+                    </div>
+                    <p className="text-body-md whitespace-pre-line text-neutral-600">{card.lines.join('\n')}</p>
+                  </article>
+                ))}
               </>
             )}
           </div>

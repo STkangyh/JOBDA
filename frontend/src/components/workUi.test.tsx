@@ -102,8 +102,24 @@ describe('work notes panel', () => {
     await user.click(screen.getByRole('button', { name: /업무노트/ }))
     await user.click(screen.getByRole('tab', { name: '메모장' }))
     expect(screen.getByRole('heading', { name: '고프로와의 대화' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '박책임와의 대화' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '박책임과의 대화' })).toBeInTheDocument()
     expect(screen.getByText('저장한 내용')).toBeInTheDocument()
+  })
+
+  it('keeps one memo card per person and adds each saved answer as new lines', async () => {
+    const user = userEvent.setup()
+    const { saveNote } = useSession.getState()
+    saveNote('답변 1', 'engineering', ['목재는 자사 공장에서 취급하지 않음'])
+    saveNote('답변 2', 'purchasing', ['단가 상승 10% 이내'])
+    saveNote('답변 3', 'engineering', ['외주 업체 문의 필요'])
+    renderPanel()
+    await user.click(screen.getByRole('button', { name: /업무노트/ }))
+    await user.click(screen.getByRole('tab', { name: '메모장' }))
+
+    expect(screen.getAllByRole('heading', { name: '박책임과의 대화' })).toHaveLength(1)
+    const card = screen.getByRole('heading', { name: '박책임과의 대화' }).closest('article')!
+    expect(card.querySelector('p')!.textContent).toBe('목재는 자사 공장에서 취급하지 않음\n외주 업체 문의 필요')
+    expect(screen.getAllByRole('article').filter((a) => a.textContent?.includes('단가 상승 10% 이내'))).toHaveLength(1)
   })
 })
 
