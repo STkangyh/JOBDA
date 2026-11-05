@@ -56,11 +56,11 @@ describe('Messenger', () => {
     await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '대기 확인')
     await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
 
-    expect(container.querySelectorAll('.animate-bounce')).toHaveLength(3)
+    expect(container.querySelectorAll('[data-typing]')).toHaveLength(1)
 
     resolveChat({ reply: '응답 도착', intent: 'other', disclose: [] })
 
-    await waitFor(() => expect(container.querySelectorAll('.animate-bounce')).toHaveLength(0))
+    await waitFor(() => expect(container.querySelectorAll('[data-typing]')).toHaveLength(0))
   })
 
   it('shows a retry banner on failure, and a successful retry clears it and sends the same text', async () => {
@@ -81,6 +81,22 @@ describe('Messenger', () => {
     expect(screen.getByText('실패할 메시지')).toBeInTheDocument()
     expect(mockedChat).toHaveBeenCalledTimes(2)
     expect(mockedChat.mock.calls[1][0]).toMatchObject({ message: '실패할 메시지' })
+  })
+
+  it('puts retry and cancel icons next to a failed bubble, and cancel drops that bubble', async () => {
+    mockedChat.mockRejectedValueOnce(new Error('network error'))
+    const user = userEvent.setup()
+    render(<Messenger defaultActive="senior" />)
+
+    await user.type(screen.getByPlaceholderText('메시지를 입력하세요'), '취소할 메시지')
+    await user.click(screen.getByRole('button', { name: '메시지 보내기' }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert.querySelectorAll('img')).toHaveLength(2)
+    await user.click(screen.getByRole('button', { name: '보내지 않기' }))
+
+    expect(screen.queryByText('취소할 메시지')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('does not send an empty or whitespace-only message', async () => {

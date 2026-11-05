@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Text } from './Text'
 import { ArrowUpwardIcon, WarningIcon } from './icons'
 import { useSession } from '../store/session'
@@ -10,6 +10,9 @@ import { groupSavedNotes } from '../lib/memoCards'
 import seniorAvatar from '../assets/work/avatars/senior.png'
 import engineeringAvatar from '../assets/work/avatars/engineering.png'
 import purchasingAvatar from '../assets/work/avatars/purchasing.png'
+import retryIcon from '../assets/work/chat/retry.svg'
+import cancelIcon from '../assets/work/chat/cancel.svg'
+import typingDots from '../assets/work/chat/typing.svg'
 
 // 관계자 얼굴 — 디자인 시스템 이미지 에셋(2026-10-31). 메신저 칩·받은 말풍선·입력 중 표시에 붙는다.
 const AVATAR: Record<Persona, string> = { senior: seniorAvatar, engineering: engineeringAvatar, purchasing: purchasingAvatar }
@@ -35,7 +38,7 @@ function NoteButton({ status, onSave }: { status: NoteStatus; onSave: () => void
       onClick={onSave}
       disabled={status !== 'idle'}
       aria-busy={status === 'saving' || undefined}
-      className="self-start rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
+      className="self-start rounded-md bg-neutral-75 px-2.5 py-2 text-caption-lg text-neutral-700 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:text-neutral-400"
     >
       {NOTE_LABEL[status]}
     </button>
@@ -45,6 +48,61 @@ function NoteButton({ status, onSave }: { status: NoteStatus; onSave: () => void
 function formatTime(t: number): string {
   const d = new Date(t)
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+// 말풍선 한 줄 — Figma 2258:32474(상대 / 내 메시지 / 전송 실패 / 입력 중 4종, 2026-11-05).
+// 말풍선은 글 길이만큼만 넓어지고(긴 글은 줄 끝까지) 바로 옆 38px 칸에 시각(또는 실패 시 재시도·취소)이 붙는다.
+// 디자인은 줄을 꽉 채우지만, 짧은 메시지는 짧은 말풍선으로 하기로 했다(2026-11-05).
+const BUBBLE_OTHERS = 'rounded-tl-2xl rounded-tr-2xl rounded-br-2xl bg-neutral-100 px-[18px] py-3'
+const BUBBLE_MY = 'rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl bg-green-200 px-[18px] py-3'
+
+const FAIL_ICON_BUTTON =
+  'size-[18px] shrink-0 cursor-pointer rounded-full transition-colors hover:bg-neutral-300 active:bg-neutral-400 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-green-700'
+
+function TimeSlot({ t, align }: { t?: number; align: 'start' | 'end' }) {
+  return (
+    <span className={`w-[38px] shrink-0 text-body-sm text-neutral-700 ${align === 'end' ? 'text-right' : ''}`}>
+      {t ? formatTime(t) : null}
+    </span>
+  )
+}
+
+function OthersRow({ persona, t, children }: { persona: Persona; t?: number; children: ReactNode }) {
+  return (
+    <div className="flex items-end gap-3">
+      <div className="flex min-w-0 items-end gap-2">
+        <Avatar persona={persona} />
+        <div className={`flex min-w-0 flex-col items-start gap-2 ${BUBBLE_OTHERS}`}>{children}</div>
+      </div>
+      <TimeSlot t={t} align="start" />
+    </div>
+  )
+}
+
+function MyRow({ text, t, error }: { text: string; t?: number; error?: { onRetry: () => void; onCancel: () => void } }) {
+  return (
+    <div className="flex items-end justify-end gap-3" data-my-message>
+      {error ? (
+        <div className="flex w-[38px] shrink-0 items-center justify-center rounded-2xl bg-white" role="alert">
+          <span className="sr-only">메시지 전송에 실패했어요.</span>
+          {/* 마우스를 올린 아이콘 뒤에 회색 원이 깔려 어느 쪽을 누르는지 보인다 */}
+          <button type="button" aria-label="재시도" title="다시 보내기" onClick={error.onRetry} className={FAIL_ICON_BUTTON}>
+            <img src={retryIcon} alt="" width={18} height={18} className="block" />
+          </button>
+          <button type="button" aria-label="보내지 않기" title="보내지 않기" onClick={error.onCancel} className={FAIL_ICON_BUTTON}>
+            <img src={cancelIcon} alt="" width={18} height={18} className="block" />
+          </button>
+        </div>
+      ) : (
+        <TimeSlot t={t} align="end" />
+      )}
+      <div className={`flex min-w-0 items-center ${BUBBLE_MY}`}>
+        <Text variant="body-md" className="min-w-0 break-words whitespace-pre-line text-green-900">
+          {text}
+        </Text>
+      </div>
+    </div>
+  )
 }
 
 // 세션2 "관계자 협업" 라운드 화면들(Workspace/SeniorFeedback/FinalFeedback)이 전부 같은 메신저 +
@@ -197,76 +255,72 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="flex min-h-full flex-col justify-end gap-3">
           {showIntro && (
-            <div className="flex items-end gap-2 self-start">
-              <Avatar persona={intro!.persona} />
-              <div className="flex max-w-[260px] flex-col gap-2 rounded-tl-2xl rounded-tr-2xl rounded-br-2xl bg-neutral-100 px-[18px] py-3">
-                <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
-                  {intro!.text}
-                </Text>
-                <div className="flex gap-2">
-                  <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700">
-                    {PERSONA_SENDER_NAME[intro!.persona]}
-                  </span>
-                  <NoteButton status={statusOf(intro!.text)} onSave={() => saveAnswer(intro!.text, intro!.persona)} />
-                </div>
+            <OthersRow persona={intro!.persona}>
+              <Text variant="body-md" className="whitespace-pre-line text-neutral-700">
+                {intro!.text}
+              </Text>
+              <div className="flex gap-2">
+                <span className="shrink-0 rounded-md bg-neutral-75 px-2.5 py-2 text-caption-lg text-neutral-700">
+                  {PERSONA_SENDER_NAME[intro!.persona]}
+                </span>
+                <NoteButton status={statusOf(intro!.text)} onSave={() => saveAnswer(intro!.text, intro!.persona)} />
               </div>
-            </div>
+            </OthersRow>
           )}
           {history.length === 0 && !showIntro && (
             <Text variant="body-sm" className="text-neutral-400">
               {PERSONA_LABEL[active]}에게 궁금한 걸 질문해보세요.
             </Text>
           )}
-          {history.map((m, i) => (
-            <div key={i} className={`flex items-end gap-2 ${m.role === 'user' ? 'flex-row-reverse self-end' : 'self-start'}`}>
-              {m.role === 'assistant' && <Avatar persona={active} />}
-              <div
-                className={`flex max-w-[260px] flex-col gap-2 px-[18px] py-3 ${
-                  m.role === 'user'
-                    ? 'rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl bg-green-300 text-green-900'
-                    : 'rounded-tl-2xl rounded-tr-2xl rounded-br-2xl bg-neutral-100 text-neutral-700'
-                }`}
-              >
-                <Text variant="body-md">{m.content}</Text>
-                {m.role === 'assistant' && (
-                  <div className="flex gap-2">
-                    <span className="shrink-0 rounded-md bg-neutral-50 px-2.5 py-2 text-xs text-neutral-700">
-                      {PERSONA_SENDER_NAME[active]}
-                    </span>
-                    <NoteButton
-                      status={statusOf(m.content)}
-                      onSave={() => saveAnswer(m.content, active, history[i - 1]?.role === 'user' ? history[i - 1].content : undefined)}
-                    />
-                  </div>
-                )}
-              </div>
-              {m.t && (
-                <Text variant="caption-sm" className="shrink-0 text-[12px] text-neutral-700">
-                  {formatTime(m.t)}
+          {history.map((m, i) =>
+            m.role === 'user' ? (
+              <MyRow key={i} text={m.content} t={m.t} />
+            ) : (
+              <OthersRow key={i} persona={active} t={m.t}>
+                <Text variant="body-md" className="break-words whitespace-pre-line text-neutral-700">
+                  {m.content}
                 </Text>
-              )}
-            </div>
-          ))}
-          {/* 이전엔 작은 회색 텍스트 한 줄("답변 작성 중...")뿐이라 실제 응답 대기(2~4초
-              실측)를 잘 놓쳤다는 피드백 — 다른 관계자 말풍선과 같은 모양(rounded-br-xl 등)의
-              점 3개 바운스 애니메이션으로 바꿔서 "지금 뭔가 진행 중"이 시각적으로 분명하게 함. */}
+                <div className="flex gap-2">
+                  <span className="shrink-0 rounded-md bg-neutral-75 px-2.5 py-2 text-caption-lg text-neutral-700">
+                    {PERSONA_SENDER_NAME[active]}
+                  </span>
+                  <NoteButton
+                    status={statusOf(m.content)}
+                    onSave={() => saveAnswer(m.content, active, history[i - 1]?.role === 'user' ? history[i - 1].content : undefined)}
+                  />
+                </div>
+              </OthersRow>
+            ),
+          )}
+          {/* 보낸 말풍선 — 전송에 실패하면 시각 자리에 재시도·취소 버튼이 붙는다(Figma 2258:32892) */}
           {showPending && (
-            <div className="flex flex-row-reverse items-end gap-2 self-end" data-pending>
-              <div className="flex max-w-[260px] flex-col gap-2 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl bg-green-300 px-[18px] py-3 text-green-900">
-                <Text variant="body-md">{pending.text}</Text>
-              </div>
-              <Text variant="caption-sm" className="shrink-0 text-[12px] text-neutral-700">
-                {formatTime(pending.t)}
-              </Text>
+            <div data-pending>
+              <MyRow
+                text={pending.text}
+                t={pending.t}
+                error={
+                  failed && failed.persona === active && !failed.login && failed.text === pending.text
+                    ? {
+                        onRetry: () => {
+                          track('chat_retry', { actor: failed.persona })
+                          send(failed.text)
+                        },
+                        onCancel: () => {
+                          setFailed(null)
+                          setPending(null)
+                        },
+                      }
+                    : undefined
+                }
+              />
             </div>
           )}
+          {/* 입력 중 — Figma 2342:15538. 응답 대기(2~4초)를 놓치지 않게 점 3개를 천천히 깜빡인다. */}
           {sending && (
-            <div className="flex items-end gap-2 self-start" role="status" aria-label={`${PERSONA_LABEL[active]} 답변 작성 중`}>
+            <div className="flex items-end gap-2 self-start" role="status" aria-label={`${PERSONA_LABEL[active]} 답변 작성 중`} data-typing>
               <Avatar persona={active} />
-              <div className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-4 py-3">
-                <span className="size-2 animate-bounce rounded-full bg-neutral-600" style={{ animationDelay: '0ms' }} />
-                <span className="size-2 animate-bounce rounded-full bg-neutral-600" style={{ animationDelay: '150ms' }} />
-                <span className="size-2 animate-bounce rounded-full bg-neutral-600" style={{ animationDelay: '300ms' }} />
+              <div className={`flex flex-col justify-center ${BUBBLE_OTHERS}`}>
+                <img src={typingDots} alt="" width={52} height={12} className="block animate-pulse" />
               </div>
             </div>
           )}
@@ -279,24 +333,6 @@ export function Messenger({ defaultActive = 'senior', intro }: MessengerProps) {
               <a href="/login" className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-error-300 transition-colors hover:bg-error-100/40">
                 로그인하기
               </a>
-            </div>
-          )}
-          {failed && failed.persona === active && !failed.login && (
-            <div className="flex items-center gap-2 self-start rounded-md border border-error-100 bg-error-100/20 px-3 py-2">
-              <WarningIcon className="size-4 shrink-0 text-error-200" />
-              <Text variant="body-sm" className="text-error-300">
-                메시지 전송에 실패했어요.
-              </Text>
-              <button
-                type="button"
-                onClick={() => {
-                  track('chat_retry', { actor: failed.persona })
-                  send(failed.text)
-                }}
-                className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-error-300 transition-colors hover:bg-error-100/40"
-              >
-                재시도
-              </button>
             </div>
           )}
         </div>
