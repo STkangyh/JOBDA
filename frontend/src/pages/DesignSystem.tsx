@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { Text } from '../components/Text'
+import { Messenger } from '../components/NegotiationPanels'
+import { useSession } from '../store/session'
+import { getMockChatMode, setMockChatMode, type MockChatMode } from '../api/mock/chat'
 import { Chip } from '../components/Chip'
 import { Checkbox } from '../components/Checkbox'
 import { Card } from '../components/Card'
@@ -88,6 +91,55 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       </Text>
       {children}
     </section>
+  )
+}
+
+// 메신저 시험장 — 실제 메신저에 답변 방식을 바꿔 가며 말풍선 4종(Figma 2258:32474)을 눈으로 확인한다.
+const CHAT_MODES: { mode: MockChatMode; label: string; hint: string }[] = [
+  { mode: 'normal', label: '정상', hint: '바로 답변이 와요' },
+  { mode: 'slow', label: '느리게 (5초)', hint: '입력 중 점 3개가 보여요' },
+  { mode: 'fail', label: '실패', hint: '1.5초 뒤 재시도·취소 버튼이 붙어요' },
+]
+
+function MessengerPlayground() {
+  const [mode, setMode] = useState<MockChatMode>(getMockChatMode)
+  const [key, setKey] = useState(0)
+  const pick = (m: MockChatMode) => {
+    setMockChatMode(m)
+    setMode(m)
+  }
+  const clear = () => {
+    useSession.setState({ chatHistory: { senior: [], engineering: [], purchasing: [] } })
+    setKey((k) => k + 1)
+  }
+  return (
+    <div className="flex flex-wrap items-start gap-6">
+      <div className="flex w-56 flex-col gap-3">
+        <Text variant="body-sm" className="text-neutral-600">
+          답변 방식을 고르고 메시지를 보내 보세요.
+        </Text>
+        {CHAT_MODES.map((c) => (
+          <button
+            key={c.mode}
+            type="button"
+            onClick={() => pick(c.mode)}
+            aria-pressed={mode === c.mode}
+            className={`flex flex-col items-start rounded-lg border px-3 py-2 text-left transition-colors ${
+              mode === c.mode ? 'border-green-700 bg-green-200' : 'border-neutral-300 bg-white hover:bg-neutral-100'
+            }`}
+          >
+            <span className="text-body-md font-medium text-neutral-900">{c.label}</span>
+            <span className="text-body-sm text-neutral-600">{c.hint}</span>
+          </button>
+        ))}
+        <button type="button" onClick={clear} className="self-start text-body-sm text-neutral-600 underline">
+          대화 지우기
+        </button>
+      </div>
+      <div className="h-[640px] w-[433px]">
+        <Messenger key={key} defaultActive="senior" intro={{ persona: 'senior', text: '색이랑 마감 모두 결정됐어요.\n설계팀에 넘길 시방서 작성하고 저한테 보내주세요.' }} />
+      </div>
+    </div>
   )
 }
 
@@ -297,6 +349,10 @@ export function DesignSystem() {
         <Card className="p-4">
           <Text variant="body-md">카드 컴포넌트 내부입니다.</Text>
         </Card>
+      </Section>
+
+      <Section title="Messenger (말풍선 시험장)">
+        <MessengerPlayground />
       </Section>
 
       <Section title="Loading">

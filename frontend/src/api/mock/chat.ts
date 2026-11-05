@@ -103,3 +103,14 @@ export function mockChat(req: ChatRequest): ChatResponse {
 
   return { reply: IRRELEVANT_REPLY, intent: 'irrelevant', disclose: [] }
 }
+
+// 디자인 시스템 페이지의 메신저 시험장에서 답변 방식을 바꿔 보는 스위치(목데이터일 때만 쓰인다).
+// slow: 5초 뒤 답변(입력 중 표시 확인용), fail: 1.5초 뒤 전송 실패(재시도·취소 버튼 확인용).
+export type MockChatMode = 'normal' | 'slow' | 'fail'
+let mockChatMode: MockChatMode = 'normal'
+export function setMockChatMode(mode: MockChatMode) {
+  mockChatMode = mode
+}
+export function getMockChatMode(): MockChatMode {
+  return mockChatMode
+}

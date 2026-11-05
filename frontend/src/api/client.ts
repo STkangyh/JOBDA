@@ -1,5 +1,5 @@
 import type { ChatRequest, ChatResponse, Finding, FindingCode, ReportRequest, ReportResponse, SessionLogRequest } from '../types'
-import { mockChat } from './mock/chat'
+import { mockChat, getMockChatMode } from './mock/chat'
 import { mockReport, computeJourney, computeProfile, WORK_OVERVIEW, JOB_MEANING } from './mock/report'
 
 // 백엔드가 BACKEND_SPEC_v4로 배포됨 (GitHub 이슈 #1). v2와의 갭은 이 파일 경계에서만
@@ -36,7 +36,15 @@ async function postJson<TReq, TRes>(path: string, body: TReq): Promise<TRes> {
 }
 
 export async function chat(req: ChatRequest): Promise<ChatResponse> {
-  if (USE_MOCK) return mockChat(req)
+  if (USE_MOCK) {
+    const mode = getMockChatMode()
+    if (mode === 'slow') await new Promise((r) => setTimeout(r, 5000))
+    if (mode === 'fail') {
+      await new Promise((r) => setTimeout(r, 1500))
+      throw new Error('mock chat failure')
+    }
+    return mockChat(req)
+  }
   return postJson('/api/chat', { scenario: SCENARIO, context: null, ...req })
 }
 
