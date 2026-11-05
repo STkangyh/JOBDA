@@ -132,6 +132,18 @@ describe('UserTestSection', () => {
     })
   })
 
+  it('marks sessions that opened the model answer and shows how many times', async () => {
+    const user = userEvent.setup()
+    renderUt()
+    const rows = within(utSection()).getAllByRole('row')
+    const p04 = rows.find((r) => r.textContent?.startsWith('P04'))!
+    expect(within(p04).getByText('모범답안 봄')).toBeInTheDocument()
+    expect(rows.filter((r) => r.textContent?.includes('모범답안 봄'))).toHaveLength(1)
+
+    await user.click(within(p04).getByRole('button', { name: '기록·검토' }))
+    expect(screen.getByText('모범답안 열람').nextElementSibling).toHaveTextContent('3회')
+  })
+
   it('shows how to start when there are no participant sessions yet', () => {
     render(<AdminDashboard report={{ ...demoReport(), ut_sessions: [], ut_stages: [] }} period="30d" onPeriod={() => {}} loading={false} ut={noopUt} />)
     expect(screen.getByText(/테스트 링크에 \?ut=참가자코드/)).toBeInTheDocument()

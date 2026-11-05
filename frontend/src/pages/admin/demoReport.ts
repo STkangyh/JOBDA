@@ -94,7 +94,7 @@ function demoUtSessions(now: number): UtSession[] {
     review: p === 'P03' ? { issue_type: 'dropoff', reason: 'unknown', evidence: 'log', note: '관계자 협업 단계에서 메신저와 자료함을 반복 이동한 뒤 기록이 끊김.' } : null,
   })
   return [
-    row('P04', 's2', 20, 'in_progress', 840, null, 6, 0),
+    { ...row('P04', 's2', 20, 'in_progress', 840, null, 6, 0), model_answer_views: 3 },
     { ...row('P05', 's2', 60, 'exited', 610, 'session2/workspace', 3, 0), exit_reasons: ['hard_task', 'other'], exit_note: '다른 일정이 생겼어요' },
     row('P03', 's2', 90, 'incomplete', 1310, 'session2/workspace', 9, 2),
     row('P02', 's1', 180, 'completed', 1490, null, 7, 0),

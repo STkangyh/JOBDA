@@ -70,6 +70,8 @@ export interface UtSession {
   exit_reasons?: string[] | null
   /** "기타"에 직접 쓴 이유 */
   exit_note?: string | null
+  /** 모범답안을 연 횟수. 마이그레이션 20261105 전에는 없음 */
+  model_answer_views?: number
 }
 
 export type IssueType = 'dropoff' | 'friction' | 'tech_error' | 'none'

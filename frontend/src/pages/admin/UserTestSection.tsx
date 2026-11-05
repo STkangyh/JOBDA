@@ -194,6 +194,9 @@ export function UserTestSection({ report, ut }: Props) {
                       <td className="whitespace-nowrap px-3 py-2.5 text-neutral-800">{s.last_screen ? screenLabel(s.last_screen) : '—'}</td>
                       <td className="whitespace-nowrap px-3 py-2.5">
                         <span className={`rounded-full px-2 py-0.5 text-caption-sm font-medium ${STATUS_STYLES[s.status]}`}>{UT_STATUS_LABELS[s.status]}</span>
+                        {(s.model_answer_views ?? 0) > 0 && (
+                          <span className="ml-1.5 rounded-full bg-green-100 px-2 py-0.5 text-caption-sm font-medium text-green-900">모범답안 봄</span>
+                        )}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-neutral-800">{formatDuration(s.time_on_task_s)}</td>
                       <td className="whitespace-nowrap px-3 py-2.5">
@@ -383,6 +386,8 @@ function ReviewPanel({ session, onSave }: { session: UtSession; onSave: (r: UtRe
           <dd className="text-neutral-800">{formatCount(session.system_errors)}회</dd>
           <dt className="text-neutral-500">반복 탐색</dt>
           <dd className="text-neutral-800">{formatCount(session.repeat_opens)}회</dd>
+          <dt className="text-neutral-500">모범답안 열람</dt>
+          <dd className="text-neutral-800">{session.model_answer_views === undefined ? '—' : `${formatCount(session.model_answer_views)}회`}</dd>
         </dl>
       </div>
 
