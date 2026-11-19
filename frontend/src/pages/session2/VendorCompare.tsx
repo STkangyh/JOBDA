@@ -146,7 +146,8 @@ export function VendorCompare() {
   const proposeVendor = useSession((s) => s.proposeVendor)
   const submitVendors = useSession((s) => s.submitVendors)
   const currentStage = useSession((s) => s.currentStage)
-  const remaining = feedbackSessionsRemaining(currentStage, false)
+  // 3차 피드백(구매팀 의견)을 받은 뒤에는 남은 피드백 세션이 없다
+  const remaining = vendorProposed ? 0 : feedbackSessionsRemaining(currentStage, false)
 
   const [phase, setPhase] = useState<'research' | 'select'>('research')
   useTrackView({ kind: 'panel', name: `vendor_phase:${vendorProposed ? 'feedback' : phase}` })
