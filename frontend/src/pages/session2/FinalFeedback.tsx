@@ -13,7 +13,7 @@ import type { Branch } from '../../types'
 // 실사용 결과("image 242" QA 지적) 두 화면을 오가는 게 불편해 원안대로 한 화면에 병합함
 // (1184:12112 "image 244" 참고) — branch_select 화면(BranchSelect.tsx)은 이제 이 화면을 거치지
 // 않고는 도달하지 않지만, Stage enum(types.ts)은 다른 에이전트들이 동시에 건드릴 수 있어 그대로
-// 두고 SCREENS 매핑도 남겨둠(직접 URL/StageJumper로는 여전히 열람 가능).
+// 두고 SCREENS 매핑도 남겨둠.
 
 interface ChoiceOption {
   branch: Branch

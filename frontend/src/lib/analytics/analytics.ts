@@ -227,7 +227,7 @@ export function setScreen(screen: string) {
   track('screen_view', via ? { via } : {})
 }
 
-// 개발용 단계 이동 버튼(StageJumper)처럼 실제 사용자 흐름이 아닌 이동을 표시 — 분석에서 걸러낸다.
+// 실제 사용자 흐름이 아닌 이동을 표시 — 분석에서 걸러낸다(예전 개발용 단계 이동 버튼의 'jumper' 기록 포함).
 export function markNextScreenVia(via: string) {
   s.nextScreenVia = via
 }

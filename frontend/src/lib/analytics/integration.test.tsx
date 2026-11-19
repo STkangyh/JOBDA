@@ -86,24 +86,22 @@ describe('useTrackView', () => {
 })
 
 describe('screen tracking in the real app', () => {
-  it('names session screens by route + stage, and tags dev stage-jumper moves', async () => {
-    const user = userEvent.setup()
+  it('names session screens by route + stage', async () => {
     render(
       <MemoryRouter initialEntries={['/session2']}>
         <App />
       </MemoryRouter>,
     )
-    await waitFor(() => expect(screen.getByText('🧭 단계 이동')).toBeInTheDocument())
-
-    await user.click(screen.getByText('🧭 단계 이동'))
-    await user.click(screen.getByRole('button', { name: '자료탐색' }))
+    await drain()
+    await waitFor(() => expect(byName('screen_view')).toHaveLength(1))
+    act(() => useSession.getState().goTo('materials'))
     await screen.findByRole('heading', { name: '자료함' })
     await drain()
 
     const views = byName('screen_view')
     expect(views.map((e) => [e.screen, e.props.via])).toEqual([
       ['session2/brief', undefined],
-      ['session2/materials', 'jumper'],
+      ['session2/materials', undefined],
     ])
     expect(views[0]).toMatchObject({ flow: 's2', session_id: useSession.getState().sessionId })
     // 자료탐색 화면이 기본 문서를 패널 뷰로 연다 → 이후 이벤트에 자동으로 붙는다.

@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useState, type ComponentType } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useSession } from './store/session'
 import { Explore } from './pages/explore/Explore'
-import { StageJumper } from './components/StageJumper'
 import { MobileNotice } from './components/MobileNotice'
 import { ScreenTracker } from './components/ScreenTracker'
 import { LoadingSpinner } from './components/LoadingSpinner'
@@ -86,38 +85,17 @@ const SCREENS: Record<Exclude<Stage, 'report'>, ComponentType> = {
   self_assessment: SelfAssessment,
 }
 
-// 임시 개발용 StageJumper가 쓰는 세션2 단계 목록/라벨. branch_select("방향 선택")는 FinalFeedback.tsx로
-// 병합돼 이제 정상 플로우로는 도달하지 않는 화면이라(FinalFeedback.tsx 주석 참고) 목록에서 뺌 —
-// Stage enum 자체는 다른 에이전트가 동시에 건드릴 수 있어 그대로 두고(BranchSelect.tsx도 남겨둠),
-// 이 개발용 점프 목록만 정리한다.
-const SESSION2_STAGES: { value: Stage; label: string }[] = [
-  { value: 'brief', label: '브리프' },
-  { value: 'materials', label: '자료탐색' },
-  { value: 'workspace', label: '관계자 협업' },
-  { value: 'senior_feedback', label: '1차 피드백' },
-  { value: 'final_feedback', label: '최종 피드백' },
-  { value: 'vendor_compare', label: '업체 비교' },
-  { value: 'self_assessment', label: '자기 평가' },
-  { value: 'report', label: '직무 리포트' },
-]
-
 // 직무 상세페이지 "업무 프로세스" 스텝 인덱스 -> 진입할 경로. 8번(시방서 작성 및 설계 이관)만
 // 세션2로 연결 — 6번(모형 제작 및 설계 검토/세션1)은 배포에서 제외돼 JobDetail.tsx에서 아예
 // 선택 불가능이라 여기 매핑도 필요 없음.
 const STEP_INDEX_TO_PATH: Record<number, string> = { 7: '/session2' }
 
 // "/session2"는 URL이 하나뿐이고 실제 화면은 Zustand의 currentStage로만 갈린다(주소창에
-// 단계가 안 드러남 — 알려진 한계, StageJumper로 우회).
+// 단계가 안 드러남 — 알려진 한계).
 function Session2Route() {
   const stage = useSession((s) => s.currentStage)
-  const goTo = useSession((s) => s.goTo)
   const Screen: ComponentType = stage === 'report' ? Report : SCREENS[stage]
-  return (
-    <>
-      <Screen />
-      <StageJumper stages={SESSION2_STAGES} current={stage} onJump={goTo} />
-    </>
-  )
+  return <Screen />
 }
 
 // react-router-dom(이미 package.json에 있었지만 안 쓰이고 있었음)으로 교체 — 이전엔 App.tsx의
