@@ -151,3 +151,23 @@ describe('session store: computeFindings (기획 확정 평가 기준 10개)', (
     expect(codes).not.toContain('vendor_compared_three')
   })
 })
+
+describe('session store: submitDraft', () => {
+  it('carries the first part of the draft into the revision form', () => {
+    const s = useSession.getState()
+    s.updateDraftPart(0, { material: '화이트 오크', color: '내추럴', finish: '유성 스테인', method: 'CNC 가공' })
+    s.updateDraftPart(1, { material: '알루미늄' })
+    s.setPartAttachment(0, 'limitSample', '판정표.docx')
+
+    useSession.getState().submitDraft()
+
+    expect(useSession.getState().final).toMatchObject({
+      material: '화이트 오크',
+      color: '내추럴',
+      finish: '유성 스테인',
+      method: 'CNC 가공',
+      limitSampleAttached: true,
+      limitSampleFileName: '판정표.docx',
+    })
+  })
+})

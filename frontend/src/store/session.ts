@@ -371,7 +371,22 @@ export const useSession = create<SessionState & SessionActions>()(
       updateDraft: (fields) => set((s) => ({ draft: { ...s.draft, ...fields } })),
       submitDraft: () => {
         track('step_complete', { step: 'workspace', pass: 'draft' })
-        set({ draftSubmitted: true, currentStage: 'senior_feedback', final: { ...get().draft } })
+        // 수정 단계는 첫 부품(목재 흡기구 커버)을 고치는 화면이라, 초안에 쓴 그 부품 내용을 그대로 이어받는다
+        const first = get().draftParts[0]
+        const limitSample = first.attachment === 'limitSample'
+        set({
+          draftSubmitted: true,
+          currentStage: 'senior_feedback',
+          final: {
+            material: first.material,
+            color: first.color,
+            finish: first.finish,
+            size: { ...first.size },
+            method: first.method,
+            limitSampleAttached: limitSample,
+            limitSampleFileName: limitSample ? first.attachmentFileName : null,
+          },
+        })
         pushLog(set, get, 'submit', { target: 'draft' })
       },
 
