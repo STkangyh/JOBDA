@@ -124,8 +124,8 @@ function SizeFields({ size, onChange }: { size: PartSpecSize; onChange: (size: P
   return (
     <div className="grid flex-1 grid-cols-4 gap-2.5">
       {SIZE_FIELDS.map(({ key, label, unit }) => (
-        <label key={key} className={`${FIELD_BOX} gap-2.5`}>
-          <span className="w-[74px] shrink-0 truncate text-body-lg text-neutral-500">{label}</span>
+        <label key={key} className={`${FIELD_BOX} gap-1.5 px-3!`}>
+          <span className="shrink-0 text-body-lg text-neutral-500">{label}</span>
           <input
             value={size[key]}
             onChange={(e) => onChange({ ...size, [key]: e.target.value })}
@@ -189,8 +189,8 @@ function ModelAnswerFields({ index }: { index: number }) {
       <FieldRow label="사이즈">
         <div className="grid flex-1 grid-cols-4 gap-2.5">
           {SIZE_FIELDS.map(({ key, label, unit }) => (
-            <span key={key} className={`${FIELD_BOX} gap-2.5`}>
-              <span className="w-[74px] shrink-0 truncate text-body-lg text-neutral-500">{label}</span>
+            <span key={key} className={`${FIELD_BOX} gap-1.5 px-3!`}>
+              <span className="shrink-0 text-body-lg text-neutral-500">{label}</span>
               <span className="min-w-0 flex-1 text-title-lg font-semibold text-neutral-700">{answer.size[key]}</span>
               <span className="shrink-0 text-body-lg text-neutral-700">{unit}</span>
             </span>
