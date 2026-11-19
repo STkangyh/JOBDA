@@ -27,8 +27,8 @@ export function SendRoundButton({ label, disabled, onClick }: { label: string; d
 }
 
 /**
- * 모범답안 칩. onToggle이 있으면 누를 때마다 모범답안 보기를 켜고 끈다(시방서 작성, 2026-11-03).
- * 모범답안 내용이 아직 없는 화면(2차 피드백, 외주 조사)은 onToggle 없이 써서 "준비 중"으로 둔다.
+ * 모범답안 칩. onToggle이 있으면 누를 때마다 모범답안 보기를 켜고 끈다(시방서 작성 2026-11-03, 외주 조사 2026-11-19).
+ * 모범답안 내용이 아직 없는 화면(2차 피드백 방향 선택)은 onToggle 없이 써서 "준비 중"으로 둔다.
  */
 export function ModelAnswerChip({ pressed = false, onToggle }: { pressed?: boolean; onToggle?: () => void }) {
   const base = 'h-[42px] shrink-0 rounded-[80px] border-2 px-3 text-body-lg text-neutral-700 drop-shadow-[0_0_8px_rgba(0,0,0,0.04)]'

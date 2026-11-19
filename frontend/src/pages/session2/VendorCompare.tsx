@@ -7,7 +7,8 @@ import { WorkSidePanel } from '../../components/NegotiationPanels'
 import { FeedbackRemainingBadge } from '../../components/FeedbackRemainingBadge'
 import { useSession, feedbackSessionsRemaining } from '../../store/session'
 import type { VendorOption } from '../../types'
-import { useTrackView } from '../../lib/analytics'
+import { track, useTrackView } from '../../lib/analytics'
+import { VENDOR_MODEL_ANSWER } from '../../data/session2Scenario'
 
 
 // Figma 823:57101(Desktop-141) "3차 피드백" 배너 실측 — 이전엔 이 문구를 표 기준(납기일/가능
@@ -115,7 +116,7 @@ function VendorTable({
                   // 깔린다 — 정적 nth-child가 아니라 실제 selectedIndex와 비교해야 선택이
                   // 바뀔 때 띠도 같이 움직인다.
                   <span key={i} className={`truncate rounded-[4px] px-3 py-2.5 text-body-lg text-neutral-700 ${selectable && i === selectedIndex ? 'bg-green-50' : ''}`}>
-                    {v[row.key] === '' ? '-' : `${v[row.key]}${row.unit ?? ''}`}
+                    {v[row.key] === '' ? '-' : `${typeof v[row.key] === 'number' ? v[row.key].toLocaleString('ko-KR') : v[row.key]}${row.unit ?? ''}`}
                   </span>
                 ),
               )}
@@ -152,6 +153,12 @@ export function VendorCompare() {
   const [phase, setPhase] = useState<'research' | 'select'>('research')
   useTrackView({ kind: 'panel', name: `vendor_phase:${vendorProposed ? 'feedback' : phase}` })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // 모범답안 보기 — 내 표 자리에 Figma 목업 업체 리스트를 읽기 전용으로 보여준다(시방서 모범답안과 같은 방식)
+  const [showAnswer, setShowAnswer] = useState(false)
+  const toggleAnswer = () => {
+    if (!showAnswer) track('model_answer_view', { step: 'vendor', phase: vendorProposed ? 'feedback' : phase })
+    setShowAnswer((v) => !v)
+  }
 
   const complete = vendors.every(
     (v) =>
@@ -159,6 +166,7 @@ export function VendorCompare() {
   )
 
   const handlePropose = () => {
+    setShowAnswer(false)
     setIsSubmitting(true)
     setTimeout(() => {
       proposeVendor()
@@ -216,26 +224,34 @@ export function VendorCompare() {
         <WorkPanel className="flex flex-col gap-[clamp(20px,4svh,40px)]">
           <div className="flex items-end justify-between gap-6">
             <div className="flex min-w-0 flex-col gap-2">
-              <h2 className="text-title-lg font-semibold text-neutral-700">{instruction}</h2>
-              {phase === 'select' && (
+              <h2 className="text-title-lg font-semibold text-neutral-700">
+                {showAnswer ? '모범답안이에요. 모범답안을 다시 누르면 내 답안으로 돌아가요.' : instruction}
+              </h2>
+              {phase === 'select' && !showAnswer && (
                 <button type="button" onClick={() => setPhase('research')} className="w-fit text-body-md text-neutral-500 underline hover:text-neutral-700">
                   목록 다시 수정하기
                 </button>
               )}
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <ModelAnswerChip />
+              <ModelAnswerChip pressed={showAnswer} onToggle={toggleAnswer} />
               <SendRoundButton label={send.label} disabled={send.disabled} onClick={send.onClick} />
             </div>
           </div>
-          <VendorTable
-            editable={phase === 'research'}
-            vendors={vendors}
-            onChange={updateVendor}
-            selectable={phase === 'select'}
-            selectedIndex={selectedVendorIndex}
-            onSelect={selectVendor}
-          />
+          {showAnswer ? (
+            <div role="region" aria-label="모범답안 · 외주 업체 리스트">
+              <VendorTable editable={false} vendors={VENDOR_MODEL_ANSWER} onChange={() => {}} selectable={false} selectedIndex={-1} onSelect={() => {}} />
+            </div>
+          ) : (
+            <VendorTable
+              editable={phase === 'research'}
+              vendors={vendors}
+              onChange={updateVendor}
+              selectable={phase === 'select'}
+              selectedIndex={selectedVendorIndex}
+              onSelect={selectVendor}
+            />
+          )}
         </WorkPanel>
       </div>
 

@@ -1,3 +1,4 @@
+import type { VendorOption } from '../types'
 // 세션2("관계자 협업" 라운드) 화면 여러 곳(SeniorFeedback.tsx/Workspace.tsx)이 공유하던 고정
 // 시나리오 문구 — 전부 동일한 오크 원목 CMF/시방서 이야기를 다른 화면에서 반복 서술하고
 // 있었음. 실측 근거는 각각 823:55090("Desktop - 130")/823:53614 등, 개별 파일에 남겨둠.
@@ -39,4 +40,12 @@ export const MODEL_ANSWERS: ModelAnswer[] = [
   { material: '천연 소가죽', color: '카멜색', colorNote: 'Panton 1595', finish: '크롬 태닝', size: { depth: '100', width: '100', height: '30', thickness: '2' }, method: '외주 업체' },
   { material: 'PUI 패널', color: '실버', finish: '아노다이징', size: { depth: '100', width: '60', height: '30', thickness: '2' }, method: 'CNC 가공' },
   { material: '미끄럼 방지 패드', color: '블랙', finish: '아노다이징', size: { depth: '100', width: '60', height: '30', thickness: '2' }, method: 'CNC 가공' },
+]
+
+// 외주 업체 조사 모범답안 (2026-11-19) — Figma 823:56362("Desktop - 138") 외주 업체 리스트 목업 값을 그대로 옮겼다.
+export const VENDOR_MODEL_ANSWER: VendorOption[] = [
+  { name: '우진 목형', location: '경기 포천', specialty: '원통 가구 OEM', deliveryHistory: '많음', skillLevel: '양호', oilFinish: '도장 부스', sampleQuality: '우수', unitPrice: 14000, capacity: 10000 },
+  { name: '세림정밀목재', location: '인천 남동 공단', specialty: '정밀 목재 CNC', deliveryHistory: '보통', skillLevel: '부적합', oilFinish: '2차 외주 필요', sampleQuality: '미달', unitPrice: 12900, capacity: 20000 },
+  { name: '한재석 공방', location: '경기 김포', specialty: '개인 공방', deliveryHistory: '없음', skillLevel: '우수', oilFinish: '하드 왁스 전문', sampleQuality: '우수', unitPrice: 20000, capacity: 1000 },
+  { name: '대성우드', location: '대구 성서 공단', specialty: '가구 부재 가공', deliveryHistory: '많음', skillLevel: '양호', oilFinish: 'UV만', sampleQuality: '양호', unitPrice: 17000, capacity: 5000 },
 ]
