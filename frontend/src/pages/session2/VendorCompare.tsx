@@ -155,6 +155,7 @@ export function VendorCompare() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   // 모범답안 보기 — 내 표 자리에 Figma 목업 업체 리스트를 읽기 전용으로 보여준다(시방서 모범답안과 같은 방식)
   const [showAnswer, setShowAnswer] = useState(false)
+  const [blocked, setBlocked] = useState(false)
   const toggleAnswer = () => {
     if (!showAnswer) track('model_answer_view', { step: 'vendor', phase: vendorProposed ? 'feedback' : phase })
     setShowAnswer((v) => !v)
@@ -194,7 +195,20 @@ export function VendorCompare() {
         : '가장 적합한 조건의 업체를 하나 골라 구매팀에 제안하세요.'
   const send =
     phase === 'research'
-      ? { label: '조사 완료', disabled: !complete, onClick: () => setPhase('select') }
+      ? {
+          label: '조사 완료',
+          // 모범답안을 보는 중에도 켜 두고, 내 표가 덜 찼으면 내 표로 돌아가 안내한다
+          disabled: !complete && !showAnswer,
+          onClick: () => {
+            if (!complete) {
+              setShowAnswer(false)
+              setBlocked(true)
+              return
+            }
+            setShowAnswer(false)
+            setPhase('select')
+          },
+        }
       : vendorProposed
         ? { label: '수정안 제출', disabled: isSubmitting, onClick: handleSubmit }
         : { label: '제안서 전달', disabled: isSubmitting, onClick: handlePropose }
@@ -227,6 +241,11 @@ export function VendorCompare() {
               <h2 className="text-title-lg font-semibold text-neutral-700">
                 {showAnswer ? '모범답안이에요. 모범답안을 다시 누르면 내 답안으로 돌아가요.' : instruction}
               </h2>
+              {phase === 'research' && blocked && !complete && !showAnswer && (
+                <p role="alert" className="text-body-md text-error-300">
+                  업체 4곳의 항목을 모두 채워야 조사를 마칠 수 있어요.
+                </p>
+              )}
               {phase === 'select' && !showAnswer && (
                 <button type="button" onClick={() => setPhase('research')} className="w-fit text-body-md text-neutral-500 underline hover:text-neutral-700">
                   목록 다시 수정하기

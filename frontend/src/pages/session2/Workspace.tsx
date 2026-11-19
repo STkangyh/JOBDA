@@ -162,6 +162,15 @@ function PartChips({ activeIndex, onSelect }: { activeIndex: number; onSelect?: 
   )
 }
 
+// 모범답안을 보는 중에도 전송 버튼은 켜 둔다 — 내 답안이 덜 찼으면 내 답안으로 돌아가 이 안내를 띄운다
+function MissingNotice({ text }: { text: string }) {
+  return (
+    <p role="alert" className="text-body-md text-error-300">
+      {text}
+    </p>
+  )
+}
+
 // 모범답안 보기(2026-11-03) — Figma 1675:16911~17655의 부품별 값을 입력칸과 같은 자리에 읽기 전용으로 보여준다.
 // 내가 쓴 값은 그대로 두고, 칩을 다시 누르면 내 답안으로 돌아간다.
 const MODEL_ANSWER_HEADING = '모범답안이에요. 모범답안을 다시 누르면 내 답안으로 돌아가요.'
@@ -233,9 +242,15 @@ function FinalSpecCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boolea
 
   // 1차 피드백이 지적한 건 한도 견본 판정표 누락 하나뿐이라 그것만 첨부하면 넘어갈 수 있다(사용자 요청).
   const requiredMissing = !final.limitSampleAttached
+  const [blocked, setBlocked] = useState(false)
 
   // 실제 지연은 없지만 라운드 전환감을 주려고 1200ms 붙잡아 둔다(헤더 로딩 표시와 공유).
   const handleClick = () => {
+    if (!finalApproved && requiredMissing) {
+      setShowAnswer(false)
+      setBlocked(true)
+      return
+    }
     // 피드백 확인 후 수정안을 낸 시점을 이전 "시방서 수정하러 가기"와 같은 단계 완료로 기록한다
     if (!finalApproved && useSession.getState().currentStage === 'senior_feedback') track('step_complete', { step: 'senior_feedback' })
     setIsSubmitting(true)
@@ -254,10 +269,11 @@ function FinalSpecCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boolea
             {showAnswer ? MODEL_ANSWER_HEADING : finalApproved ? '최종적인 시방서 사양을 인계 전 확인하세요.' : INSTRUCTION}
           </h2>
           <PartChips activeIndex={0} />
+          {blocked && requiredMissing && !showAnswer && <MissingNotice text="한도 견본 판정표를 첨부해야 제출할 수 있어요." />}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <ModelAnswerChip pressed={showAnswer} onToggle={toggleAnswer} />
-          <SendRoundButton label={finalApproved ? '시방서 인계' : '수정안 제출'} disabled={(!finalApproved && requiredMissing) || isSubmitting} onClick={handleClick} />
+          <SendRoundButton label={finalApproved ? '시방서 인계' : '수정안 제출'} disabled={(!finalApproved && requiredMissing && !showAnswer) || isSubmitting} onClick={handleClick} />
         </div>
       </div>
 
@@ -325,7 +341,9 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
   // OS 파일 탐색기는 비동기(모달)라, 열려있는 동안 탭을 옮길 수 있어 어느 부품의 어떤 첨부였는지를 ref로 들고 있다.
   const pendingAttachmentRef = useRef<{ index: number; kind: 'colorChip' | 'limitSample' } | null>(null)
 
-  const requiredMissing = draftParts.some((p) => !p.material.trim() || !p.color.trim() || !p.finish.trim() || !p.method.trim())
+  const partMissing = (p: (typeof draftParts)[number]) => !p.material.trim() || !p.color.trim() || !p.finish.trim() || !p.method.trim()
+  const requiredMissing = draftParts.some(partMissing)
+  const [blocked, setBlocked] = useState(false)
 
   const selectTab = (i: number) => {
     setActiveIndex(i)
@@ -356,6 +374,13 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
   }
 
   const handleSubmit = () => {
+    if (requiredMissing) {
+      // 모범답안을 보다가 눌렀으면 내 답안으로 돌아가 처음 비어 있는 부품 탭을 연다
+      setShowAnswer(false)
+      setActiveIndex(draftParts.findIndex(partMissing))
+      setBlocked(true)
+      return
+    }
     setIsSubmitting(true)
     setTimeout(() => {
       submitDraft()
@@ -369,10 +394,11 @@ function DraftPartsCard({ isSubmitting, setIsSubmitting }: { isSubmitting: boole
         <div className="flex min-w-0 flex-col gap-4">
           <h2 className="text-title-lg font-semibold text-neutral-700">{showAnswer ? MODEL_ANSWER_HEADING : INSTRUCTION}</h2>
           <PartChips activeIndex={activeIndex} onSelect={selectTab} />
+          {blocked && requiredMissing && !showAnswer && <MissingNotice text="부품마다 소재, 컬러, 마감, 생산 방식을 채워야 제출할 수 있어요." />}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <ModelAnswerChip pressed={showAnswer} onToggle={toggleAnswer} />
-          <SendRoundButton label="초안 제출" disabled={requiredMissing || isSubmitting} onClick={handleSubmit} />
+          <SendRoundButton label="초안 제출" disabled={(requiredMissing && !showAnswer) || isSubmitting} onClick={handleSubmit} />
         </div>
       </div>
 

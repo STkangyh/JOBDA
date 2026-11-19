@@ -42,6 +42,19 @@ describe('spec model answer', () => {
     expect(screen.queryByRole('region', { name: /모범답안/ })).not.toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: '소재' })).toHaveValue('자작나무')
   })
+  it('keeps send usable while viewing the model answer and points back to my empty fields', async () => {
+    const user = userEvent.setup()
+    renderWorkspace()
+
+    await user.click(screen.getByRole('button', { name: '모범답안' }))
+    const send = screen.getByRole('button', { name: '초안 제출' })
+    expect(send).toBeEnabled()
+
+    await user.click(send)
+    expect(screen.queryByRole('region', { name: /모범답안/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('채워야 제출할 수 있어요')
+    expect(useSession.getState().draftSubmitted).toBe(false)
+  })
 })
 
 describe('color attachment (+) button', () => {
